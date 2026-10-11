@@ -35,7 +35,9 @@ NOTES
   - The trycloudflare link is public while the tunnel runs - only share it
     with people you want in. Close the tunnel window to shut it.
   - To use another port:  set PORT=9000  then  node server.js
-  - Your browser still needs internet access to load the 3D engine and fonts.
+  - Your browser still needs internet access to load the fonts.
+  - Choppy killcam clips or low FPS? Options -> Graphics: Medium or Low, and
+    Clip res 720p or 1080p. Clips can't record faster than your monitor.
 
 HOST IT PERMANENTLY ON RENDER (free, no tunnel)
   This folder is ready to deploy as-is. You get a fixed link like
