@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: rust-simulator
+    name: lunas-mw2-sim
     runtime: node
     plan: free
     buildCommand: echo "no build step"

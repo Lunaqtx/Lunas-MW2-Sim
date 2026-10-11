@@ -1,4 +1,4 @@
-// Rust Simulator local server: serves the game and relays player state over WebSockets.
+// Lunas-MW2-Sim local server: serves the game and relays player state over WebSockets.
 // No installs needed beyond Node.js 18+.  Run:  node server.js   (PORT=8080 by default)
 'use strict';
 const http=require('http'),fs=require('fs'),path=require('path'),crypto=require('crypto'),os=require('os');
@@ -62,7 +62,7 @@ server.on('upgrade',(req,sock)=>{
   sock.on('close',()=>bye(c));sock.on('error',()=>bye(c));sock.on('end',()=>bye(c));
 });
 server.listen(PORT,'0.0.0.0',()=>{
-  console.log('\n  Rust Simulator server is running.\n');
+  console.log('\n  Lunas-MW2-Sim server is running.\n');
   console.log('  On this PC:        http://localhost:'+PORT);
   for(const list of Object.values(os.networkInterfaces()))for(const a of list||[])if(a.family==='IPv4'&&!a.internal)console.log('  Same Wi-Fi / LAN:  http://'+a.address+':'+PORT);
   console.log('\n  For friends over the internet, run the tunnel (see README) and share the https link it prints.\n  Keep this window open while you play. Press Ctrl+C to stop.\n');

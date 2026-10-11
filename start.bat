@@ -1,5 +1,5 @@
 @echo off
-title Rust Simulator
+title Lunas-MW2-Sim
 cd /d "%~dp0"
 where node >nul 2>nul
 if errorlevel 1 (
@@ -11,7 +11,7 @@ if errorlevel 1 (
   pause
   exit /b
 )
-start "Rust Simulator server" cmd /k node server.js
+start "Lunas-MW2-Sim server" cmd /k node server.js
 timeout /t 2 >nul
 start "" http://localhost:8080
 where cloudflared >nul 2>nul
@@ -31,5 +31,5 @@ echo  Starting the internet tunnel. In the new window, look for a line like
 echo      https://something-random.trycloudflare.com
 echo  and send that link to your friends. It changes every time you start it.
 echo.
-start "Rust Simulator tunnel (share the trycloudflare.com link)" cmd /k cloudflared tunnel --url http://localhost:8080
+start "Lunas-MW2-Sim tunnel (share the trycloudflare.com link)" cmd /k cloudflared tunnel --url http://localhost:8080
 pause

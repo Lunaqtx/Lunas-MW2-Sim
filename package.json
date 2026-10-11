@@ -1,8 +1,8 @@
 {
-  "name": "rust-simulator",
+  "name": "lunas-mw2-sim",
   "version": "1.0.0",
   "private": true,
-  "description": "Rust Simulator game server: serves the game and relays multiplayer lobbies over WebSockets.",
+  "description": "Lunas-MW2-Sim game server: serves the game and relays multiplayer lobbies over WebSockets.",
   "main": "server.js",
   "scripts": { "start": "node server.js" },
   "engines": { "node": ">=18" }

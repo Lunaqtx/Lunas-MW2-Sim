@@ -1,4 +1,4 @@
-RUST SIMULATOR - HOST IT YOURSELF (Windows)
+LUNAS-MW2-SIM - HOST IT YOURSELF (Windows)
 ===========================================
 
 This folder runs the game on your own PC, so you and your friends can play
@@ -39,7 +39,7 @@ NOTES
 
 HOST IT PERMANENTLY ON RENDER (free, no tunnel)
   This folder is ready to deploy as-is. You get a fixed link like
-  https://rust-simulator.onrender.com that works any time.
+  https://lunas-mw2-sim.onrender.com that works any time.
   1. Make a free GitHub account, create a new repository, and upload
      everything in this folder (Add file -> Upload files).
   2. Make a free account at https://render.com and choose
