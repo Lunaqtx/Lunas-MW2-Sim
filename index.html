@@ -632,15 +632,17 @@ function surfCanvas(kind){
     for(let i=0;i<900;i++){x.fillStyle=r()<0.5?`rgba(60,55,48,${0.12+r()*0.25})`:`rgba(250,248,240,${0.1+r()*0.2})`;x.fillRect(r()*N,r()*N,1,1);} // aggregate
     for(let i=0;i<4;i++){let px=r()*N,py=r()*N;x.strokeStyle='rgba(60,55,48,.3)';x.lineWidth=0.7;x.beginPath();x.moveTo(px,py);for(let k=0;k<8;k++){px+=(r()-0.5)*14;py+=4+r()*8;x.lineTo(px,py);}x.stroke();} // hairline cracks
     for(let i=0;i<10;i++){const sx=r()*N;wrapDo((ox,oy)=>{const g=x.createLinearGradient(0,oy,0,oy+N*0.6);g.addColorStop(0,'rgba(70,60,45,.22)');g.addColorStop(1,'rgba(70,60,45,0)');x.fillStyle=g;x.fillRect(sx+ox,oy,3+r()*6,N*0.6);});}
-  }else if(kind==='wood'){
-    fill('#d2c0a0');const P=4,ph=N/P;
-    for(let p=0;p<P;p++){const y0=p*ph,tone=0.85+r()*0.25;x.fillStyle=`rgba(${182*tone|0},${160*tone|0},${126*tone|0},.45)`;x.fillRect(0,y0,N,ph);
-      for(let k=0;k<14;k++){const yy=y0+4+r()*(ph-8),amp=1+r()*2.5,fr=1+(r()*3|0);x.strokeStyle=`rgba(90,62,34,${0.13+r()*0.18})`;x.lineWidth=0.6+r()*1.2;x.beginPath();
+  }else if(kind==='wood'){ // sun-bleached grey-brown boards: open seams, raised grain, nail lines, a few knots and stains
+    fill('#b9ad98');const P=4,ph=N/P;
+    for(let p=0;p<P;p++){const y0=p*ph,tone=0.86+r()*0.2;x.fillStyle=`rgba(${168*tone|0},${150*tone|0},${124*tone|0},.55)`;x.fillRect(0,y0,N,ph);
+      for(let k=0;k<18;k++){const yy=y0+3+r()*(ph-6),amp=0.6+r()*2.2,fr=1+(r()*3|0);x.strokeStyle=`rgba(78,64,48,${0.1+r()*0.16})`;x.lineWidth=0.5+r()*1.0;x.beginPath();
         for(let i=0;i<=N;i+=4){const yv=yy+Math.sin(i/N*TAU*fr+k)*amp;i?x.lineTo(i,yv):x.moveTo(i,yv);}x.stroke();}
-      for(let k=0;k<40;k++){const yy=y0+2+r()*(ph-4);x.fillStyle=`rgba(70,45,20,${0.05+r()*0.08})`;x.fillRect(0,yy,N,0.6);}
-      x.fillStyle='rgba(40,28,16,.48)';x.fillRect(0,y0,N,1.8);x.fillStyle='rgba(255,240,215,.16)';x.fillRect(0,y0+1.6,N,1);
-      for(const nx of[18,N/2+18])for(const ny of[y0+10,y0+ph-10]){x.fillStyle='rgba(50,40,30,.45)';x.beginPath();x.arc(nx,ny,1.8,0,TAU);x.fill();}}
-
+      for(let k=0;k<50;k++){const yy=y0+2+r()*(ph-4);x.fillStyle=`rgba(${r()<0.5?'60,50,38':'235,228,214'},${0.04+r()*0.07})`;x.fillRect(0,yy,N,0.6);}
+      if(r()<0.7){const kx=r()*N,ky=y0+8+r()*(ph-16);wrapDo((ox,oy)=>{x.fillStyle='rgba(70,52,34,.5)';x.beginPath();x.ellipse(kx+ox,ky+oy,3+r()*3,1.6+r(),0,0,TAU);x.fill();x.strokeStyle='rgba(70,52,34,.25)';x.lineWidth=0.7;x.beginPath();x.ellipse(kx+ox,ky+oy,7,3.2,0,0,TAU);x.stroke();});}
+      const g=x.createLinearGradient(0,y0,0,y0+ph);g.addColorStop(0,'rgba(40,32,22,.28)');g.addColorStop(0.12,'rgba(40,32,22,0)');g.addColorStop(0.88,'rgba(40,32,22,0)');g.addColorStop(1,'rgba(40,32,22,.3)');x.fillStyle=g;x.fillRect(0,y0,N,ph); // rounded board edges
+      x.fillStyle='rgba(26,20,14,.62)';x.fillRect(0,y0,N,2.2);x.fillStyle='rgba(255,246,230,.14)';x.fillRect(0,y0+2.2,N,1);   // open seam between boards
+      for(const nx of[14,N/2+14])for(const ny of[y0+9,y0+ph-9]){x.fillStyle='rgba(44,36,30,.6)';x.beginPath();x.arc(nx,ny,1.7,0,TAU);x.fill();blob(nx,ny+5,6,'rgba(110,60,30,A)',0.22);}} // nails weeping rust
+    for(let i=0;i<8;i++)blob(r()*N,r()*N,14+r()*30,'rgba(90,80,64,A)',0.12);
   }else if(kind==='deck'){
     fill('#c9c4bc');
     for(let gy=0;gy<16;gy++)for(let gx=0;gx<16;gx++){const cx=gx*16+(gy%2?8:0)+4,cy=gy*16+8,ang=(gx+gy)%2?0.8:-0.8;
@@ -653,13 +655,19 @@ function surfCanvas(kind){
     for(let i=0;i<500;i++){x.fillStyle=`rgba(${r()<0.5?'255,255,255':'40,35,30'},${0.03+r()*0.05})`;x.fillRect(r()*N,r()*N,20+r()*80,1);}
     for(let i=0;i<40;i++){x.strokeStyle=`rgba(255,255,255,${0.1+r()*0.15})`;x.lineWidth=0.6;const sx=r()*N,sy=r()*N;x.beginPath();x.moveTo(sx,sy);x.lineTo(sx+(r()-0.5)*30,sy+(r()-0.5)*30);x.stroke();}
     for(let i=0;i<16;i++)blob(r()*N,r()*N,6+r()*26,'rgba(120,64,30,A)',0.14+r()*0.14);
-  }else if(kind==='bag'){ // woven sack cloth: soft weave, a stitched seam, dust caked into the fibres (the stacking comes from real geometry now)
-    fill('#cbbb98');
-    for(let i=0;i<N;i+=2){x.fillStyle=`rgba(80,62,38,${0.05+r()*0.06})`;x.fillRect(0,i,N,1);x.fillStyle=`rgba(80,62,38,${0.04+r()*0.05})`;x.fillRect(i,0,1,N);}
-    for(let i=0;i<40;i++)blob(r()*N,r()*N,10+r()*36,'rgba(120,98,66,A)',0.08+r()*0.1);
-    for(let i=0;i<10;i++)blob(r()*N,r()*N,8+r()*24,'rgba(225,212,185,A)',0.12);
-    x.fillStyle='rgba(70,52,30,.28)';x.fillRect(0,N*0.5,N,1.2);for(let i=0;i<N;i+=6){x.fillStyle='rgba(70,52,30,.32)';x.fillRect(i,N*0.5-2,3,1);}
-    for(let i=0;i<1200;i++){x.fillStyle=`rgba(60,45,25,${r()*0.1})`;x.fillRect(r()*N,r()*N,1.5,1);}
+  }else if(kind==='floor'){
+    fill('#b4b5ad');for(let i=0;i<40;i++)blob(r()*N,r()*N,16+r()*50,'rgba(90,92,86,A)',0.05+r()*0.08);
+    for(let i=0;i<14;i++)blob(r()*N,r()*N,6+r()*18,'rgba(40,36,30,A)',0.18+r()*0.2);                                                  // oil stains
+    for(let i=0;i<10;i++){const y=r()*N,c=r()*0.3+0.1;x.strokeStyle=`rgba(40,38,34,${c*0.5})`;x.lineWidth=3+r()*4;x.beginPath();x.moveTo(0,y);x.bezierCurveTo(N*0.3,y+(r()-0.5)*60,N*0.6,y+(r()-0.5)*60,N,y);x.stroke();} // tyre scuffs
+    for(const v of[0,128]){x.fillStyle='rgba(50,48,42,.55)';x.fillRect(0,v,N,1.6);x.fillRect(v,0,1.6,N);x.fillStyle='rgba(255,255,250,.2)';x.fillRect(0,v+1.6,N,0.8);x.fillRect(v+1.6,0,0.8,N);} // saw-cut joints
+    for(let i=0;i<700;i++){x.fillStyle=r()<0.5?`rgba(60,60,55,${0.1+r()*0.15})`:`rgba(250,250,245,${0.08+r()*0.12})`;x.fillRect(r()*N,r()*N,1,1);}
+  }else if(kind==='bag'){ // dusty burlap: a visible over-under weave, loose fibres, a sewn seam, sand worked into the cloth
+    fill('#b8ac94');
+    for(let j=0;j<N;j+=2)for(let i=0;i<N;i+=2){const on=((i+j)>>1)&1;x.fillStyle=on?`rgba(255,248,232,${0.02+r()*0.03})`:`rgba(70,58,40,${0.03+r()*0.035})`;x.fillRect(i,j,2,2);}
+    for(let i=0;i<260;i++){x.strokeStyle=`rgba(${r()<0.5?'90,74,50':'225,214,190'},${0.12+r()*0.15})`;x.lineWidth=0.5;const sx=r()*N,sy=r()*N,a=r()*TAU,l=3+r()*7;x.beginPath();x.moveTo(sx,sy);x.lineTo(sx+Math.cos(a)*l,sy+Math.sin(a)*l);x.stroke();}
+    for(let i=0;i<34;i++)blob(r()*N,r()*N,10+r()*36,'rgba(104,90,66,A)',0.1+r()*0.12);
+    for(let i=0;i<14;i++)blob(r()*N,r()*N,8+r()*26,'rgba(214,200,170,A)',0.16);
+    x.fillStyle='rgba(60,48,30,.3)';x.fillRect(0,N*0.5-0.6,N,1.4);for(let i=0;i<N;i+=5){x.fillStyle='rgba(60,48,30,.42)';x.fillRect(i,N*0.5-2.4,2.6,1.1);x.fillRect(i+2.5,N*0.5+1.4,2.6,1.1);}
   }
   // one shared weathering pass on every surface so concrete, wood, steel and rust read as the same world:
   // broad grime mottling, faint rain streaks, a film of desert dust, and the same fine grain
@@ -670,7 +678,7 @@ function surfCanvas(kind){
   grain(13,false);
   return c;
 }
-const SURF_SCALE={pipe:1/2.4,rust:1/2.4,paint:1/2.4,conc:1/3,wood:1/1.4,deck:1/1.6,steel:1/2,bag:1/1.6};
+const SURF_SCALE={floor:1/4,pipe:1/2.4,rust:1/2.4,paint:1/2.4,conc:1/3,wood:1/1.4,deck:1/1.6,steel:1/2,bag:1/1.6};
 const surfTexCache={};
 function surfTex(kind){if(surfTexCache[kind])return surfTexCache[kind];const t=new THREE.CanvasTexture(surfCanvas(kind));t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;return surfTexCache[kind]=t;}
 function triplanar(m,scale){ // samples the material's map in world space, so stretched boxes keep a constant texel size and faces line up
@@ -686,11 +694,11 @@ const KIND={};
 [0x58514a,0x9a7a34,0x3c3833,0x3a3a38].forEach(c=>KIND[c]='steel');
 [0x6a5a48,0x4a4638,0x4a463b].forEach(c=>KIND[c]='deck');
 [0x9b9486,0x5d5a48,0x6e6655,0x6a6352,0x2e2a24].forEach(c=>KIND[c]='conc');
-KIND[0xa48f63]='bag';KIND[0x7a6440]='wood';
+KIND[0xa48f63]='bag';KIND[0x8c8f86]='floor';KIND[0x7a6440]='wood';
 [0x2f4f6e,0x8a2e22,0x9a7a4a,0x45603a].forEach(c=>KIND[c]='paint');
 const matCache={};
 function weather(hex,kind){ // desaturate toward luminance and lift the darkest values slightly
-  const c=new THREE.Color(hex),l=c.r*0.3+c.g*0.59+c.b*0.11,k=kind==='paint'?0.9:0.88;
+  const c=new THREE.Color(hex),l=c.r*0.3+c.g*0.59+c.b*0.11,k=kind==='paint'?0.9:kind==='wood'?0.6:kind==='bag'?0.62:0.88;
   c.r=(l+(c.r-l)*k)*1.0;c.g=(l+(c.g-l)*k)*0.975;c.b=(l+(c.b-l)*k)*0.93;c.multiplyScalar(0.95).addScalar(0.005);return c;}
 function guessKind(hex){const c=new THREE.Color(hex),mx=Math.max(c.r,c.g,c.b),mn=Math.min(c.r,c.g,c.b);return mx-mn<0.06?'steel':'rust';} // neutral greys read as bare steel, anything warm as weathered metal
 function mat(color,kind){kind=kind||KIND[color]||guessKind(color);const key=color+'|'+kind;if(matCache[key])return matCache[key];const m=triplanar(new THREE.MeshLambertMaterial({color:weather(color,kind),map:surfTex(kind)}),SURF_SCALE[kind]);m.userData.kind=kind;return matCache[key]=m;}
@@ -712,6 +720,13 @@ function addCylV(cx,cz,r,h,color,y0=0){
   cylColV(cx,cz,r,y0,y0+h);
   const cap=new THREE.Mesh(new THREE.CylinderGeometry(r*1.03,r*1.03,0.22,28),mat(0x5b3f2c));cap.position.set(cx,y0+h,cz);scene.add(cap);
   for(let i=0;i<3;i++){const band=new THREE.Mesh(new THREE.CylinderGeometry(r*1.015,r*1.015,0.12,28),mat(0x4d3424));band.position.set(cx,y0+h*(0.25+i*0.25),cz);scene.add(band);}
+  if(r<1)return;const lm=mat(0x3a3a38,'steel'),ang=Math.PI;
+  addLadder(cx-r-0.02,cz,'x-',y0,y0+h+0.4);                                                                            // climbable, ends at the roof so you step off onto it
+  for(const s2 of[-0.5,0.5]){const b0=new V3(cx-r-0.1,y0+h-0.25,cz+s2),b1=new V3(cx-r-0.1,y0+h+1.05,cz+s2),b2=new V3(cx-r+0.45,y0+h+1.05,cz+s2),b3=new V3(cx-r+0.45,y0+h+0.22,cz+s2);
+    rod(scene,b0,b1,0.025,lm,6);rod(scene,b1,b2,0.025,lm,6);rod(scene,b2,b3,0.025,lm,6);}                                  // grab rails either side of the exit
+  const ia=ang+1.2,ix=Math.cos(ia),iz=Math.sin(ia);rod(scene,new V3(cx+ix*r*0.95,y0+0.55,cz+iz*r*0.95),new V3(cx+ix*(r+0.5),y0+0.55,cz+iz*(r+0.5)),0.12,mat(0x5d4632,'pipe'),12);
+  const fl=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,0.06,14),mat(0x4d3424,'pipe'));fl.position.set(cx+ix*(r+0.5),y0+0.55,cz+iz*(r+0.5));fl.lookAt(cx+ix*(r+2),y0+0.55,cz+iz*(r+2));fl.rotateX(Math.PI/2);scene.add(fl);
+  const wh=new THREE.Mesh(new THREE.TorusGeometry(0.13,0.02,4,12),mat(0x8a2e22,'paint'));wh.position.set(cx+ix*(r+0.3),y0+0.8,cz+iz*(r+0.3));wh.rotation.x=Math.PI/2;scene.add(wh);rod(scene,new V3(cx+ix*(r+0.3),y0+0.55,cz+iz*(r+0.3)),new V3(cx+ix*(r+0.3),y0+0.8,cz+iz*(r+0.3)),0.018,lm,5);
 }
 function cylColV(cx,cz,r,y0,y1,n){n=n||(r>1.2?10:6);for(let i=0;i<n;i++){const za=-r+2*r*i/n,zb=-r+2*r*(i+1)/n,zm=(za+zb)/2,hw=r*Math.sqrt(Math.max(0,1-(zm/r)**2));addCol(cx-hw,y0,cz+za,cx+hw,y1,cz+zb);}} // a round footprint built from slices, so you can hug the curve
 function cylColZ(cx,yc,z0,z1,r,n){n=n||6;for(let i=0;i<n;i++){const xa=-r+2*r*i/n,xb=-r+2*r*(i+1)/n,xm=(xa+xb)/2,hh=r*Math.sqrt(Math.max(0,1-(xm/r)**2));addCol(cx+xa,Math.max(0,yc-hh),z0,cx+xb,yc+hh,z1);}} // lying along z
@@ -726,7 +741,11 @@ function container(cx,y0,cz,rot,color){
   for(let i=0;i<7;i++){const t=(i+0.5)/7-0.5;
     if(rot){addBox(cx+w/2+0.02,y0,cz+t*d,0.05,2.6,0.2,rib,false,false);addBox(cx-w/2-0.02,y0,cz+t*d,0.05,2.6,0.2,rib,false,false);}
     else{addBox(cx+t*w,y0,cz+d/2+0.02,0.2,2.6,0.05,rib,false,false);addBox(cx+t*w,y0,cz-d/2-0.02,0.2,2.6,0.05,rib,false,false);}}
+  boxCastings(cx,y0,cz,w,d);
+  const ex=rot?cz+d/2+0.04:cx+w/2+0.04;for(const o of[-0.85,-0.3,0.3,0.85]){if(rot){addBox(cx+o,y0+0.15,ex,0.05,2.3,0.05,0x3a3a38,false,false);addBox(cx+o+0.06,y0+1.1,ex+0.04,0.16,0.08,0.05,0x3a3a38,false,false);}
+    else{addBox(ex,y0+0.15,cz+o,0.05,2.3,0.05,0x3a3a38,false,false);addBox(ex+0.04,y0+1.1,cz+o+0.06,0.05,0.08,0.16,0x3a3a38,false,false);}} // lock bars and handles on the doors
 }
+function boxCastings(cx,y0,cz,w,d){for(const a of[-1,1])for(const b of[-1,1])for(const top of[0,1]){const sz=top?0.24:0.22;addBox(cx+a*(w/2+0.03-sz/2),y0+(top?2.6-sz+0.03:-0.0),cz+b*(d/2+0.03-sz/2),sz,sz,sz,0x3a3a38,false,false);}}
 function addLadder(x,z,face,y0,y1){ // face: direction from wall toward the climber: 'x+','x-','z+','z-'
   const g=new THREE.Group();const rm=mat(0x3c3833);const W=0.9,D=0.7;
   const along=face[0]==='x'?'z':'x', s=face[1]==='+'?1:-1;
@@ -744,9 +763,28 @@ const C={RUST:0x8a4a26,RUSTD:0x6c3a20,RUSTW:0x7a4024,STEEL:0x58514a,DECK:0x6a5a4
 const CS=1.4; // crate size
 const MAP_SCALE=1.1; // the whole yard is built at this scale; small props (crates, barrels, barriers, pallets...) keep their real size
 const PROPS=[];let propDepth=0;
-function prop(fn,ax,ay,az){if(propDepth)return fn();propDepth++;const r={ms:scene.children.length,cs:colliders.length,ax,ay,az};try{return fn();}finally{propDepth--;r.me=scene.children.length;r.ce=colliders.length;PROPS.push(r);}}
-function asProp(fn,anchor){return function(...a){const [x,y,z]=anchor(...a);return prop(()=>fn.apply(this,a),x,y,z);};}
-const crate=(x,y,z)=>prop(()=>addBox(x,y,z,CS,CS,CS,C.CRATE),x,y,z);
+function prop(fn,ax,ay,az,n){if(propDepth)return fn();propDepth++;const r={n,ms:scene.children.length,cs:colliders.length,ax,ay,az};try{return fn();}finally{propDepth--;r.me=scene.children.length;r.ce=colliders.length;PROPS.push(r);}}
+function asProp(fn,anchor){return function(...a){const [x,y,z]=anchor(...a);return prop(()=>fn.apply(this,a),x,y,z,fn.name);};}
+const stencilM=(()=>{const c=document.createElement('canvas');c.width=256;c.height=128;const x=c.getContext('2d');x.fillStyle='rgba(28,24,20,.82)';x.font='bold 46px monospace';x.textAlign='center';
+  x.fillText('CARGO 04',128,58);x.font='bold 22px monospace';x.fillText('THIS SIDE UP',128,92);for(const ax of[28,228]){x.beginPath();x.moveTo(ax,30);x.lineTo(ax-12,52);x.lineTo(ax+12,52);x.fill();x.fillRect(ax-4,52,8,26);}
+  const im=x.getImageData(0,0,256,128),d=im.data,r=mulberry(9);for(let i=3;i<d.length;i+=4)if(d[i]&&r()<0.3)d[i]*=0.3+r()*0.5;x.putImageData(im,0,0); // sprayed through a worn stencil: patchy
+  const t=new THREE.CanvasTexture(c);return new THREE.MeshLambertMaterial({map:t,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2});})();
+const hazM=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.fillStyle='#c9a227';x.fillRect(0,0,64,64);x.fillStyle='#24211d';
+  for(let i=-64;i<128;i+=32){x.beginPath();x.moveTo(i,0);x.lineTo(i+16,0);x.lineTo(i+80,64);x.lineTo(i+64,64);x.fill();}const im=x.getImageData(0,0,64,64),d=im.data,r=mulberry(5);
+  for(let i=0;i<d.length;i+=4){const n=(r()-0.5)*40;d[i]+=n;d[i+1]+=n;d[i+2]+=n*0.8;if(r()<0.06){d[i]=d[i+1]=d[i+2]=120;}}x.putImageData(im,0,0);
+  return triplanar(new THREE.MeshLambertMaterial({color:weather(0xd8d0c0,'paint'),map:new THREE.CanvasTexture(c)}),1/0.9);})();
+hazM.map.wrapS=hazM.map.wrapT=THREE.RepeatWrapping;
+function hazBox(cx,y0,cz,w,h,d){const m=addBox(cx,y0,cz,w,h,d,0x9a7a34,false,false);m.material=hazM;return m;}
+function signM(txt,sub,bg,fg){const c=document.createElement('canvas');c.width=512;c.height=192;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,512,192);x.strokeStyle=fg;x.lineWidth=8;x.strokeRect(10,10,492,172);
+  x.fillStyle=fg;x.textAlign='center';let fs=96;do{x.font='bold '+fs+'px monospace';fs-=4;}while(x.measureText(txt).width>468&&fs>20);x.fillText(txt,256,sub?112:128);if(sub){x.font='bold 30px monospace';x.fillText(sub,256,160);}
+  const im=x.getImageData(0,0,512,192),d=im.data,r=mulberry(txt.length*31);for(let i=0;i<d.length;i+=4){const n=(r()-0.5)*36;d[i]+=n;d[i+1]+=n;d[i+2]+=n;if(r()<0.02){d[i]*=0.7;d[i+1]*=0.7;d[i+2]*=0.7;}}x.putImageData(im,0,0);
+  return new THREE.MeshLambertMaterial({color:weather(0xffffff,'paint'),map:new THREE.CanvasTexture(c)});}
+function sign(m,cx,cy,cz,w,h,ry){const g=new THREE.Mesh(new THREE.PlaneGeometry(w,h),m);g.position.set(cx,cy,cz);g.rotation.y=ry||0;scene.add(g);return g;}
+function crateDetail(x,y,z,S){const h=S/2,BT=0x5c5040,BR=0x3e3b36;KIND[BT]='wood';
+  for(const a of[-1,1])for(const b of[-1,1]){addBox(x,y+h+a*(h-0.05),z+b*(h+0.012)-b*0.05,S+0.024,0.1,0.1,BT,false,false);addBox(x+b*(h+0.018)-b*0.05,y+h+a*(h-0.05),z,0.1,0.1,S-0.18,BT,false,false);addBox(x+a*(h+0.006)-a*0.055,y,z+b*(h+0.006)-b*0.055,0.11,S,0.11,BT,false,false);
+    for(const c of[-1,1])addBox(x+a*(h-0.045),y+(c<0?0.006:S-0.14),z+b*(h-0.045),0.16,0.16,0.16,BR,false,false);} // battens on every edge, steel corner caps
+  const sm=new THREE.Mesh(new THREE.PlaneGeometry(S*0.62,S*0.31),stencilM);sm.position.set(x,y+S*0.55,z+h+0.02);scene.add(sm);}
+const crate=(x,y,z)=>prop(()=>{const m=addBox(x,y,z,CS,CS,CS,C.CRATE);crateDetail(x,y,z,CS);return m;},x,y,z,'crate');
 // ground
 const grainTex=(function(){ // fine sand grains and pebbles, multiplied over the dunes up close
   const N=256,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),im=x.createImageData(N,N),d=im.data;
@@ -851,51 +889,165 @@ function railing(x0,z0,x1,z1,y0,y1){ // pipe railing: solid to bodies, see-throu
   for(const yy of[y1-0.04,y0+(y1-y0)*0.5]){alongX?addBox(cx,yy-0.03,cz,len,0.06,0.06,rm,false,true):addBox(cx,yy-0.03,cz,0.06,0.06,len,rm,false,true);}
   const n=Math.max(1,Math.round(len/1.2));for(let k=0;k<=n;k++){const t=k/n;const px=alongX?x0+t*len:cx,pz=alongX?cz:z0+t*len;addBox(px,y0,pz,0.06,y1-y0,0.06,rm,false,true);}}
 // ---- helpers for hollow buildings and props (everything here collides) ----
-function room(x0,z0,x1,z1,h,color,openings,roof){ // openings: [side,'a','b',top] along that wall, side n(z0) s(z1) w(x0) e(x1)
-  const T=0.2,op=openings||[];
+const WINDOWS=[];
+function room(x0,z0,x1,z1,h,color,openings,roof,base=0){ // openings: [side,'a','b',top] along that wall, side n(z0) s(z1) w(x0) e(x1); base lifts the whole room (an upper storey)
+  const T=0.2,op=openings||[];for(const o of op)WINDOWS.push({side:o[0],a:o[1],b:o[2],top:o[3]+base,bot:(o[4]||0)+base,w:o[0]==='n'?z0:o[0]==='s'?z1:o[0]==='w'?x0:x1});
   const wall=(side)=>{const along=side==='n'||side==='s';const lo=along?x0:z0,hi=along?x1:z1;const cuts=op.filter(o=>o[0]===side).sort((a,b)=>a[1]-b[1]);
-    let cur=lo;const seg=(a,b,y0,y1)=>{if(b-a<0.02||y1-y0<0.02)return;if(side==='n')slab(a,z0,b,z0+T,y0,y1,color);else if(side==='s')slab(a,z1-T,b,z1,y0,y1,color);else if(side==='w')slab(x0,a,x0+T,b,y0,y1,color);else slab(x1-T,a,x1,b,y0,y1,color);};
+    let cur=lo;const seg=(a,b,y0,y1)=>{if(b-a<0.02||y1-y0<0.02)return;y0+=base;y1+=base;if(side==='n')slab(a,z0,b,z0+T,y0,y1,color);else if(side==='s')slab(a,z1-T,b,z1,y0,y1,color);else if(side==='w')slab(x0,a,x0+T,b,y0,y1,color);else slab(x1-T,a,x1,b,y0,y1,color);};
     for(const [,a,b,top,bot] of cuts){seg(cur,a,0,h);seg(a,b,top,h);if(bot)seg(a,b,0,bot);cur=b;}seg(cur,hi,0,h);};
   for(const sd of['n','s','w','e'])wall(sd);
-  if(roof!==false)slab(x0,z0,x1,z1,h,h+0.14,0x4a463b);
+  if(roof!==false)slab(x0,z0,x1,z1,base+h,base+h+0.14,0x4a463b);
+  roomDetail(x0,z0,x1,z1,h,color,op,roof,base);
 }
-function barrel(x,z,col,tip){const m=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,0.9,16),mat(col,'paint'));m.position.set(x,0.45,z);m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);
+function roomDetail(x0,z0,x1,z1,h,color,op,roof,base){const T=0.2,TR=0x4a4438,PS=0x5a5246,y0=base,yt=base+h;KIND[TR]='steel';KIND[PS]='conc';
+  for(const [cx,cz] of[[x0,z0],[x1,z0],[x0,z1],[x1,z1]])addBox(cx,y0,cz,0.32,h+0.06,0.32,PS,false,false);                       // corner pilasters
+  if(roof!==false){for(const [ax,az,w,d] of[[(x0+x1)/2,z0+0.02,x1-x0+0.1,0.14],[(x0+x1)/2,z1-0.02,x1-x0+0.1,0.14],[x0+0.02,(z0+z1)/2,0.14,z1-z0-0.12],[x1-0.02,(z0+z1)/2,0.14,z1-z0-0.12]])addBox(ax,yt+0.06,az,w,0.3,d,TR,false,false);} // parapet lip
+  for(const [side,a,b,top,bot] of op){const along=side==='n'||side==='s',wc=side==='n'?z0+T/2:side==='s'?z1-T/2:side==='w'?x0+T/2:x1-T/2,D=T+0.14,yb=y0+(bot||0),ytp=y0+top;
+    const bx=(u,v0,v1,w)=>along?addBox(u,v0,wc,w,v1-v0,D,TR,false,false):addBox(wc,v0,u,D,v1-v0,w,TR,false,false);
+    bx(a-0.05,yb,ytp+0.1,0.14);bx(b+0.05,yb,ytp+0.1,0.14);bx((a+b)/2,ytp-0.02,ytp+0.12,b-a+0.24);                                   // jambs and head
+    if(bot)(along?addBox((a+b)/2,yb-0.1,wc,b-a+0.3,0.12,T+0.26,TR,false,false):addBox(wc,yb-0.1,(a+b)/2,T+0.26,0.12,b-a+0.3,TR,false,false)); // sill
+  }
+  {const IN=0.03,DD=0x4b5547,SP=0x8a7a40;KIND[DD]='paint';KIND[SP]='paint';
+    addBox((x0+x1)/2,y0,(z0+z1)/2,x1-x0-2*T,0.022,z1-z0-2*T,0x8c8f86,false,false);                                                // sealed concrete floor
+    for(const sd of['n','s','w','e']){const along=sd==='n'||sd==='s',lo=(along?x0:z0)+T+IN,hi=(along?x1:z1)-T-IN,face=sd==='n'?z0+T:sd==='s'?z1-T:sd==='w'?x0+T:x1-T,o=sd==='n'||sd==='w'?1:-1;
+      const cuts=op.filter(q=>q[0]===sd&&(q[4]||0)<1.0).map(q=>[q[1]-0.16,q[2]+0.16]).sort((a,b)=>a[0]-b[0]);let cur=lo;
+      const seg=(a,b)=>{if(b-a<0.1)return;const c=(a+b)/2,L=b-a;if(along){addBox(c,y0+0.022,face+o*0.014,L,0.93,0.024,DD,false,false);addBox(c,y0+0.95,face+o*0.016,L,0.06,0.028,SP,false,false);}
+        else{addBox(face+o*0.014,y0+0.022,c,0.024,0.93,L,DD,false,false);addBox(face+o*0.016,y0+0.95,c,0.028,0.06,L,SP,false,false);}};
+      for(const [a,b] of cuts){seg(cur,Math.min(a,hi));cur=Math.max(cur,b);}seg(cur,hi);}
+    const lx=(x0+x1)/2,lz=(z0+z1)/2;addBox(lx,yt-0.12,lz,1.3,0.1,0.32,0x3a3a38,false,false);{const l=new THREE.Mesh(boxGeo,new THREE.MeshBasicMaterial({color:0xfff0c8}));l.scale.set(1.18,0.02,0.22);l.position.set(lx,yt-0.13,lz);scene.add(l);} // ceiling lamp
+    const bl=['s','n','e','w'].find(sd=>!op.some(q=>q[0]===sd));if(bl){const along=bl==='n'||bl==='s',face=bl==='n'?z0+T:bl==='s'?z1-T:bl==='w'?x0+T:x1-T,o=bl==='n'||bl==='w'?1:-1,lo=(along?x0:z0)+T+0.3,hi=(along?x1:z1)-T-0.3,cm=mat(0x3a3a38,'steel');
+      const P=(u,y,d)=>along?new V3(u,y,face+o*d):new V3(face+o*d,y,u);rod(scene,P(lo,yt-0.35,0.05),P(hi,yt-0.35,0.05),0.022,cm,6);                      // conduit run under the ceiling
+      const jb=P((lo+hi)/2,yt-0.5,0.07);addBox(jb.x,jb.y,jb.z,along?0.3:0.1,0.3,along?0.1:0.3,0x5d6150,false,false);
+      const ex=P(lo+0.35,y0+1.55,0.12),ext=new THREE.Mesh(new THREE.CylinderGeometry(0.085,0.085,0.46,12),mat(0x8a2e22,'paint'));ext.position.set(ex.x,ex.y,ex.z);scene.add(ext); // extinguisher on its bracket
+      const eh=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.05,0.08,8),cm);eh.position.set(ex.x,ex.y+0.27,ex.z);scene.add(eh);const bk=P(lo+0.35,y0+1.45,0.03);addBox(bk.x,bk.y,bk.z,along?0.2:0.04,0.06,along?0.04:0.2,0x3a3a38,false,false);}}
+  if(base)return;
+  addCylV2(x1+0.11,z1-0.45,0.07,yt+0.1,0x3e3b36);                                                                                  // downpipe off the roof
+  const blank=['s','n','e','w'].find(sd=>!op.some(o=>o[0]===sd));if(!blank)return;
+  const along=blank==='n'||blank==='s',out=blank==='n'?z0-0.05:blank==='s'?z1+0.05:blank==='w'?x0-0.05:x1+0.05,mid=along?(x0+x1)/2:(z0+z1)/2,o=blank==='n'||blank==='w'?-1:1;
+  const put=(u,yy,w,hh,dd,col)=>along?addBox(u,yy,out+o*dd/2,w,hh,dd,col,false,false):addBox(out+o*dd/2,yy,u,dd,hh,w,col,false,false);
+  put(mid-0.9,h-1.2,0.9,0.6,0.1,0x3e3b36);for(let i=0;i<4;i++)put(mid-0.9,h-1.12+i*0.13,0.84,0.04,0.16,0x55504a);              // louvred vent
+  put(mid+0.9,1.2,0.45,0.6,0.16,0x5d6150);put(mid+0.9,1.8,0.06,h-1.8,0.12,0x3e3b36);}                                            // fuse box with its conduit up to the roof
+function addCylV2(cx,cz,r,h,color){const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,8),mat(color,'steel'));m.position.set(cx,h/2,cz);scene.add(m);}
+function barrel(x,z,col,tip){const m=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,0.9,18),mat(col,'paint'));m.position.set(x,0.45,z);m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);
+  for(const y of[0.02,0.88]){const t=new THREE.Mesh(new THREE.TorusGeometry(0.295,0.018,5,18),mat(col,'paint'));t.rotation.x=Math.PI/2;t.position.set(x,y,z);scene.add(t);}
+  {const l=new THREE.Mesh(new THREE.CircleGeometry(0.28,18),mat(0x3a3a38,'steel'));l.rotation.x=-Math.PI/2;l.position.set(x,0.885,z);scene.add(l);for(const [bx,bz,r] of[[0.15,0.05,0.04],[-0.17,-0.04,0.025]]){const b=new THREE.Mesh(new THREE.CylinderGeometry(r,r,0.03,8),mat(0x5a5650,'steel'));b.position.set(x+bx,0.9,z+bz);scene.add(b);}
+   const bd=new THREE.Mesh(new THREE.CylinderGeometry(0.312,0.312,0.16,18,1,true),mat(0xd8d0bc,'paint'));bd.position.set(x,0.5,z);scene.add(bd);}
   for(const y of[0.22,0.68]){const r=new THREE.Mesh(new THREE.CylinderGeometry(0.31,0.31,0.05,16),mat(0x3a3a38,'steel'));r.position.set(x,y,z);scene.add(r);}
   addCol(x-0.3,0,z-0.3,x+0.3,0.9,z+0.3);}
 function barrels(x,z,n,col){const P=[[0,0],[0.65,0.1],[0.3,0.62],[-0.4,0.55],[0.95,0.72],[-0.2,-0.66]];for(let i=0;i<n;i++)barrel(x+P[i][0],z+P[i][1],Array.isArray(col)?col[i%col.length]:col);}
-function jersey(x,z,alongX){const L=2.2,sh=new THREE.Shape([new THREE.Vector2(-0.32,0),new THREE.Vector2(0.32,0),new THREE.Vector2(0.22,0.25),new THREE.Vector2(0.12,0.82),new THREE.Vector2(-0.12,0.82),new THREE.Vector2(-0.22,0.25)]);
-  const g=new THREE.ExtrudeGeometry(sh,{depth:L,bevelEnabled:false});g.translate(0,0,-L/2);if(alongX)g.rotateY(Math.PI/2);const m=new THREE.Mesh(g,mat(0x7e7f7c,'conc'));m.position.set(x,0,z);m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);
+function jersey(x,z,alongX){const L=2.2,V=(a,b)=>new THREE.Vector2(a,b),SL=0.36,YS=0.13,w0=0.32-0.1*YS/0.25,cm=mat(0x7e7f7c,'conc');
+  const prof=[V(-0.32,0),V(0.32,0),V(0.22,0.25),V(0.12,0.82),V(-0.12,0.82),V(-0.22,0.25)],top=[V(-w0,YS),V(w0,YS),V(0.22,0.25),V(0.12,0.82),V(-0.12,0.82),V(-0.22,0.25)];
+  const g=new THREE.Group();g.position.set(x,0,z);if(alongX)g.rotation.y=Math.PI/2;scene.add(g);
+  const piece=(shape,z0,z1)=>{const geo=new THREE.ExtrudeGeometry(new THREE.Shape(shape),{depth:z1-z0-0.03,bevelEnabled:true,bevelThickness:0.015,bevelSize:0.012,bevelSegments:1});geo.translate(0,0,z0+0.015);const m=new THREE.Mesh(geo,cm);m.castShadow=m.receiveShadow=true;g.add(m);worldMeshes.push(m);return m;};
+  piece(prof,-L/2,-SL/2);piece(prof,SL/2,L/2);piece(top,-SL/2-0.02,SL/2+0.02);                                  // two feet either side of the forklift slot
+  const st=mat(0x3a3a38,'steel'),rs=mat(0x6a4a33,'rust');
+  for(const zz of[-L*0.3,L*0.3]){const lp=new THREE.Mesh(new THREE.TorusGeometry(0.055,0.012,5,10,Math.PI),rs);lp.position.set(0,0.82,zz);g.add(lp);} // lifting loops cast into the top
+  for(const e of[-1,1]){const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.018,0.018,0.5,6),st);pin.position.set(e*0.07,0.5,e*(L/2+0.015));g.add(pin);
+    const pl=new THREE.Mesh(boxGeo,st);pl.scale.set(0.12,0.16,0.03);pl.position.set(-e*0.06,0.62,e*(L/2+0.01));g.add(pl);}  // pin-and-loop end connectors
+  const ch=new THREE.Mesh(boxGeo,mat(0x6a6b68,'conc'));ch.scale.set(0.09,0.06,0.16);ch.position.set(0.11,0.8,L/2-0.12);ch.rotation.set(0.4,0.3,0.2);g.add(ch); // a chipped corner
+  for(const sd of[-1,1]){const rf=new THREE.Mesh(boxGeo,mat(0xb08a2a,'paint'));rf.scale.set(0.012,0.07,0.16);rf.position.set(sd*0.168,0.56,0);rf.rotation.z=-sd*0.17;g.add(rf);} // amber reflectors on both faces
   if(alongX)addCol(x-L/2,0,z-0.3,x+L/2,0.82,z+0.3);else addCol(x-0.3,0,z-L/2,x+0.3,0.82,z+L/2);}
+
 function spool(x,z,rot){const g=new THREE.Group();g.position.set(x,0.75,z);g.rotation.y=rot||0;scene.add(g);
   for(const s of[-0.38,0.38]){const d=new THREE.Mesh(new THREE.CylinderGeometry(0.75,0.75,0.06,20),mat(0x7a6440,'wood'));d.rotation.x=Math.PI/2;d.position.z=s;d.castShadow=true;g.add(d);worldMeshes.push(d);}
-  const c=new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,0.72,16),mat(0x3a3a38,'steel'));c.rotation.x=Math.PI/2;g.add(c);
+  const c=new THREE.Mesh(new THREE.CylinderGeometry(0.52,0.52,0.7,20),mat(0x1c1c1a,'steel'));c.rotation.x=Math.PI/2;g.add(c);                                         // wound cable
+  for(let k=0;k<6;k++){const t=new THREE.Mesh(new THREE.TorusGeometry(0.52,0.028,5,20),mat(0x2a2a28,'steel'));t.position.z=-0.3+k*0.12;g.add(t);}
+  for(const s of[-0.42,0.42]){for(let k=-2;k<=2;k++){const pl=new THREE.Mesh(boxGeo,mat(0x5c5040,'wood'));pl.scale.set(0.02,1.42,0.012);pl.position.set(k*0.28,0,s+(s>0?0.03:-0.03));g.add(pl);}           // plank seams
+    const hb=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.02,12),mat(0x1c1c1a,'steel'));hb.rotation.x=Math.PI/2;hb.position.z=s+(s>0?0.032:-0.032);g.add(hb);
+    for(let k=0;k<6;k++){const a=k/6*TAU,b=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.02,6),mat(0x5a5650,'steel'));b.rotation.x=Math.PI/2;b.position.set(Math.cos(a)*0.3,Math.sin(a)*0.3,s+(s>0?0.035:-0.035));g.add(b);}}
+  {const e=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.6,6),mat(0x1c1c1a,'steel'));e.position.set(0.55,-0.45,0.2);e.rotation.z=0.6;g.add(e);}                 // loose cable end
   const hw=Math.abs(Math.cos(rot||0))*0.42+Math.abs(Math.sin(rot||0))*0.75,hd=Math.abs(Math.sin(rot||0))*0.42+Math.abs(Math.cos(rot||0))*0.75;addCol(x-hw,0,z-hd,x+hw,1.5,z+hd);}
-function pipeStack(x,z,len,alongX){const R=0.3;const P=[[-0.31,R],[0.31,R],[0,R+0.53]];for(const [o,y] of P){const m=new THREE.Mesh(new THREE.CylinderGeometry(R,R,len,14),mat(0x5d4632,'rust'));
-    if(alongX){m.rotation.z=Math.PI/2;m.position.set(x,y,z+o);}else{m.rotation.x=Math.PI/2;m.position.set(x+o,y,z);}m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);}
-  if(alongX){addCol(x-len/2,0,z-0.62,x+len/2,0.62,z+0.62);addCol(x-len/2,0.62,z-0.3,x+len/2,1.13,z+0.3);}else{addCol(x-0.62,0,z-len/2,x+0.62,0.62,z+len/2);addCol(x-0.3,0.62,z-len/2,x+0.3,1.13,z+len/2);}}
-function pallet(x,z,stack){addBox(x,0,z,1.25,0.16,1.05,C.CRATE);if(stack>0)addBox(x,0.16,z,1.05,0.75,0.95,C.CRATE);if(stack>1)addBox(x+0.05,0.91,z-0.05,0.95,0.6,0.85,0x6a5636);}
+function pipeStack(x,z,len,alongX){const R=0.3,S=0.16,P=[[-0.31,S+R],[0.31,S+R],[0,S+R+0.53]];
+  const g=new THREE.Group();g.position.set(x,0,z);if(!alongX)g.rotation.y=Math.PI/2;scene.add(g); // built along x, turned if needed
+  const outM=mat(0x5d4632,'pipe'),inM=new THREE.MeshLambertMaterial({color:0x2a1f16,side:THREE.BackSide}),flM=mat(0x4d3424,'pipe'),wd=mat(0x5c5040,'wood');
+  const cyl=(r,l,m,open,seg)=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(r,r,l,seg||22,1,open),m);c.rotation.z=Math.PI/2;c.castShadow=c.receiveShadow=true;return c;};
+  P.forEach(([o,y],k)=>{const p=cyl(R,len,outM,true);p.position.set(0,y,o);g.add(p);worldMeshes.push(p);
+    const bore=cyl(R-0.035,len+0.01,inM,true);bore.position.set(0,y,o);g.add(bore);
+    for(const e of[-1,1]){const ring=new THREE.Mesh(new THREE.RingGeometry(R-0.035,R+0.055,22),flM);ring.position.set(e*(len/2+0.012),y,o);ring.rotation.y=e*Math.PI/2;g.add(ring);
+      const fl=cyl(R+0.055,0.07,flM,true);fl.position.set(e*(len/2-0.045),y,o);g.add(fl);
+      for(let b=0;b<8;b++){const a=b/8*TAU+k,bo=new THREE.Mesh(new THREE.CylinderGeometry(0.014,0.014,0.03,6),mat(0x3a3a38,'steel'));bo.rotation.z=Math.PI/2;bo.position.set(e*(len/2+0.012),y+Math.sin(a)*(R+0.03),o+Math.cos(a)*(R+0.03));g.add(bo);}} // flange bolts
+    for(let s2=-len/2+1.3+k*0.4;s2<len/2-0.6;s2+=1.6){const w=cyl(R+0.008,0.035,flM,true,22);w.position.set(s2,y,o);g.add(w);}}); // girth welds
+  for(const sx of[-len*0.33,len*0.33]){const sl=new THREE.Mesh(boxGeo,wd);sl.scale.set(0.2,S,1.6);sl.position.set(sx,S/2,0);sl.castShadow=sl.receiveShadow=true;g.add(sl);worldMeshes.push(sl);
+    for(const e of[-1,1]){const ck=new THREE.Mesh(boxGeo,wd);ck.scale.set(0.16,0.12,0.14);ck.position.set(sx,S+0.06,e*0.68);g.add(ck);}}   // sleepers and chocks under the lower pair
+  if(alongX){addCol(x-len/2,0,z-0.8,x+len/2,S,z+0.8);addCol(x-len/2,S,z-0.62,x+len/2,S+0.62,z+0.62);addCol(x-len/2,S+0.62,z-0.3,x+len/2,S+1.13,z+0.3);}
+  else{addCol(x-0.8,0,z-len/2,x+0.8,S,z+len/2);addCol(x-0.62,S,z-len/2,x+0.62,S+0.62,z+len/2);addCol(x-0.3,S+0.62,z-len/2,x+0.3,S+1.13,z+len/2);}}
+
+function pallet(x,z,stack){ // slatted pallet on nine blocks; first load is taped cartons, second is a stack of feed sacks
+  const W=1.25,D=1.05;addCol(x-W/2,0,z-D/2,x+W/2,0.16,z+D/2);
+  for(const a of[-1,0,1])for(const b of[-1,0,1])vb(x+a*(W/2-0.08),0,z+b*(D/2-0.07),0.14,0.09,0.14,0x5c5040);for(const b of[-1,0,1])vb(x,0.09,z+b*(D/2-0.07),W,0.03,0.14,0x6a5636);
+  for(let i=0;i<7;i++)vb(x-W/2+0.07+i*(W-0.14)/6,0.12,z,0.13,0.035,D,i%2?0x6a5636:0x7a6440);
+  if(stack>0){addCol(x-0.52,0.16,z-0.47,x+0.52,0.91,z+0.47);for(const a of[-1,1])for(const b of[-1,1]){const bx=x+a*0.26,bz=z+b*0.235;vb(bx,0.16,bz,0.5,0.37,0.45,0x9a7a52);vb(bx,0.53,bz,0.5,0.37,0.45,0x8f714c);
+      vb(bx,0.52,bz,0.502,0.03,0.08,0xc9b48a);vb(bx,0.89,bz,0.08,0.025,0.452,0xc9b48a);}                                                   // taped cartons
+    const wr=new THREE.Mesh(boxGeo,new THREE.MeshLambertMaterial({color:0xdde4e6,transparent:true,opacity:0.22,depthWrite:false}));wr.scale.set(1.06,0.6,0.96);wr.position.set(x,0.5,z);scene.add(wr);} // stretch wrap
+  if(stack>1){addCol(x-0.46,0.91,z-0.43,x+0.56,1.51,z+0.33);for(let r=0;r<3;r++)for(let k=0;k<2;k++){const sk=new THREE.Mesh(bagGeo,mat(BAG_TONES[(r+k)%4],'bag'));sk.scale.set(0.46,0.1,0.32);sk.position.set(x+0.05+(r%2?0.04:-0.04),0.99+r*0.2,z-0.05+(k?0.18:-0.18));sk.rotation.y=(r%2)*0.1;scene.add(sk);}}}
+
 function truck(x,z){ // burnt-out flatbed along x, cab to +x
-  addBox(x+2.1,0.55,z,1.9,1.6,2.1,0x6a4030);addBox(x+2.1,2.15,z,1.6,0.08,1.9,0x4a2a20,false);addBox(x+3.07,1.05,z,0.06,0.8,1.6,0x1a1a18,false,false);
-  addBox(x-0.6,0.55,z,4.0,0.3,2.2,0x5a3a28);addBox(x-0.6,0.85,z-1.05,4.0,0.5,0.1,0x5a3a28);addBox(x-0.6,0.85,z+1.05,4.0,0.5,0.1,0x5a3a28);addBox(x-2.55,0.85,z,0.1,0.5,2.2,0x5a3a28);
-  addCol(x-2.6,0,z-1.1,x+3.05,0.55,z+1.1);
-  for(const wx of[x-1.8,x+0.3,x+2.2])for(const s of[-1,1]){const w=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.32,14),mat(0x1c1c1a,'steel'));w.rotation.x=Math.PI/2;w.position.set(wx,0.45,z+s*1.0);scene.add(w);}}
-function forklift(x,z){addBox(x,0.25,z,1.2,1.0,2.0,0xb08a2a);addBox(x,1.25,z+0.35,1.1,0.08,1.2,0x2a2a28,false);for(const s of[-0.5,0.5])addBox(x+s,1.25,z+0.85,0.08,1.1,0.08,0x2a2a28,false,false);
-  addBox(x,0,z-1.1,1.0,2.6,0.12,0x2a2a28);addBox(x-0.25,0,z-1.65,0.12,0.08,1.0,0x3a3a38);addBox(x+0.25,0,z-1.65,0.12,0.08,1.0,0x3a3a38);addCol(x-0.6,0,z-1.0,x+0.6,0.25,z+1.0);
-  for(const [wx,wz] of[[-0.6,-0.6],[0.6,-0.6],[-0.6,0.6],[0.6,0.6]]){const w=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.2,12),mat(0x1c1c1a,'steel'));w.rotation.z=Math.PI/2;w.position.set(x+wx,0.28,z+wz);scene.add(w);}}
-const bagGeo=(()=>{const g=new THREE.SphereGeometry(1,8,4),P=g.attributes.position; // pillow: a squared-off ellipsoid with flattened top and bottom
-  for(let i=0;i<P.count;i++){let x=P.getX(i),y=P.getY(i),z=P.getZ(i);const sq=v=>Math.sign(v)*Math.pow(Math.abs(v),0.55);x=sq(x)*0.96;z=sq(z)*0.94;y=Math.sign(y)*Math.min(Math.abs(y),0.72)/0.72;P.setXYZ(i,x,y,z);}
+  const CAB=0x6a4030,SOOT=0x2e2a24,ST=0x3a3a38,GL=0x34444a,TY=0x1c1c1a,RIM=0x5a5650,WD=0x5c5040;KIND[CAB]='rust';KIND[SOOT]='steel';KIND[RIM]='steel';KIND[WD]='wood';
+  const vb=(cx,y0,cz,w,h,d,c)=>addBox(cx,y0,cz,w,h,d,c,false,false);
+  // chassis, fuel tank, steps
+  for(const s of[-0.45,0.45])vb(x+0.4,0.45,z+s,6.0,0.2,0.14,ST);for(const cx of[-2.0,-0.6,0.9])vb(x+cx,0.47,z,0.12,0.16,0.9,ST);
+  {const t=new THREE.Mesh(new THREE.CylinderGeometry(0.27,0.27,1.0,14),mat(RIM,'steel'));t.rotation.z=Math.PI/2;t.position.set(x+1.8,0.55,z-0.82);scene.add(t);for(const e of[-0.4,0.4])vb(x+1.8+e,0.26,z-0.82,0.05,0.58,0.58,ST);}
+  vb(x+2.1,0.42,z+1.06,0.7,0.06,0.3,ST);vb(x+2.1,0.42,z-1.06,0.7,0.06,0.3,ST);
+  // cab: body, roof cap, pillars, glass (one pane blown out), door seams and handles
+  addBox(x+2.1,0.75,z,1.7,1.6,2.1,CAB);vb(x+2.05,2.35,z,1.55,0.1,1.95,SOOT);
+  for(const s of[-1,1]){vb(x+2.93,1.55,z+s*0.97,0.1,0.8,0.12,CAB);vb(x+2.0,1.62,z+s*1.055,1.1,0.55,0.02,GL);vb(x+2.0,2.17,z+s*1.065,1.2,0.06,0.03,SOOT);vb(x+2.0,1.56,z+s*1.065,1.2,0.06,0.03,SOOT);vb(x+1.42,1.56,z+s*1.065,0.06,0.67,0.03,SOOT);vb(x+2.58,1.56,z+s*1.065,0.06,0.67,0.03,SOOT);vb(x+1.38,0.8,z+s*1.058,0.03,1.45,0.02,SOOT);vb(x+2.72,0.8,z+s*1.058,0.03,0.75,0.02,SOOT);vb(x+2.5,1.35,z+s*1.07,0.16,0.04,0.04,ST);
+    vb(x+2.95,1.9,z+s*1.2,0.04,0.04,0.28,ST);vb(x+2.95,1.75,z+s*1.36,0.05,0.34,0.2,ST);}                                  // mirrors on arms
+  vb(x+2.955,1.6,z+0.45,0.02,0.7,0.82,GL);vb(x+2.955,2.18,z-0.45,0.02,0.12,0.82,GL);vb(x+2.955,1.6,z-0.62,0.02,0.22,0.4,GL); // windshield, the left pane shattered to a few shards
+  vb(x+2.96,2.27,z,0.1,0.08,2.0,CAB);vb(x+2.96,1.52,z,0.1,0.08,2.0,CAB);vb(x+2.96,1.55,z,0.1,0.75,0.08,CAB);
+  // hood, grille, headlights, bumper, fenders
+  addBox(x+3.35,0.75,z,0.8,0.85,1.9,CAB);vb(x+3.3,1.6,z,0.72,0.05,1.7,SOOT);
+  vb(x+3.77,0.85,z,0.04,0.7,1.2,SOOT);for(let i=0;i<5;i++)vb(x+3.8,0.92+i*0.13,z,0.04,0.05,1.14,RIM);
+  for(const s of[-0.78,0.78]){const h=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.08,14),mat(RIM,'steel'));h.rotation.z=Math.PI/2;h.position.set(x+3.78,1.25,z+s);scene.add(h);
+    const l=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,0.02,14),mat(0x6e6a5e,'steel'));l.rotation.z=Math.PI/2;l.position.set(x+3.825,1.25,z+s);scene.add(l);}
+  addBox(x+3.88,0.5,z,0.16,0.26,2.2,ST);
+  for(const s of[-1,1]){vb(x+3.2,1.2,z+s*1.0,1.05,0.06,0.24,CAB);const fe=vb(x+3.72,0.95,z+s*1.0,0.06,0.3,0.24,CAB);fe.rotation.z=-0.5;vb(x+2.68,0.95,z+s*1.0,0.06,0.3,0.24,CAB);}
+  // exhaust stack behind the cab
+  {const ex=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,2.4,10),mat(0x5d4632,'pipe'));ex.position.set(x+1.15,1.6,z+0.82);scene.add(ex);const cp=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.07,0.18,10),mat(SOOT,'steel'));cp.position.set(x+1.15,2.85,z+0.82);scene.add(cp);}
+  // stake bed: planked deck, headboard, stake pockets, one side rail fallen off
+  addBox(x-0.6,0.75,z,3.9,0.15,2.2,WD);for(let i=0;i<6;i++)vb(x-0.6,0.905,z-0.92+i*0.368,3.86,0.012,0.02,SOOT);
+  addBox(x+1.22,0.9,z,0.1,1.3,2.1,ST);for(let i=0;i<5;i++)vb(x+1.16,1.0,z-0.84+i*0.42,0.04,1.15,0.06,ST);
+  for(let i=0;i<5;i++){const px=x-2.45+i*0.9;vb(px,0.9,z+1.08,0.08,0.62,0.08,WD);if(i<3)vb(px,0.9,z-1.08,0.08,0.62,0.08,WD);}
+  addBox(x-0.6,1.3,z+1.08,3.9,0.18,0.06,WD);addCol(x-2.55,0.9,z+1.04,x+1.3,1.5,z+1.12);
+  {const r=vb(x-1.6,0.06,z-1.85,2.6,0.16,0.06,WD);r.rotation.x=1.35;r.rotation.y=0.1;}                                           // the fallen rail lying in the sand
+  for(const s of[-1,1]){vb(x-2.6,0.85,z+s*0.85,0.04,0.12,0.22,0x8a2e22);vb(x-2.3,0.2,z+s*1.0,0.02,0.45,0.32,TY);}                 // tail lights, mud flaps
+  addCol(x-2.6,0,z-1.1,x+3.95,0.75,z+1.1);
+  // wheels: tyre, rim, hub and lug nuts; front singles, rear duals; the left front is flat
+  const wheel=(wx,wz,flat)=>{const tm=mat(TY,'steel'),rm=mat(RIM,'steel'),sz=wz>z?1:-1;
+    const t=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.3,20),tm);t.rotation.x=Math.PI/2;t.position.set(wx,flat?0.43:0.5,wz);if(flat)t.scale.set(1,1,1),t.scale.x=1.05;scene.add(t);
+    for(let k=0;k<20;k++){const a=k/20*TAU,tr=vb(wx+Math.cos(a)*0.5,(flat?0.43:0.5)+Math.sin(a)*0.5-0.03,wz,0.06,0.06,0.3,TY);tr.rotation.z=a;}       // tread blocks
+    const rim=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,0.32,16),rm);rim.rotation.x=Math.PI/2;rim.position.set(wx,flat?0.43:0.5,wz);scene.add(rim);
+    const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.13,0.08,10),rm);hub.rotation.x=Math.PI/2;hub.position.set(wx,flat?0.43:0.5,wz+sz*0.19);scene.add(hub);
+    for(let k=0;k<6;k++){const a=k/6*TAU,nt=new THREE.Mesh(new THREE.CylinderGeometry(0.018,0.018,0.04,6),rm);nt.rotation.x=Math.PI/2;nt.position.set(wx+Math.cos(a)*0.18,(flat?0.43:0.5)+Math.sin(a)*0.18,wz+sz*0.175);scene.add(nt);}};
+  for(const s of[-1,1]){wheel(x+3.2,z+s*0.98,s<0);wheel(x-1.5,z+s*0.98);wheel(x-0.35,z+s*0.98);}}
+
+function forklift(x,z){ // counterbalance forklift, forks to -z: body and counterweight, seat, steering, overhead guard, mast with carriage and forks
+  const Y=0xb08a2a,DK=0x2a2a28,ST=0x3a3a38;KIND[Y]='paint';
+  addBox(x,0.22,z+0.1,1.15,0.78,1.7,Y);addBox(x,0.22,z+0.85,1.2,1.1,0.32,0x3a3a38);                                         // chassis and counterweight
+  vb(x,1.0,z+0.45,1.0,0.12,0.8,DK);vb(x,1.12,z+0.5,0.5,0.1,0.45,0x1c1c1a);vb(x,1.22,z+0.72,0.5,0.45,0.1,0x1c1c1a);                // hood, seat
+  rod(scene,new V3(x,1.0,z-0.3),new V3(x,1.45,z-0.05),0.03,mat(DK,'steel'),6);{const sw=new THREE.Mesh(new THREE.TorusGeometry(0.16,0.018,5,14),mat(0x1c1c1a,'steel'));sw.position.set(x,1.47,z-0.03);sw.rotation.x=1.2;scene.add(sw);}
+  for(const sx of[-0.5,0.5])for(const sz of[-0.45,0.8]){vb(x+sx,1.0,z+sz,0.06,1.15,0.06,DK);addCol(x+sx-0.04,1.0,z+sz-0.04,x+sx+0.04,2.15,z+sz+0.04);}
+  vb(x,2.15,z+0.18,1.1,0.05,1.36,DK);for(let i=0;i<5;i++)vb(x,2.2,z-0.4+i*0.3,1.0,0.03,0.04,DK);                                // overhead guard with its grid
+  for(const sx of[-0.36,0.36]){vb(x+sx,0.2,z-0.92,0.1,2.5,0.12,ST);addCol(x+sx-0.05,0.2,z-0.98,x+sx+0.05,2.7,z-0.86);}for(const y of[0.9,1.8,2.62])vb(x,y,z-0.92,0.82,0.08,0.1,ST); // mast
+  rod(scene,new V3(x,0.4,z-0.85),new V3(x,1.9,z-0.85),0.05,mat(0x9a9890,'steel'),8);vb(x,0.25,z-1.02,0.9,0.5,0.06,DK);                         // lift cylinder, carriage
+  for(const sx of[-0.25,0.25]){vb(x+sx,0.02,z-1.6,0.12,0.06,1.1,ST);vb(x+sx,0.02,z-1.06,0.12,0.6,0.06,ST);addCol(x+sx-0.06,0,z-2.15,x+sx+0.06,0.08,z-1.05);} // forks
+  addCol(x-0.6,0,z-0.75,x+0.6,1.0,z+1.0);
+  for(const [wx,wz,r] of[[-0.6,-0.55,0.3],[0.6,-0.55,0.3],[-0.6,0.7,0.26],[0.6,0.7,0.26]]){cylX(x+wx-0.11,x+wx+0.11,r,z+wz,r,mat(0x1c1c1a,'steel'),16);cylX(x+wx+(wx<0?-0.115:0.105),x+wx+(wx<0?-0.105:0.115),r,z+wz,r*0.55,mat(Y,'paint'),12);}
+  lamp(x-0.45,2.12,z-0.46,0xfff0c0);lamp(x+0.45,2.12,z-0.46,0xfff0c0);lamp(x,2.22,z+0.75,0xffa020);}
+
+const bagGeo=(()=>{const g=new THREE.SphereGeometry(1,12,6),P=g.attributes.position; // pillow: a squared-off ellipsoid with flattened top and bottom
+  for(let i=0;i<P.count;i++){let x=P.getX(i),y=P.getY(i),z=P.getZ(i);const sq=v=>Math.sign(v)*Math.pow(Math.abs(v),0.36);x=sq(x)*0.98;z=sq(z)*0.96;y=Math.sign(y)*Math.min(Math.abs(y),0.6)/0.6;if(Math.abs(x)>0.85)y*=0.82;P.setXYZ(i,x,y,z);}
   g.computeVertexNormals();return g;})();
-const BAG_TONES=[0xa48f63,0x98845a,0xab9870,0x8e7b54];let bagSeed=mulberry(4242);
+const BAG_TONES=[0x948670,0x8a7c64,0x9c8f76,0x81745e];let bagSeed=mulberry(4242);
 function sandbags(cx,y0,cz,w,h,d){ // stacked, staggered sacks around a hidden core that does the colliding and stops bullets
-  const core=addBox(cx,y0,cz,Math.max(0.05,w-0.12),Math.max(0.05,h-0.06),Math.max(0.05,d-0.12),0x6f6046,false);core.material=mat(0x6f6046,'bag');
+  const core=addBox(cx,y0,cz,Math.max(0.05,w-0.16),Math.max(0.05,h-0.08),Math.max(0.05,d-0.16),0x7a6e58,false);core.material=mat(0x7a6e58,'bag');
   colliders.push({min:new V3(cx-w/2,y0,cz-d/2),max:new V3(cx+w/2,y0+h,cz+d/2)});
   const alongX=w>=d,len=alongX?w:d,thick=alongX?d:w,rows=Math.max(1,Math.round(h/0.21)),rh=h/rows,deep=Math.max(1,Math.round(thick/0.4)),dd=thick/deep,r=bagSeed;
   for(let ry=0;ry<rows;ry++){const n=Math.max(1,Math.round(len/0.56)),bl=len/n,off=(ry%2?0.5:0)*bl;
     for(let k=0;k<deep;k++)for(let i=0;i<n+(ry%2?1:0);i++){let a=-len/2+off+(i+0.5)*bl-(ry%2?bl:0),L=bl;const lo=Math.max(-len/2,a-L/2),hi=Math.min(len/2,a+L/2);if(hi-lo<bl*0.4)continue;a=(lo+hi)/2;L=hi-lo;
       const b=-thick/2+(k+0.5)*dd,m=new THREE.Mesh(bagGeo,mat(BAG_TONES[(r()*BAG_TONES.length)|0],'bag'));
-      const sx=L/2*(0.98+r()*0.04),sy=rh/2*(ry===rows-1?1.12:1.04),sz=dd/2*(1.0+r()*0.06);
+      const sx=L/2*(1.03+r()*0.05),sy=rh/2*(ry===rows-1?1.1:1.07)*(0.94+r()*0.1),sz=dd/2*(1.02+r()*0.06);a+=(r()-0.5)*0.05;
       if(alongX){m.scale.set(sx,sy,sz);m.position.set(cx+a,y0+rh*(ry+0.5),cz+b);}else{m.scale.set(sz,sy,sx);m.position.set(cx+b,y0+rh*(ry+0.5),cz+a);}
-      m.rotation.set((r()-0.5)*0.05,(r()-0.5)*0.08,(r()-0.5)*0.05);m.castShadow=m.receiveShadow=true;scene.add(m);}}
+      m.rotation.set((r()-0.5)*0.07,(r()-0.5)*0.12,(r()-0.5)*0.09);m.castShadow=m.receiveShadow=true;scene.add(m);}}
   return core;}
 function bagWall(x0,z0,x1,z1,h){const a=Math.min(x0,x1),b=Math.max(x0,x1),c=Math.min(z0,z1),e=Math.max(z0,z1),hh=h||1.05;return sandbags((a+b)/2,0,(c+e)/2,b-a,hh,e-c);}
 barrel=asProp(barrel,(x,z)=>[x,0,z]);barrels=asProp(barrels,(x,z)=>[x,0,z]);jersey=asProp(jersey,(x,z)=>[x,0,z]);spool=asProp(spool,(x,z)=>[x,0,z]);
@@ -908,20 +1060,28 @@ function lattice(cx,cz,y0,h,b,t,color){const L=[[-1,-1],[1,-1],[1,1],[-1,1]],at=
 const TWR={ms:scene.children.length,cs:colliders.length,ls:ladders.length,rs:ramps.length,ps:PROPS.length};
 // ---- Central tower: bigger MW2-style rig. Rusted base room with three doorways, wrap-around deck, mid ring, top crow's nest ----
 const TB=5.8,TH=5.0,TW=0.3;
-slab(-TB,TB-TW,-1.1,TB,0,TH,C.RUSTW);slab(1.1,TB-TW,TB,TB,0,TH,C.RUSTW);slab(-1.1,TB-TW,1.1,TB,2.6,TH,C.RUSTW);           // south door
+slab(-TB,TB-TW,2.6,TB,0,TH,C.RUSTW);slab(4.8,TB-TW,TB,TB,0,TH,C.RUSTW);slab(2.6,TB-TW,4.8,TB,2.6,TH,C.RUSTW);             // south door, east of the south stair's landing
 slab(TB-TW,-TB,TB,-1.1,0,TH,C.RUSTW);slab(TB-TW,1.1,TB,TB,0,TH,C.RUSTW);slab(TB-TW,-1.1,TB,1.1,2.6,TH,C.RUSTW);           // east door
 slab(-TB,-TB,-TB+TW,2.4,0,TH,C.RUSTW);slab(-TB,4.2,-TB+TW,TB,0,TH,C.RUSTW);slab(-TB,2.4,-TB+TW,4.2,2.6,TH,C.RUSTW);       // west door
-slab(-TB,-TB,-2,-TB+TW,0,TH,C.RUSTW);slab(2,-TB,TB,-TB+TW,0,TH,C.RUSTW);slab(-2,-TB,2,-TB+TW,0,1.4,C.RUSTW);slab(-2,-TB,2,-TB+TW,2.5,TH,C.RUSTW); // north window
-for(let i=-4;i<=4;i++){if(Math.abs(i)<=1)continue;const o=i*1.25;
-  addBox(o,0,TB+0.03,0.14,TH,0.06,C.RUSTD,false,false);addBox(o,0,-TB-0.03,0.14,TH,0.06,C.RUSTD,false,false);
-  addBox(TB+0.03,0,o,0.06,TH,0.14,C.RUSTD,false,false);if(o<2.2||o>4.4)addBox(-TB-0.03,0,o,0.06,TH,0.14,C.RUSTD,false,false);}
+slab(-TB,-TB,-4.6,-TB+TW,0,TH,C.RUSTW);slab(-2.0,-TB,TB,-TB+TW,0,TH,C.RUSTW);slab(-4.6,-TB,-2.0,-TB+TW,0,0.82,C.RUSTW);slab(-4.6,-TB,-2.0,-TB+TW,1.86,TH,C.RUSTW); // north window, west of the north stair
+{const FR=0x4a3a2c;KIND[FR]='steel';for(const x of[-4.66,-1.94])addBox(x,0.76,-TB+TW/2,0.12,1.16,TW+0.12,FR,false,false);addBox(-3.3,1.84,-TB+TW/2,2.84,0.1,TW+0.12,FR,false,false);addBox(-3.3,0.74,-TB+TW/2,2.94,0.1,TW+0.24,FR,false,false);for(const x of[-3.75,-2.85])addBox(x,0.84,-TB+TW/2,0.04,1.0,0.04,FR,false,false);} // window frame, sill and two bars
+WINDOWS.push({tower:1,side:'n',a:-4.6,b:-2.0,bot:0.82,top:1.86,w:-TB},{tower:1,side:'s',a:2.6,b:4.8,bot:0,top:2.6,w:TB},{tower:1,side:'e',a:-1.1,b:1.1,bot:0,top:2.6,w:TB},{tower:1,side:'w',a:2.4,b:4.2,bot:0,top:2.6,w:-TB});
+for(let i=-4;i<=4;i++){const o=i*1.25;
+  if(o<2.4||o>5.0)addBox(o,0,TB+0.03,0.14,TH,0.06,C.RUSTD,false,false);if(o<-4.8||o>-1.8)addBox(o,0,-TB-0.03,0.14,TH,0.06,C.RUSTD,false,false);if(Math.abs(i)>1){
+  addBox(TB+0.03,0,o,0.06,TH,0.14,C.RUSTD,false,false);if(o<2.2||o>4.4)addBox(-TB-0.03,0,o,0.06,TH,0.14,C.RUSTD,false,false);}}
 addBox(0,0,0,3.0,TH,3.0,C.RUSTD); // shaft core
-crate(-4.4,0,-4.4);crate(-4.4,0,-3.0);crate(-3.0,0,-4.4);crate(4.4,0,-4.4);crate(4.4,CS,-4.4);addBox(4.2,0,4.2,1.6,1.0,1.6,C.STEEL);barrels(-4.3,4.2,3,[0x8a2e22,0x2f4f6e]);
+crate(-4.4,0,-0.6);crate(-4.4,0,0.8);crate(-4.4,CS,-0.6);crate(4.4,0,-4.4);crate(4.4,CS,-4.4);barrels(-2.2,4.4,3,[0x8a2e22,0x2f4f6e]);
+{const PM=mat(0x5d4632,'pipe'),BX=0x5d6150;KIND[BX]='paint';
+  for(const z of[-3.2,-3.7])rod(scene,new V3(TB+0.14,0,z),new V3(TB+0.14,TH+0.2,z),z<-3.4?0.09:0.06,PM,10);                   // risers up the east wall
+  for(const x of[0.8,1.3])rod(scene,new V3(x,0,-TB-0.14),new V3(x,TH+0.2,-TB-0.14),0.07,PM,10);                              // and the north wall
+  rod(scene,new V3(-TB-0.14,3.4,-4.8),new V3(-TB-0.14,3.4,1.9),0.08,PM,10);                                                    // header along the west wall above the door line
+  addBox(TB+0.12,1.3,-2.3,0.16,0.7,0.5,BX,false,false);addBox(-TB-0.12,1.3,-1.2,0.16,0.7,0.5,BX,false,false);addBox(-1,1.4,TB+0.12,0.6,0.6,0.16,BX,false,false); // junction boxes
+  sign(signM('DANGER','HIGH PRESSURE','#c9a227','#1e1b18'),-0.9,2.9,TB+0.04,1.5,0.56,0);}
 const LP=7.2,LY=TH,LT=TH+0.35;
 slab(-LP,-LP,LP,-1.5,LY,LT,C.DECK);slab(-LP,-1.5,-1.5,LP,LY,LT,C.DECK);slab(1.5,-1.5,LP,LP,LY,LT,C.DECK);
 slab(-1.5,1.5,-0.7,LP,LY,LT,C.DECK);slab(0.7,1.5,1.5,LP,LY,LT,C.DECK);slab(-0.7,2.8,0.7,LP,LY,LT,C.DECK);slab(-1.5,-1.5,1.5,1.5,LY,LT,C.DECK);
 for(const sx of[-LP+0.25,LP-0.25])for(const sz of[-LP+0.25,LP-0.25])addBox(sx,0,sz,0.4,LY,0.4,C.STEEL);
-for(const sx of[-LP+0.25,LP-0.25])addBox(sx,0,0,0.3,LY,0.3,C.STEEL); // mid-span legs
+for(const sx of[-LP+0.25,LP-0.25])addBox(sx,0,-3.6,0.3,LY,0.3,C.STEEL); // mid-span legs, kept off the east and west door lines
 railing(-LP,-LP,-1.8,-LP+0.15,LT,LT+1);railing(0.2,-LP,LP,-LP+0.15,LT,LT+1);   // north edge, open where the north stair landing meets the deck
 railing(-LP,LP-0.15,-0.2,LP,LT,LT+1);railing(1.8,LP-0.15,LP,LP,LT,LT+1);         // south edge, open for the south stair landing
 railing(LP-0.15,-LP,LP,LP,LT,LT+1);railing(-LP,-LP,-LP+0.15,LP,LT,LT+1);
@@ -973,19 +1133,118 @@ function stairsX(xFoot,xTop,z0,z1,yTop,n,landX){const dir=Math.sign(xTop-xFoot),
   stairsX(TWR_X+LPs,TWR_X+0.2,-LPs-W,-LPs,LTs,24,TWR_X-2.2);   // north face: foot at the east corner, climbing west to a landing in the middle
   stairsX(TWR_X-LPs,TWR_X-0.2,LPs,LPs+W,LTs,24,TWR_X+2.2);}   // south face: foot at the west corner, climbing east
 
+// ======== detailed machinery and furniture: every prop is built from parts you can read, colliding only where it is solid ========
+const vb=(cx,y0,cz,w,h,d,c)=>addBox(cx,y0,cz,w,h,d,c,false,false);
+function cylX(x0,x1,y,z,r,m,seg){const c=new THREE.Mesh(new THREE.CylinderGeometry(r,r,x1-x0,seg||16),m);c.rotation.z=Math.PI/2;c.position.set((x0+x1)/2,y,z);c.castShadow=c.receiveShadow=true;scene.add(c);return c;}
+function cylZ(z0,z1,x,y,r,m,seg){const c=new THREE.Mesh(new THREE.CylinderGeometry(r,r,z1-z0,seg||16),m);c.rotation.x=Math.PI/2;c.position.set(x,y,(z0+z1)/2);c.castShadow=c.receiveShadow=true;scene.add(c);return c;}
+function cylY(y0,y1,x,z,r,m,seg){const c=new THREE.Mesh(new THREE.CylinderGeometry(r,r,y1-y0,seg||16),m);c.position.set(x,(y0+y1)/2,z);c.castShadow=c.receiveShadow=true;scene.add(c);return c;}
+function dial(x,y,z,ry,r){const d=new THREE.Mesh(new THREE.CylinderGeometry(r,r,0.03,14),mat(0x3a3a38,'steel'));d.rotation.x=Math.PI/2;d.rotation.y=ry;d.position.set(x,y,z);scene.add(d);
+  const f=new THREE.Mesh(new THREE.CircleGeometry(r*0.8,14),new THREE.MeshLambertMaterial({color:0xd8d2c0}));f.position.set(x+Math.sin(ry)*0.017,y,z+Math.cos(ry)*0.017);f.rotation.y=ry;scene.add(f);}
+function lamp(x,y,z,col){const g=new THREE.Mesh(new THREE.SphereGeometry(0.025,6,4),new THREE.MeshBasicMaterial({color:col}));g.position.set(x,y,z);scene.add(g);}
+// enclosed diesel generator set on a skid: louvred doors, radiator grille, control panel, muffler and stack, fuel and power lines
+function genset(cx,cz,L,W,Hh,col,alongX){const ax=(a,b)=>alongX?a:b,X=(u,v)=>cx+ax(u,v),Z=(u,v)=>cz+ax(v,u),B=(u,y,v,l,h,w,c)=>vb(X(u,v),y,Z(u,v),ax(l,w),h,ax(w,l),c);KIND[col]='paint';
+  const SK=0.18,dk=0x3a3a38,st=mat(dk,'steel');addCol(cx-ax(L,W)/2,0,cz-ax(W,L)/2,cx+ax(L,W)/2,Hh,cz+ax(W,L)/2);
+  for(const s of[-1,1])B(0,0,s*(W/2-0.1),L+0.2,SK,0.2,dk);for(let i=0;i<4;i++)B(-L/2+0.4+i*(L-0.8)/3,0,0,0.14,SK*0.8,W-0.1,dk);   // skid rails and cross members
+  B(0,SK,0,L,Hh-SK-0.06,W,col);B(0,Hh-0.08,0,L+0.06,0.1,W+0.06,col);                                                                 // enclosure and its roof lip
+  const nd=Math.max(2,Math.round(L/1.2)),dw=L/nd;
+  for(const s of[-1,1]){const o=s*(W/2+0.01);
+    for(let i=1;i<nd;i++)B(-L/2+i*dw,SK+0.05,o,0.03,Hh-SK-0.2,0.02,dk);                                                               // door seams
+    for(let i=0;i<nd;i++){B(-L/2+(i+0.85)*dw,SK+(Hh-SK)*0.45,o+s*0.02,0.05,0.18,0.04,0x9a9890);                                          // latch handles
+      if(i===0||i===nd-1)for(let k=0;k<6;k++)B(-L/2+(i+0.5)*dw,SK+0.35+k*0.14,o+s*0.012,dw*0.6,0.04,0.03,dk);}                          // louvres at both ends
+    B(L*0.15,SK+Hh*0.55,o+s*0.012,0.6,0.25,0.02,0xc9a227);}                                                                          // warning plate
+  {const e=L/2+0.02;B(e,SK+0.15,0,0.03,Hh-SK-0.45,W-0.3,0x1e1c1a);for(let k=0;k<9;k++)B(e+0.02,SK+0.25+k*(Hh-SK-0.65)/8,0,0.03,0.04,W-0.36,0x55524a);} // radiator grille
+  {const e=-L/2-0.06;B(e,SK+0.6,ax(0,-W*0.15),0.12,0.9,0.7,0x4a4a46);dial(X(e-0.07,-W*0.2),SK+1.2,Z(e-0.07,-W*0.2),alongX?-Math.PI/2:Math.PI,0.07);dial(X(e-0.07,0),SK+1.2,Z(e-0.07,0),alongX?-Math.PI/2:Math.PI,0.07);
+    lamp(X(e-0.07,-W*0.3),SK+0.95,Z(e-0.07,-W*0.3),0x40ff60);lamp(X(e-0.07,-W*0.22),SK+0.95,Z(e-0.07,-W*0.22),0xff3020);}               // control panel with gauges and lamps
+  {const mx=X(-L*0.15,0),mz=Z(-L*0.15,0);const mu=alongX?cylX(mx-0.7,mx+0.7,Hh+0.28,mz,0.22,mat(0x5d4632,'pipe')):cylZ(mz-0.7,mz+0.7,mx,Hh+0.28,0.22,mat(0x5d4632,'pipe'));void mu;
+    for(const e of[-0.5,0.5])B(-L*0.15+e,Hh,0,0.08,0.08,0.4,dk);const sx=X(-L*0.15+0.6,0),sz=Z(-L*0.15+0.6,0);cylY(Hh+0.28,Hh+1.25,sx,sz,0.08,mat(0x4d3424,'pipe'),10);const cp=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.1,0.06,10),st);cp.position.set(sx,Hh+1.3,sz);cp.rotation.x=0.4;scene.add(cp);} // muffler and stack with rain cap
+  for(const s of[-1,1])for(const e of[-1,1]){const t=new THREE.Mesh(new THREE.TorusGeometry(0.06,0.015,4,8),st);t.position.set(X(e*(L/2-0.15),s*(W/2-0.15)),Hh+0.07,Z(e*(L/2-0.15),s*(W/2-0.15)));scene.add(t);} // lifting eyes
+  {const a=new V3(X(L*0.35,W/2+0.05),SK+0.3,Z(L*0.35,W/2+0.05)),b=new V3(X(L*0.35,W/2+0.6),0.04,Z(L*0.35,W/2+0.6));rod(scene,a,b,0.035,mat(0x1c1c1a,'steel'),6);} // power cable into the sand
+}
+// centrifugal pump: motor with cooling fins and terminal box, guarded coupling, volute casing, inlet with flange, all on a base plate
+function pumpUnit(X,Z){const st=mat(0x58514a,'steel'),mo=mat(0x3f5a78,'paint'),dk=0x3a3a38,pm=mat(0x5d4632,'pipe');KIND[0x3f5a78]='paint';
+  addCol(X-1.3,0,Z-0.7,X+1.3,0.2,Z+0.7);addCol(X-1.25,0.2,Z-0.5,X+0.7,1.3,Z+0.5);
+  vb(X,0,Z,2.6,0.2,1.4,0x58514a);for(const e of[-1.1,1.1])for(const f of[-0.55,0.55])cylY(0.2,0.26,X+e,Z+f,0.04,st,6);              // base plate and hold-down bolts
+  cylX(X-1.25,X-0.05,0.68,Z,0.44,mo,20);for(let k=0;k<7;k++)cylX(X-1.1+k*0.14,X-1.07+k*0.14,0.68,Z,0.47,mo,20);                      // motor and its fins
+  vb(X-1.0,0.2,Z,0.18,0.3,0.7,0x3f5a78);vb(X+0.2,0.2,Z,0.5,0.25,0.6,0x3f5a78);vb(X-0.65,1.1,Z,0.3,0.22,0.3,0x3f5a78);                // motor feet, pump pedestal, terminal box
+  {const g=vb(X+0.08,0.4,Z,0.3,0.55,0.55,0xc9a227);void g;}                                                                    // coupling guard
+  cylX(X+0.35,X+0.82,0.75,Z,0.5,st,22);const ey=cylX(X+0.82,X+0.95,0.75,Z,0.2,st,14);void ey;                                    // volute casing and eye
+  cylZ(Z,Z+1.15,X+0.6,0.75,0.17,pm,14);cylZ(Z+1.12,Z+1.2,X+0.6,0.75,0.27,mat(0x4d3424,'pipe'),16);cylY(0.0,0.75,X+0.6,Z+1.32,0.17,pm,14);
+  dial(X+0.6,1.18,Z+0.2,0,0.06);}
+// gate-valve manifold on a plinth: risers, a header with flanges, a handwheel valve and a pressure gauge
+function valveStation(X,Z){const pm=mat(0x5d4632,'pipe'),fm=mat(0x4d3424,'pipe'),st=mat(0x3a3a38,'steel');addCol(X-0.8,0,Z-0.5,X+0.8,0.15,Z+0.5);addCol(X-0.75,0.15,Z-0.2,X+0.75,1.05,Z+0.2);
+  vb(X,0,Z,1.6,0.15,1.0,0x9b9486);for(const e of[-0.55,0.55]){cylY(0.15,0.8,X+e,Z,0.1,pm,12);cylY(0.4,0.46,X+e,Z,0.17,fm,14);}
+  cylX(X-0.65,X+0.65,0.85,Z,0.11,pm,12);for(const e of[-0.25,0.25])cylX(X+e-0.03,X+e+0.03,0.85,Z,0.18,fm,14);
+  vb(X,0.7,Z,0.3,0.32,0.26,0x58514a);cylY(1.0,1.3,X,Z,0.025,st,6);const w=new THREE.Mesh(new THREE.TorusGeometry(0.17,0.02,5,14),mat(0x8a2e22,'paint'));w.position.set(X,1.3,Z);w.rotation.x=Math.PI/2;scene.add(w);
+  for(let k=0;k<3;k++){const a=k/3*Math.PI;rod(scene,new V3(X+Math.cos(a)*0.17,1.3,Z+Math.sin(a)*0.17),new V3(X-Math.cos(a)*0.17,1.3,Z-Math.sin(a)*0.17),0.01,st,4);}
+  cylY(0.95,1.08,X+0.5,Z,0.02,st,6);dial(X+0.5,1.15,Z+0.01,0,0.07);}
+// workbench: steel frame on legs, a thick top, a vise, tools, a lower shelf with bins
+function workbench(X,Z,L,D,alongX){const ax=(a,b)=>alongX?a:b,B=(u,y,v,l,h,w,c)=>vb(X+ax(u,v),y,Z+ax(v,u),ax(l,w),h,ax(w,l),c),H=0.92,fr=0x3a4a5a;KIND[fr]='paint';
+  addCol(X-ax(L,D)/2,0,Z-ax(D,L)/2,X+ax(L,D)/2,H,Z+ax(D,L)/2);
+  for(const e of[-1,1])for(const f of[-1,1])B(e*(L/2-0.05),0,f*(D/2-0.05),0.06,H-0.06,0.06,fr);B(0,0.18,0,L-0.08,0.03,D-0.08,fr);B(0,H-0.06,0,L,0.06,D,0x6a5636); // legs, shelf, top
+  for(let i=0;i<3;i++)B(-L/2+0.3+i*0.42,0.21,0,0.36,0.22,D*0.6,i%2?0x2f4f6e:0x8a2e22);                                                // parts bins
+  B(L/2-0.25,H,0,0.18,0.12,0.14,0x3a4a5a);B(L/2-0.25,H+0.12,0,0.22,0.06,0.18,0x3a3a38);                                              // vise
+  B(-0.2,H,-D*0.2,0.3,0.03,0.04,0x8a2e22);B(0.1,H,D*0.1,0.22,0.06,0.12,0xc9a227);B(-L/2+0.25,H,0.05,0.16,0.18,0.16,0x5d6150);       // a hammer, a drill case, a can
+  B(0,H,ax(-D/2+0.02,-D/2+0.02),L,0.6,0.02,0x55524a);for(let i=0;i<6;i++)B(-L/2+0.2+i*(L-0.4)/5,H+0.2,-D/2+0.04,0.04,0.2,0.02,0x3a3a38);} // pegboard with tools
+// steel desk with a console, monitor, papers, and a chair pushed in
+function desk(X,Z,L,D,face){const B=(u,y,v,l,h,w,c)=>vb(X+u,y,Z+v,l,h,w,c),H=0.76,fr=0x55524a;addCol(X-L/2,0,Z-D/2,X+L/2,H,Z+D/2);
+  B(0,H-0.04,0,L,0.04,D,0x6e6a5e);B(-L/2+0.25,0,0,0.44,H-0.04,D-0.06,fr);for(let i=0;i<3;i++)B(-L/2+0.25,0.08+i*0.22,face*(D/2-0.02),0.4,0.003+0.18,0.02,0x6e6a5e);
+  for(const e of[L/2-0.04])for(const f of[-1,1])B(e,0,f*(D/2-0.04),0.05,H-0.04,0.05,fr);
+  B(0.15,H,-face*0.08,0.5,0.32,0.06,0x2a2a28);B(0.15,H+0.04,-face*0.08+face*0.035,0.44,0.24,0.01,0x1d2a30);B(0.15,H,-face*0.02,0.12,0.04,0.12,0x2a2a28); // monitor
+  B(0.15,H,face*0.15,0.42,0.02,0.14,0x3a3a38);B(-0.35,H,face*0.1,0.21,0.004+0.01,0.3,0xe6e0d0);B(0.55,H,0,0.18,0.16,0.18,0x3f5a78);       // keyboard, papers, radio
+  const cz=Z+face*(D/2+0.22);vb(X,0,cz,0.08,0.45,0.08,0x2a2a28);vb(X,0.45,cz,0.44,0.06,0.42,0x2a2a28);vb(X,0.5,cz+face*0.2,0.42,0.48,0.05,0x2a2a28);}
+// rolling tool chest: stacked drawers with pulls, a top box with a lid, casters
+function toolChest(X,Z,L,D,alongX){const ax=(a,b)=>alongX?a:b,B=(u,y,v,l,h,w,c)=>vb(X+ax(u,v),y,Z+ax(v,u),ax(l,w),h,ax(w,l),c),R=0x8a2e22;
+  addCol(X-ax(L,D)/2,0,Z-ax(D,L)/2,X+ax(L,D)/2,1.3,Z+ax(D,L)/2);
+  B(0,0.1,0,L,0.85,D,R);B(0,0.95,0,L*0.96,0.35,D*0.9,R);B(0,1.3,0,L*0.98,0.03,D*0.92,0x3a3a38);
+  for(let i=0;i<6;i++){const y=0.16+i*0.13;B(0,y,D/2+0.005,L-0.08,0.008,0.01,0x3a1a14);B(0,y+0.05,D/2+0.02,L*0.5,0.02,0.02,0x9a9890);} // drawer seams and pulls (front)
+  for(let i=0;i<2;i++){const y=1.0+i*0.15;B(0,y,D*0.45+0.005,L*0.9,0.008,0.01,0x3a1a14);}
+  for(const e of[-1,1])for(const f of[-1,1])cylY(0,0.1,X+ax(e*(L/2-0.08),f*(D/2-0.08)),Z+ax(f*(D/2-0.08),e*(L/2-0.08)),0.05,mat(0x1c1c1a,'steel'),8);}
+// engine block on a repair stand
+function engineStand(X,Z){const st=0x3a4a5a,eb=0x4a4a46;KIND[st]='paint';addCol(X-0.8,0,Z-0.6,X+0.8,1.2,Z+0.6);
+  vb(X,0,Z,1.6,0.08,0.12,st);vb(X-0.7,0,Z,0.12,0.08,1.1,st);vb(X+0.7,0,Z,0.12,0.08,1.1,st);vb(X-0.7,0.08,Z,0.1,0.6,0.1,st);
+  vb(X+0.05,0.35,Z,1.05,0.55,0.6,eb);for(const s of[-1,1]){const h=vb(X+0.05,0.88,Z+s*0.2,1.0,0.22,0.24,0x58514a);h.rotation.x=s*0.35;}  // block and the two cylinder heads in a vee
+  for(let i=0;i<4;i++)for(const s of[-1,1])cylY(0.95,1.05,X-0.32+i*0.24,Z+s*0.32,0.025,mat(0x8a2e22,'paint'),6);                     // plug leads
+  cylX(X-0.62,X-0.48,0.6,Z,0.18,mat(0x3a3a38,'steel'),14);vb(X+0.6,0.3,Z,0.06,0.5,0.5,0x58514a);}
+// generic crate detail for any box: battens on every edge, steel corners, a stencil on the front
+function crateDetailB(x,y,z,w,h,d){const BT=0x5c5040,BR=0x3e3b36;KIND[BT]='wood';const hw=w/2,hd=d/2;
+  for(const a of[-1,1])for(const b of[-1,1]){vb(x,y+(a<0?0.0:h-0.1)+0.0,z+b*(hd+0.012)-b*0.05,w+0.024,0.1,0.1,BT);vb(x+b*(hw+0.018)-b*0.05,y+(a<0?0:h-0.1),z,0.1,0.1,d-0.18,BT);vb(x+a*(hw+0.006)-a*0.055,y,z+b*(hd+0.006)-b*0.055,0.11,h,0.11,BT);
+    for(const c of[0,1])vb(x+a*(hw-0.045),y+(c?h-0.13:0.008),z+b*(hd-0.045),0.16,0.145,0.16,BR);}}
+// ammo can: ribbed lid, latch and handle
+function ammoCan(x,y,z,w,h,d){const c=0x45603a,ax=w>=d;addBox(x,y,z,w,h,d,c);vb(x,y+h,z,w*0.96,0.03,d*0.96,0x3c5232);vb(x,y+h+0.03,z,ax?w*0.4:0.04,0.03,ax?0.04:d*0.4,0x2a2a28);
+  vb(x+(ax?w/2+0.01:0),y+h*0.55,z+(ax?0:d/2+0.01),ax?0.02:0.12,0.1,ax?0.12:0.02,0x2a2a28);for(const s of[-0.3,0.3])vb(x+(ax?s*w:0),y+h*0.98,z+(ax?0:s*d),ax?0.03:w,0.02,ax?d:0.03,0x3c5232);}
+
 
 // ======== Yard layout: named areas around the tower, built for three lanes between the plane (A, west) and the hangar (B, east) ========
-// attackers come in from the north edge behind the pipeline, defenders from the south behind the dock. Every piece collides the way it looks.
+// attackers come in from the south edge behind the dock, defenders hold the north behind the pipeline; both sites sit in the north half. Every piece collides the way it looks.
 
 // open-ended shipping container: both door pairs swung flat against the sides, a way straight through, optional cover inside
 function openBox(cx,cz,alongX,col,inside){const L=6.1,W=2.45,H=2.6,T=0.1,rib=((col>>16&255)*0.8<<16)|((col>>8&255)*0.8<<8)|((col&255)*0.8|0);if(!KIND[rib])KIND[rib]='paint';
   const ax=(a,b)=>alongX?a:b;
   for(const s of[-1,1]){addBox(cx+ax(0,s*(W/2-T/2)),0,cz+ax(s*(W/2-T/2),0),ax(L,T),H,ax(T,L),col);                                       // long walls
     for(let i=0;i<7;i++){const t=(i+0.5)/7-0.5;addBox(cx+ax(t*L,s*(W/2+0.02)),0,cz+ax(s*(W/2+0.02),t*L),ax(0.2,0.05),H,ax(0.05,0.2),rib,false,false);}
-    for(const e of[-1,1]){addBox(cx+ax(e*(L/2+0.62),s*(W/2+0.07)),0,cz+ax(s*(W/2+0.07),e*(L/2+0.62)),ax(1.2,0.06),H-0.1,ax(0.06,1.2),col);}} // doors folded back along the sides
-  addBox(cx,H-T,cz,ax(L,W),T,ax(W,L),col);addBox(cx,0,cz,ax(L-0.1,W-0.2),0.06,ax(W-0.2,L-0.1),0x4a463b,false,true);
-  for(const [t,kind,side] of(inside||[])){const px=cx+ax(t*L,side*0.55),pz=cz+ax(side*0.55,t*L);if(kind==='crate')crate(px,0,pz);else if(kind==='barrels')barrels(px-0.3,pz-0.3,2,[0x2f4f6e,0x8a2e22]);else if(kind==='bags')sandbags(px,0,pz,ax(0.8,1.2),0.9,ax(1.2,0.8));}}
+    for(const e of[-1,1]){addBox(cx+ax(e*(L/2-0.6),s*(W/2+0.075)),0,cz+ax(s*(W/2+0.075),e*(L/2-0.6)),ax(1.2,0.06),H-0.1,ax(0.06,1.2),col);}} // doors hinged at the corners, folded back flat against the ribs
+  for(const e of[-1,1])WINDOWS.push(alongX?{side:e<0?'w':'e',a:cz-W/2+0.15,b:cz+W/2-0.15,w:cx+e*L/2,top:2.4}:{side:e<0?'n':'s',a:cx-W/2+0.15,b:cx+W/2-0.15,w:cz+e*L/2,top:2.4});
+  addBox(cx,H-T,cz,ax(L,W),T,ax(W,L),col);addBox(cx,0,cz,ax(L-0.1,W-0.2),0.02,ax(W-0.2,L-0.1),0x4a463b,false,true);boxCastings(cx,0,cz,ax(L,W),ax(W,L));
+  for(const [t,kind,side] of(inside||[])){const px=cx+ax(t*L,side*0.58),pz=cz+ax(side*0.58,t*L);if(kind==='crate')prop(()=>{addBox(px,0,pz,1.0,1.0,1.0,C.CRATE);crateDetailB(px,0,pz,1.0,1.0,1.0);},px,0,pz,'crate');else if(kind==='barrels')barrels(px-0.3,pz-0.3,2,[0x2f4f6e,0x8a2e22]);else if(kind==='bags')sandbags(px,0,pz,ax(0.8,1.2),0.9,ax(1.2,0.8));}}
 
+function sectionMark(){return{ms:scene.children.length,cs:colliders.length,rs:ramps.length,ls:ladders.length,ps:PROPS.length,ws:WINDOWS.length};}
+function moveSection(m,dx,dz){ // slide everything built since the mark: meshes, collision, ramps, ladders, prop anchors and door records
+  for(let i=m.ms;i<scene.children.length;i++){const o=scene.children[i];o.position.x+=dx;o.position.z+=dz;}
+  for(let i=m.cs;i<colliders.length;i++){const c=colliders[i];c.min.x+=dx;c.max.x+=dx;c.min.z+=dz;c.max.z+=dz;}
+  for(const r of ramps.slice(m.rs)){r.x0+=dx;r.x1+=dx;r.z0+=dz;r.z1+=dz;}
+  for(const l of ladders.slice(m.ls)){l.x0+=dx;l.x1+=dx;l.lx+=dx;l.z0+=dz;l.z1+=dz;l.lz+=dz;}
+  for(const r of PROPS.slice(m.ps)){r.ax+=dx;r.az+=dz;}
+  for(const w of WINDOWS.slice(m.ws)){if(w.side==='n'||w.side==='s'){w.a+=dx;w.b+=dx;w.w+=dz;}else{w.a+=dz;w.b+=dz;w.w+=dx;}}}
+function turnSection(m,cx,cz){ // spin everything built since the mark half a turn about (cx,cz)
+  const q=new THREE.Quaternion().setFromAxisAngle(new V3(0,1,0),Math.PI),fx=x=>2*cx-x,fz=z=>2*cz-z;
+  for(let i=m.ms;i<scene.children.length;i++){const o=scene.children[i];o.position.x=fx(o.position.x);o.position.z=fz(o.position.z);o.quaternion.premultiply(q);}
+  for(let i=m.cs;i<colliders.length;i++){const c=colliders[i],a=c.min.clone(),b=c.max.clone();c.min.x=fx(b.x);c.max.x=fx(a.x);c.min.z=fz(b.z);c.max.z=fz(a.z);}
+  for(const r of ramps.slice(m.rs)){const x0=r.x0,z0=r.z0;r.x0=fx(r.x1);r.x1=fx(x0);r.z0=fz(r.z1);r.z1=fz(z0);const y=r.y0;r.y0=r.y1;r.y1=y;}
+  for(const l of ladders.slice(m.ls)){const x0=l.x0,z0=l.z0;l.x0=fx(l.x1);l.x1=fx(x0);l.z0=fz(l.z1);l.z1=fz(z0);l.lx=fx(l.lx);l.lz=fz(l.lz);}
+  for(const r of PROPS.slice(m.ps)){r.ax=fx(r.ax);r.az=fz(r.az);}
+  const opp={n:'s',s:'n',e:'w',w:'e'};for(const w of WINDOWS.slice(m.ws)){const along=w.side==='n'||w.side==='s',f=along?fx:fz,a=w.a;w.a=f(w.b);w.b=f(a);w.w=along?fz(w.w):fx(w.w);w.side=opp[w.side];}}
+const PLANE_DZ=-10,HANGAR_DZ=-10,PLANE_CZ=1.1; // the plane is turned round (tail to the north) and slid north; the hangar slides north: both sites sit in the north half // both sites sit in the north half, closer to the defenders
+const PLANE_SEC=sectionMark();
 // ---- PLANE (A site): crashed cargo plane west of the tower. Hold, nose and tail are all walk-through shells; nothing collides where you can't see something ----
 const hullMats={};function hullMat(col){return hullMats[col]||(hullMats[col]=triplanar(new THREE.MeshLambertMaterial({color:weather(col,'steel'),map:surfTex('steel'),side:THREE.DoubleSide}),SURF_SCALE.steel));}
 function hullShell(par,cx,yc,cz0,cz1,R,t0,tl,col,R1){const m=new THREE.Mesh(new THREE.CylinderGeometry(R1==null?R:R1,R,cz1-cz0,28,1,true,t0,tl),hullMat(col));m.rotation.x=Math.PI/2;m.position.set(cx,yc,(cz0+cz1)/2);m.castShadow=m.receiveShadow=true;m.userData.keep=true;par.add(m);worldMeshes.push(m);return m;}
@@ -1002,22 +1261,30 @@ function hullShell(par,cx,yc,cz0,cz1,R,t0,tl,col,R1){const m=new THREE.Mesh(new 
   addCol(CX-2.3,0.4,HZ0,CX-1.84,3.8,DOOR_W[0]);addCol(CX-2.3,0.4,DOOR_W[1],CX-1.84,3.8,HZ1);addCol(CX-2.3,2.6,DOOR_W[0],CX-1.84,3.8,DOOR_W[1]);
   addCol(CX+1.84,0.4,HZ0,CX+2.3,3.8,DOOR_E[0]);addCol(CX+1.84,0.4,DOOR_E[1],CX+2.3,3.8,HZ1);addCol(CX+1.84,2.6,DOOR_E[0],CX+2.3,3.8,DOOR_E[1]);
   addCol(CX-1.84,3.5,HZ0,CX+1.84,3.9,HZ1);
-  for(const sx of[-1,1]){addBox(CX+sx*1.55,0.4,(HZ0+HZ1)/2,0.4,0.08,9.5,0x5d4632,false,false);addBox(CX+sx*1.72,0.85,(HZ0+HZ1)/2,0.06,0.5,9.5,0x5d4632,false,false);} // web benches (flat to the walls)
+  for(const sx of[-1,1]){addBox(CX+sx*1.55,0.4,(HZ0+HZ1)/2,0.4,0.08,9.5,HULLD,false,false);addBox(CX+sx*1.72,0.85,(HZ0+HZ1)/2,0.06,0.5,9.5,HULLD,false,false);} // web benches (flat to the walls)
   crate(CX+0.9,0.4,-1.2);                                                                                       // one crate of spilled cargo for cover mid-hold
   // NOSE: open at the break so you can walk into the flight deck; tapered nose with a proper band of cockpit windows, instrument panel and seats
-  {const NZ0=-16.8,NZC=-13.8,NZ1=-8.6,NR=2.1,NY=1.55,NF=1.15;
-    hullShell(scene,CX,NY,NZC,NZ1,NR,0.6,Math.PI*2-1.2,HULL);
-    hullShell(scene,CX,NY,NZ0,NZC,NF,0.6,Math.PI*2-1.2,HULL,NR);                                                    // taper down to the nose tip
-    const cap=new THREE.Mesh(new THREE.SphereGeometry(NF,20,10,0,TAU,0,Math.PI/2),hullMat(HULL));cap.rotation.x=-Math.PI/2;cap.scale.set(1,0.55,1);cap.position.set(CX,NY,NZ0);cap.userData.keep=true;scene.add(cap);worldMeshes.push(cap); // nose tip, solid from inside too
-    for(const z of[NZC+0.2,NZ1-0.2])ring(z,NR+0.02,z>NZC+1?BURN:HULLD,z>NZC+1?0.22:0.03);
-    for(const [ph,zz,yo] of[[-1.0,-15.5,0],[-0.6,-15.9,0.06],[-0.2,-16.15,0.1],[0.2,-16.15,0.1],[0.6,-15.9,0.06],[1.0,-15.5,0],[-1.25,-14.7,-0.2],[1.25,-14.7,-0.2]]){ // cockpit glazing: front panes plus the side "eyebrow" windows
-      const t=(zz-NZ0)/(NZC-NZ0),r=NF+(NR-NF)*t+0.02,w=new THREE.Mesh(boxGeo,mat(GLASS,'steel'));w.scale.set(0.62,0.46,0.04);w.position.set(CX+Math.sin(ph)*r,NY+Math.cos(ph)*r*0.94+yo,zz);w.lookAt(CX+Math.sin(ph)*r*4,NY+Math.cos(ph)*r*3.4,zz-2.4);scene.add(w);
-      const fr=new THREE.Mesh(boxGeo,mat(HULLD,'steel'));fr.scale.set(0.7,0.54,0.03);fr.position.copy(w.position);fr.quaternion.copy(w.quaternion);fr.translateZ(-0.01);scene.add(fr);}
-    slab(CX-1.7,-16.2,CX+1.7,NZ1,0,0.4,0x4a463b);
-    addBox(CX,0.4,-15.9,2.2,0.9,0.4,0x2a2a28);addBox(CX,1.3,-15.75,2.2,0.08,0.5,0x3a3a38,false,false);       // instrument panel + glare shield
-    for(const sx of[-0.62,0.62]){addBox(CX+sx,0.4,-14.7,0.6,0.5,0.6,0x3a3a38);addBox(CX+sx,0.9,-14.42,0.6,0.7,0.12,0x3a3a38,false,false);} // pilot seats
-    for(const sx of[-1,1]){addCol(CX+sx*1.72-(sx>0?0:0.46),0.4,NZC,CX+sx*1.72+(sx>0?0.46:0),3.6,NZ1);addCol(CX+sx*1.32-(sx>0?0:0.6),0.4,-15.3,CX+sx*1.32+(sx>0?0.6:0),3.3,NZC);addCol(CX+sx*1.0-(sx>0?0:0.6),0.4,NZ0,CX+sx*1.0+(sx>0?0.6:0),2.9,-15.3);}
-    addCol(CX-1.7,3.3,NZC,CX+1.7,3.7,NZ1);addCol(CX-1.4,3.0,NZ0,CX+1.4,3.4,NZC);addCol(CX-1.2,0,NZ0-0.6,CX+1.2,2.4,NZ0);}
+  {const NR=2.1,NY=1.55,NZC=-13.6,NZ1=-8.6,NL=3.8,NZ0=NZC-NL;                                                       // NOSE: one smooth turned profile from the fuselage to a rounded tip
+    const zt=t=>NZC-NL*t,rt=t=>NR*Math.sqrt(Math.max(0,1-Math.pow(t,2.4))),yt=t=>NY-0.55*NR*t*t; // round section that shrinks to a point, its centre drooping so the crown slopes down to a low tip
+    const at=(t,ph,o)=>new V3(CX+Math.sin(ph)*rt(t)*(1+o),yt(t)-Math.cos(ph)*rt(t)*(1+o),zt(t));
+    const noseSkin=(t0,t1,p0,p1)=>{const NT=12,NP=Math.max(4,Math.round((p1-p0)/TAU*40)),pos=[],idx=[];
+      for(let i=0;i<=NT;i++){const t=t0+(t1-t0)*i/NT;for(let j=0;j<=NP;j++){const v=at(t,p0+(p1-p0)*j/NP,0);pos.push(v.x-CX,v.y,v.z);}}
+      for(let i=0;i<NT;i++)for(let j=0;j<NP;j++){const a=i*(NP+1)+j,b=a+NP+1;idx.push(a,b,a+1,a+1,b,b+1);}
+      const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);g.computeVertexNormals();
+      const m=new THREE.Mesh(g,hullMat(HULL));m.position.set(CX,0,0);m.castShadow=m.receiveShadow=true;m.userData.keep=true;scene.add(m);worldMeshes.push(m);};
+    hullShell(scene,CX,NY,NZC,NZ1,NR,0.6,Math.PI*2-1.2,HULL);                                                         // fuselage barrel, open at the break
+    const W0=0.3,W1=0.56,WH=1.0;                                                                                     // windshield: a real slot through the crown, split into four panes
+    noseSkin(0,W0,0,TAU);noseSkin(W0,W1,0,Math.PI-WH);noseSkin(W0,W1,Math.PI+WH,TAU);noseSkin(W1,1,0,TAU);
+    const fm=mat(HULLD,'steel');
+    for(const ph of[Math.PI-WH,Math.PI-WH/2,Math.PI,Math.PI+WH/2,Math.PI+WH]){const pts=[];for(let k=0;k<=4;k++)pts.push(at(W0+(W1-W0)*k/4,ph,0.004));for(let k=0;k<4;k++)rod(scene,pts[k],pts[k+1],0.045,fm,6);} // frame posts following the curve of the skin
+    for(const t of[W0,W1])for(let k=0;k<10;k++){const a=Math.PI-WH+2*WH*k/10,b=Math.PI-WH+2*WH*(k+1)/10;rod(scene,at(t,a,0.004),at(t,b,0.004),0.04,fm,6);} // sill and header
+    for(let k=1;k<4;k++){const t=W1+(1-W1)*k/4.4;for(let j=0;j<16;j++){const a=Math.PI*0.25+Math.PI*1.5*j/16,b=Math.PI*0.25+Math.PI*1.5*(j+1)/16;rod(scene,at(t,a,0.022),at(t,b,0.022),0.014,fm,4);}} // panel seams on the nose cone
+    ring(NZ1-0.2,NR+0.02,BURN,0.22);
+    slab(CX-1.7,NZC,CX+1.7,NZ1,0,0.4,0x4a463b);slab(CX-1.2,NZC-1.7,CX+1.2,NZC,0,0.4,0x4a463b);                       // cabin floor, narrowing into the flight deck
+    addBox(CX,0.4,-15.25,2.0,0.9,0.36,0x2a2a28);addBox(CX,1.3,-15.1,2.0,0.07,0.45,0x3a3a38,false,false);             // instrument panel + glare shield
+    for(const sx of[-0.58,0.58]){addBox(CX+sx,0.4,-14.25,0.56,0.5,0.56,0x3a3a38);addBox(CX+sx,0.9,-13.98,0.56,0.7,0.1,0x3a3a38,false,false);} // pilot seats
+    for(const sx of[-1,1]){addCol(CX+sx*1.72-(sx>0?0:0.46),0.4,NZC,CX+sx*1.72+(sx>0?0.46:0),3.6,NZ1);addCol(CX+sx*1.5-(sx>0?0:0.5),0.4,-15.5,CX+sx*1.5+(sx>0?0.5:0),3.4,NZC);}
+    addCol(CX-1.7,3.3,NZC,CX+1.7,3.7,NZ1);addCol(CX-1.5,3.1,-15.5,CX+1.5,3.5,NZC);addCol(CX-1.6,0,NZ0,CX+1.6,2.9,-15.5);}
   // TAIL: open at the break and through the lowered rear ramp, fin and stabilisers squared up so their collision is exactly what you see
   {const TZ0=9,TZ1=16.4,TR0=2.15,TR1=1.5;
     hullShell(scene,CX,YC,TZ0,TZ1,TR0,0.6,Math.PI*2-1.2,HULL,TR1);ring(TZ0+0.18,TR0+0.02,BURN,0.22);
@@ -1027,84 +1294,139 @@ function hullShell(par,cx,yc,cz0,cz1,R,t0,tl,col,R1){const m=new THREE.Mesh(new 
     const fin=new THREE.Mesh(sideGeo([[11.2,3.0],[16.4,3.0],[16.6,9.6],[15.0,9.8]],null,0.36,0),mat(HULL,'steel'));fin.position.x=CX;fin.castShadow=true;scene.add(fin);worldMeshes.push(fin);
     const band=new THREE.Mesh(sideGeo([[14.6,8.2],[16.55,8.2],[16.57,8.9],[14.8,8.9]],null,0.4,0),mat(0x8a2e22,'paint'));band.position.x=CX;scene.add(band);
     addCol(CX-0.18,3.0,11.6,CX+0.18,9.6,16.5);
-    slab(CX-6.4,14.2,CX-1.4,16.2,2.95,3.2,HULL);slab(CX+1.4,14.2,CX+3.6,16.2,2.95,3.2,HULL);                     // stabilisers, the right one snapped short
+    slab(CX-6.4,14.2,CX-1.3,16.2,2.05,2.3,HULL);slab(CX+1.3,14.2,CX+3.6,16.2,2.05,2.3,HULL);                     // stabilisers rooted in the tail cone, the right one snapped short
     const rmp=rampMesh2z(CX-1.3,CX+1.3,TZ1,19.6,0.4,0,HULLD);ramps.push({axis:'z',x0:CX-1.3,x1:CX+1.3,z0:TZ1,z1:19.6,y0:0.4,y1:0});}
-  // left wing: torn off, lying flat along the west side, both engines still slung under it
-  slab(-38.6,-9.1,-35.4,5.1,0,0.95,HULL);
-  for(const z of[-6.2,1.4]){const n=new THREE.Mesh(new THREE.CylinderGeometry(0.62,0.7,3.4,16),mat(HULLD,'steel'));n.rotation.x=Math.PI/2;n.position.set(-34.5,0.7,z);n.castShadow=true;scene.add(n);worldMeshes.push(n);cylColZ(-34.5,0.7,z-1.7,z+1.7,0.7,5);
-    const hub=new THREE.Mesh(new THREE.SphereGeometry(0.3,10,8),mat(BURN,'steel'));hub.position.set(-34.5,0.7,z-1.8);scene.add(hub);
-    for(let b=0;b<4;b++){const bl=addBox(-34.5,0,z-1.85,0.18,1.6,0.06,0x2a2a28,false,false);bl.position.y=0.7;bl.rotation.set(0.3*(b%2?1:-1),0,b*Math.PI/2+0.4);}}
+  // left wing: torn off and lying flat along the west side; a real aerofoil in skin panels with a drooped flap, a torn root and a nav light on the tip
+  {const LE=-35.4,CH=3.2,Z0=-9.1,Z1=5.1,up=[[0,0.25],[0.03,0.55],[0.1,0.78],[0.25,0.92],[0.4,0.95],[0.6,0.82],[0.75,0.62]],fl=[[0.765,0.6],[0.88,0.42],[1,0.22]];
+    const X=u=>LE-u*CH,shp=(pts,bot,ins)=>new THREE.Shape([new THREE.Vector2(X(pts[0][0])+ins,bot)].concat(pts.map(([u,y])=>new THREE.Vector2(X(u),y-ins))).concat([new THREE.Vector2(X(pts[pts.length-1][0]),bot)]));
+    const ex=(sh,z0,z1,m)=>{const g=new THREE.ExtrudeGeometry(sh,{depth:z1-z0,bevelEnabled:false});g.translate(0,0,z0);const w=new THREE.Mesh(g,m);w.castShadow=w.receiveShadow=true;scene.add(w);worldMeshes.push(w);return w;};
+    const skin=mat(HULL,'steel'),dark=mat(0x3a3c38,'steel'),flp=mat(0x6c6f66,'steel');
+    ex(shp(up,0,0.012),Z0+0.04,Z1-0.04,dark);                                                                   // dark core shows through the panel joints
+    for(let zz=Z0;zz<Z1-0.1;zz+=1.78)ex(shp(up,0,0),zz+0.008,Math.min(Z1,zz+1.78)-0.008,skin);                  // skin panels with real seams between them
+    {const f=ex(shp(fl,0,0),Z0+0.6,Z1-1.2,flp);f.position.y=-0.03;}ex(shp(fl,0,0.01),Z0+0.02,Z0+0.58,dark);    // flap, drooped a touch, and the aileron bay
+    for(const u of[0.18,0.5])for(let zz=Z0+0.4;zz<Z1-0.3;zz+=0.9){const y=u<0.3?0.9:0.93;addBox(X(u),y,zz,0.03,0.02,0.5,HULLD,false,false);} // rivet strips over the spars
+    for(const [u,h] of[[0,0.92],[0.25,0.95],[0.5,0.88],[0.75,0.62]])addCol(X(u+0.25),0,Z0,X(u),h,Z1);           // stepped collision that follows the curve
+    for(const [x,y,ry,rz] of[[X(0.2),0.55,0.5,0.3],[X(0.45),0.62,-0.4,-0.5],[X(0.7),0.4,0.9,0.2]]){const t=addBox(x,0,Z1+0.18,0.6,0.04,0.42,HULL,false,false);t.position.y=y;t.rotation.set(0.6,ry,rz);} // torn skin curling off the root
+    for(const u of[0.25,0.6])addBox(X(u),0.12,Z1+0.25,0.14,0.62,0.5,HULLD,false,false);                         // spars sticking out of the break
+    for(const [dx,dz] of[[0.3,0.9],[0.9,0.6],[1.4,1.1]])rod(scene,new V3(X(0.35),0.5,Z1),new V3(X(0.35)+dx*0.5,0.02,Z1+dz),0.012,mat(0x1c1c1a,'steel'),4); // cut cables in the sand
+    {const nl=new THREE.Mesh(new THREE.SphereGeometry(0.07,8,6),new THREE.MeshLambertMaterial({color:0x7a1a12,emissive:0x2a0604}));nl.position.set(X(0.3),0.55,Z0-0.03);scene.add(nl);}}
+  // engines: proper turned nacelles along the chord, intake, cooling gills, exhausts, a spinner and four bent blades
+  function cylColX(x0,x1,yc,cz,r,n){n=n||6;for(let i=0;i<n;i++){const za=-r+2*r*i/n,zb=-r+2*r*(i+1)/n,zm=(za+zb)/2,hh=r*Math.sqrt(Math.max(0,1-(zm/r)**2));addCol(x0,Math.max(0,yc-hh),cz+za,x1,yc+hh,cz+zb);}}
+  function engine(xb,yc,zc,len,dir,crushed){const nm=mat(HULLD,'steel'),dm=mat(0x1c1c1a,'steel'),rs=mat(0x5a3d29,'rust');
+    const prof=[[0.3,0],[0.42,0.12],[0.58,0.5],[0.68,0.95],[0.71,len*0.6],[0.7,len-0.2],[0.66,len-0.04],[0.52,len],[0.46,len-0.12]];
+    const lg=new THREE.LatheGeometry(prof.map(([r,t])=>new THREE.Vector2(r,t)),24);lg.rotateZ(-dir*Math.PI/2);const nac=new THREE.Mesh(lg,nm);nac.position.set(xb,yc,zc);if(crushed)nac.scale.set(1,0.78,1.08);nac.castShadow=nac.receiveShadow=true;scene.add(nac);worldMeshes.push(nac);
+    const ax=(t)=>xb+dir*t,yy=yc*(crushed?0.85:1);
+    const face=new THREE.Mesh(new THREE.CircleGeometry(0.46,20),dm);face.position.set(ax(len-0.12),yc,zc);face.rotation.y=dir*Math.PI/2;scene.add(face);
+    for(let k=0;k<12;k++){const a=k/12*TAU,gl=new THREE.Mesh(boxGeo,nm);gl.scale.set(0.34,0.03,0.14);gl.position.set(ax(0.75),yc+Math.sin(a)*0.66,zc+Math.cos(a)*0.66);gl.rotation.x=-a;scene.add(gl);} // cooling gills
+    for(const s2 of[-1,1]){const e=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.08,0.5,8),rs);e.rotation.z=Math.PI/2;e.position.set(ax(0.4),yc-0.28,zc+s2*0.52);scene.add(e);}  // exhaust stubs
+    for(const t of[len*0.45,len*0.75]){const sm=new THREE.Mesh(new THREE.TorusGeometry(0.712,0.008,3,28),nm);sm.position.set(ax(t),yc,zc);sm.rotation.y=Math.PI/2;scene.add(sm);} // cowl seams
+    const sp=new THREE.LatheGeometry([[0.001,0.55],[0.12,0.48],[0.24,0.3],[0.3,0.08],[0.3,0]].map(([r,t])=>new THREE.Vector2(r,t)),18);sp.rotateZ(-dir*Math.PI/2);const spn=new THREE.Mesh(sp,mat(0x8a2e22,'paint'));spn.position.set(ax(len+0.02),yc,zc);scene.add(spn);
+    const bm=mat(0x2a2a28,'steel'),R=1.05;
+    for(let b=0;b<4;b++){const a=b*Math.PI/2+(crushed?0.9:0.35),tipY=yc+Math.cos(a)*R,bend=tipY<0.2?1.3:tipY<yc?0.7:0.18;
+      const hub=new THREE.Group();hub.position.set(ax(len+0.14),yc,zc);hub.rotation.x=a;scene.add(hub);
+      const half=(s0,s1,w0,w1,par)=>{const sh=new THREE.Shape([new THREE.Vector2(-w0/2,s0),new THREE.Vector2(w0/2,s0),new THREE.Vector2(w1/2,s1),new THREE.Vector2(w1*0.15,s1+0.05),new THREE.Vector2(-w1/2,s1)]);
+        const g=new THREE.ExtrudeGeometry(sh,{depth:0.035,bevelEnabled:false});g.translate(0,0,-0.0175);const m=new THREE.Mesh(g,bm);m.rotation.y=Math.PI/2+0.45;m.castShadow=true;par.add(m);return m;};
+      half(0.22,0.58,0.13,0.25,hub);const outer=new THREE.Group();outer.position.y=0.58;outer.rotation.z=dir*bend;hub.add(outer);half(0,R-0.58,0.25,0.12,outer);}}
+  engine(-36.6,0.7,-6.2,3.2,1,false);engine(-36.6,0.7,1.4,3.2,1,false);cylColX(-36.6,-33.4,0.7,-6.2,0.7,5);cylColX(-36.6,-33.4,0.7,1.4,0.7,5);
   // right wing: still attached at the roof, bent down into the sand: a ramp up onto the fuselage, engine crushed under its tip
   {const x0=-26.7,y0=3.7,x1=-20.6,y1=0.35,z0=-4,z1=-0.8,sl=(y1-y0)/(x1-x0),xr=-27.6,xt=-20.3,L=Math.hypot(xt-xr,(xt-xr)*sl),xm=(xr+xt)/2,ym=y0+(xm-x0)*sl-0.16;
     const w=new THREE.Mesh(boxGeo,mat(HULL,'steel'));w.scale.set(L,0.32,z1-z0);w.position.set(xm,ym,(z0+z1)/2);w.rotation.z=Math.atan(sl);w.castShadow=w.receiveShadow=true;scene.add(w);worldMeshes.push(w);
+    {const g=new THREE.Group();g.position.copy(w.position);g.rotation.z=w.rotation.z;scene.add(g);const ad=(lx,ly,lz,sx,sy,sz,c)=>{const m=new THREE.Mesh(boxGeo,mat(c,'steel'));m.scale.set(sx,sy,sz);m.position.set(lx,ly,lz);g.add(m);return m;};
+      for(let i=1;i<5;i++)ad(-L/2+i*L/5,0.165,0,0.025,0.012,z1-z0-0.04,HULLD);for(const lz of[-0.75,0.6])ad(0,0.165,lz,L-0.1,0.012,0.022,HULLD);                 // panel seams and spar rivet lines on top
+      const f=ad(0,-0.02,(z1-z0)/2+0.2,L*0.8,0.08,0.4,0x6c6f66);f.rotation.x=0.35;}                                                                   // the flap hanging off the trailing edge
     ramps.push({x0,x1,z0,z1,y0,y1});
-    const n=new THREE.Mesh(new THREE.CylinderGeometry(0.62,0.7,4.2,16),mat(HULLD,'steel'));n.rotation.x=Math.PI/2;n.position.set(-23,0.7,-2.4);n.castShadow=true;scene.add(n);worldMeshes.push(n);cylColZ(-23,0.7,-4.5,-0.3,0.7,5);
-    for(let b=0;b<4;b++){const bl=addBox(-23,0,-4.6,0.18,1.5,0.06,0x2a2a28,false,false);bl.position.y=0.7;bl.rotation.set(0.5,0.2,b*Math.PI/2+0.9);}}
+    slab(-28.4,z0,-26.6,z1,3.35,4.05,HULL);                                                                   // wing root fairing joining the bent wing to the roof
+    engine(-24.6,0.62,-2.4,3.0,1,true);cylColX(-24.6,-21.6,0.62,-2.4,0.62,5);}
   // the break between hold and tail is the A site: main gear, a hasty sandbag nest on each flank, skin panels in the sand
-  for(const z of[7.4,8.4]){const t=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.55,0.4,16),mat(0x1c1c1a,'steel'));t.rotation.z=Math.PI/2;t.position.set(-32.6,0.55,z);scene.add(t);worldMeshes.push(t);}addCol(-32.8,0,6.85,-32.4,1.1,8.95);
+  {const TY=mat(0x1c1c1a,'steel'),RM=mat(0x6a6a62,'steel'),ST=mat(0x4a4a46,'steel'),GX=-32.6;
+    for(const z of[7.4,8.4]){const t=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.55,0.38,22),TY);t.rotation.z=Math.PI/2;t.position.set(GX,0.5,z);scene.add(t);worldMeshes.push(t);
+      for(let k=0;k<22;k++){const a=k/22*TAU,tr=new THREE.Mesh(boxGeo,TY);tr.scale.set(0.34,0.05,0.07);tr.position.set(GX,0.5+Math.sin(a)*0.55,z+Math.cos(a)*0.55);tr.rotation.x=-a;scene.add(tr);} // tread
+      for(const sd of[-1,1]){const r=new THREE.Mesh(new THREE.CylinderGeometry(0.33,0.33,0.04,18),RM);r.rotation.z=Math.PI/2;r.position.set(GX+sd*0.19,0.5,z);scene.add(r);
+        const h=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.14,0.08,10),ST);h.rotation.z=Math.PI/2;h.position.set(GX+sd*0.23,0.5,z);scene.add(h);
+        for(let k=0;k<8;k++){const a=k/8*TAU,bo=new THREE.Mesh(new THREE.CylinderGeometry(0.018,0.018,0.03,6),ST);bo.rotation.z=Math.PI/2;bo.position.set(GX+sd*0.215,0.5+Math.sin(a)*0.22,z+Math.cos(a)*0.22);scene.add(bo);}}}
+    const bg=new THREE.Mesh(boxGeo,ST);bg.scale.set(0.16,0.16,1.5);bg.position.set(GX,0.5,7.9);scene.add(bg);                                   // bogie beam through both axles
+    rod(scene,new V3(GX-0.6,0.34,8.75),new V3(GX-1.25,-0.1,9.85),0.14,ST,12);rod(scene,new V3(GX,0.58,7.9),new V3(GX-0.65,0.32,8.8),0.085,mat(0xb0aca0,'steel'),10);{const c=new THREE.Mesh(new THREE.TorusGeometry(0.15,0.035,6,14),ST);c.position.set(GX-0.6,0.34,8.75);c.lookAt(GX,0.58,7.9);scene.add(c);} // the oleo strut snapped off, chrome piston showing
+    rod(scene,new V3(GX-0.4,0.62,8.3),new V3(GX-0.9,0.35,9.0),0.04,ST,6);rod(scene,new V3(GX-0.9,0.35,9.0),new V3(GX-0.5,0.28,9.4),0.04,ST,6);           // torque links
+    rod(scene,new V3(GX-0.2,0.6,7.6),new V3(GX-0.9,0.03,6.7),0.014,mat(0x1c1c1a,'steel'),4);                                                           // hydraulic line
+    addCol(GX-0.2,0,6.85,GX+0.2,1.05,8.95);}
   bagWall(-35,5.8,-34.2,8.6);bagWall(-24.8,9.8,-22,10.6);
   for(const [x,z,ry] of[[-24.4,-7.4,0.4],[-33.6,-14,1.1],[-22.5,4.6,2.2],[-35.4,11,0.7],[-27,-19.2,1.6]]){const p=addBox(x,0,z,1.8,0.1,1.2,HULLD,false,false);p.rotation.set(0.12,ry,0.08);}
 })();
 function dedupe(pts){return pts.filter((p,i)=>{const q=pts[(i+pts.length-1)%pts.length];return Math.abs(p[0]-q[0])>1e-6||Math.abs(p[1]-q[1])>1e-6;});} // a zero-length edge turns into NaN vertices when extruded
 function rampMesh2z(x0,x1,z0,z1,ya,yb,color){const m=new THREE.Mesh(sideGeo(dedupe([[z0,0],[z1,0],[z1,yb],[z0,ya]]),null,x1-x0,0),mat(color));m.position.x=(x0+x1)/2;m.position.y=-0.02;m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);return m;}
 
+WINDOWS.push({side:'e',a:1,b:3,w:-26.8,top:2.6},{side:'w',a:-5,b:-3.2,w:-31.2,top:2.6},{side:'s',a:-30.6,b:-27.4,w:-7,top:3},{side:'n',a:-30.6,b:-27.4,w:5,top:3},{side:'s',a:-30.6,b:-27.4,w:-8.6,top:3},{side:'n',a:-30.6,b:-27.4,w:9,top:3});
+turnSection(PLANE_SEC,-29,PLANE_CZ);moveSection(PLANE_SEC,0,PLANE_DZ);
 // ---- DERRICK (northwest): raised drilling platform under a lattice tower, ramp down to the east; overlooks the plane's nose ----
 slab(-42,-36,-34,-28,2.5,2.8,C.DECK);
 for(const sx of[-41.8,-34.2])for(const sz of[-35.8,-28.2])addBox(sx,0,sz,0.4,2.5,0.4,C.STEEL);addBox(-38,0,-28.2,0.3,2.5,0.3,C.STEEL);
 lattice(-38,-32.4,2.8,13,3.0,0.7,0x2f2620);
 rampMesh2(-34,-28,-32.2,-30.6,2.8,0,C.DECK);ramps.push({x0:-34,x1:-28,z0:-32.2,z1:-30.6,y0:2.8,y1:0});
 railing(-42,-28.15,-34,-28,2.8,3.8);railing(-42,-36,-41.85,-28,2.8,3.8);railing(-34.15,-36,-34,-32.2,2.8,3.8);railing(-34.15,-30.6,-34,-28,2.8,3.8);
-addBox(-38,2.8,-34.6,2.6,0.7,0.6,C.STEEL);addBox(-40.6,2.8,-31,0.6,0.9,1.8,C.STEEL);crate(-36,2.8,-30);
-pipeStack(-38,-25.5,4.2,true);bagWall(-23.6,-22.4,-20.4,-21.6);bagWall(-20.4,-22.4,-19.6,-19.8); // drill pipe under the platform's lee, an L of bags facing the nose
+{const st=mat(0x3a3a38,'steel'),Y=2.8;addCol(-39.3,Y,-34.9,-36.7,Y+0.7,-34.3);vb(-38,Y,-34.6,2.6,0.12,0.6,0x58514a);for(const e of[-1.15,1.15])vb(-38+e,Y+0.12,-34.6,0.14,0.55,0.55,0x58514a);
+  cylX(-39.05,-36.95,Y+0.42,-34.6,0.24,mat(0x5d4632,'pipe'),18);for(const e of[-0.95,0.95])cylX(-38+e-0.03,-38+e+0.03,Y+0.42,-34.6,0.32,st,18);for(let k=0;k<5;k++)cylX(-38.7+k*0.3,-38.66+k*0.3,Y+0.42,-34.6,0.255,mat(0x1c1c1a,'steel'),16); // drawworks drum with wire wraps
+  rod(scene,new V3(-38,Y+0.66,-34.6),new V3(-38,Y+13,-32.4),0.012,mat(0x1c1c1a,'steel'),4);                                    // drill line up to the crown
+  addCol(-40.9,Y,-31.9,-40.3,Y+0.9,-30.1);vb(-40.6,Y,-31,0.6,0.9,1.8,0x5d6150);vb(-40.28,Y+0.5,-31,0.04,0.35,1.5,0x2a2a28);for(let k=0;k<3;k++)dial(-40.25,Y+0.68,-31.5+k*0.5,Math.PI/2,0.07);
+  lamp(-40.26,Y+0.56,-31.6,0xff3020);lamp(-40.26,Y+0.56,-31.4,0x40ff60);vb(-40.6,Y+0.9,-31,0.66,0.04,1.86,0x3a3a38);}                                // driller's console with gaugescrate(-36,2.8,-30);
+pipeStack(-36,-25.5,4.2,true);bagWall(-19.4,-21.4,-16.2,-20.6); // drill pipe under the platform's lee, an L of bags facing the nose
 
 // ---- PIPELINE (north): walkable elevated pipe with three gaps, each lined up with a route south ----
 function rampMesh2(x0,x1,z0,z1,ya,yb,color){const sh=new THREE.Shape(dedupe([[x0,0],[x1,0],[x1,yb],[x0,ya]]).map(p=>new THREE.Vector2(p[0],p[1])));
   const g=new THREE.ExtrudeGeometry(sh,{depth:z1-z0,bevelEnabled:false});g.translate(0,-0.03,z0);const m=new THREE.Mesh(g,mat(color));m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);return m;}
 function pipeline(x0,x1,z){pipeX(x0,x1,z,1.95,0.65,0x6a4a33,false);addCol(x0,1.3,z-0.65,x1,2.6,z+0.65); // the pipe itself: collision matches the visible gap under it
-  for(let x=x0+1.5;x<x1;x+=5)addBox(x,0,z,0.45,1.3,1.3,C.STEEL);
+  for(let x=x0+1.5;x<x1;x+=5){addBox(x,0,z,0.45,1.3,1.3,C.STEEL);const sd=new THREE.Mesh(new THREE.TorusGeometry(0.67,0.05,5,16,Math.PI),mat(0x3a3a38,'steel'));sd.rotation.y=Math.PI/2;sd.position.set(x,1.95,z);scene.add(sd);addBox(x,1.22,z,0.5,0.08,1.5,0x3a3a38,false,false);} // supports with strap saddles
+  for(let x=x0+2.5;x<x1-0.5;x+=5){const w=new THREE.Mesh(new THREE.CylinderGeometry(0.66,0.66,0.05,20,1,true),mat(0x4d3424,'pipe'));w.rotation.z=Math.PI/2;w.position.set(x,1.95,z);scene.add(w);}
   for(let x=x0+4;x<x1-1;x+=8){const f=new THREE.Mesh(new THREE.CylinderGeometry(0.75,0.75,0.18,20),mat(0x4d3424,'pipe'));f.rotation.z=Math.PI/2;f.position.set(x,1.95,z);scene.add(f);}}
 const PZ=-31;pipeline(-18,-8,PZ);pipeline(0,12,PZ);pipeline(20,30,PZ);           // gaps: x -8..0 (pump house), 12..20 (north stairs), 30+ (hangar side)
 for(let k=0;k<5;k++)sandbags(-21.6+k*0.8,0,PZ,0.8,(k+1)*0.52,1.3);
 for(let k=0;k<5;k++)sandbags(15.6-k*0.8,0,PZ,0.8,(k+1)*0.52,1.3);
-addBox(-12,0,-29,1.6,1.2,1.0,C.STEEL);pipeX(-12.4,-11.6,-28.4,1.0,0.12,0x8a2e22,false);
+valveStation(-12,-29);
 jersey(-4,-34.6,true);jersey(16,-34.6,true);jersey(32,-34.6,true);
 
 // ---- PUMP HOUSE (north middle): a real room now, 10 x 8, doors on three sides and a west window ----
 room(-9,-27,1,-19,3.6,0x6a6352,[['n',-5,-3.4,2.4],['s',-2,-0.4,2.4],['e',-24,-22.4,2.4],['w',-24.6,-22.8,2.3,1.1]]);
-addBox(-6.6,0,-25.6,3,1.6,1.6,C.STEEL);pipeX(-8.8,-5.1,-25.6,1.25,0.22,0x5d4632,false);addCylV(-1.4,-25.4,0.6,2.0,0x5d5a48); // pump + header tank along the north wall
-crate(-8,0,-20.2);crate(-8,CS,-20.2);crate(-6.6,0,-20.2);addBox(-1,0,-20.4,1.6,0.9,0.7,C.STEEL);              // crates and a bench along the south wall, the middle left open
+pumpUnit(-7.5,-25.8);pipeX(-6.9,-4.9,-25.8,1.05,0.18,0x5d4632,false);                        // pump with its outlet pipe leaving the east face
+{const el=new THREE.Mesh(new THREE.SphereGeometry(0.2,12,8),mat(0x5d4632,'pipe'));el.position.set(-4.9,1.05,-25.8);scene.add(el);
+ const dn=new THREE.Mesh(new THREE.CylinderGeometry(0.165,0.165,1.05,12),mat(0x5d4632,'pipe'));dn.position.set(-4.9,0.525,-25.8);dn.castShadow=true;scene.add(dn);worldMeshes.push(dn);
+ const fl=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.06,14),mat(0x4d3424,'pipe'));fl.position.set(-4.9,0.03,-25.8);scene.add(fl);}addCylV(-1.4,-25.4,0.6,2.0,C.STEEL); // elbow down into a floor flange; header tank along the north wall
+crate(-8,0,-20.2);crate(-8,CS,-20.2);crate(-6.6,0,-20.2);workbench(0.35,-20.6,1.4,0.7,false);              // crates and a bench along the south wall, the middle left open
 sandbags(-3.4,0,-15,3.6,1.05,0.8);
 
 // ---- COMMS (northeast): 7 x 6 shed, roof reachable up the crate steps, antenna and dish ----
 room(19,-28,26,-22,3.2,0x6a6352,[['s',21,22.6,2.3],['w',-26,-24.4,2.2,1.1],['e',-25.6,-24,2.3]]);
-slab(15.8,-24.4,16.6,-23.4,0,0.6,C.CRATE);slab(16.6,-24.4,17.4,-23.4,0,1.2,C.CRATE);slab(17.4,-24.4,18.2,-23.4,0,1.8,C.CRATE);slab(18.2,-24.4,19,-23.4,0,2.4,C.CRATE);
+for(let k=0;k<4;k++){const x0=15.8+k*0.8;addCol(x0,0,-23.8,x0+0.8,0.6*(k+1),-22.8);for(let j=0;j<=k;j++){addBox(x0+0.4,j*0.6,-23.3,0.78,0.58,0.98,C.CRATE,false,true);crateDetailB(x0+0.4,j*0.6,-23.3,0.78,0.58,0.98);}} // crate steps: real stacked crates
 (function antenna(){const m=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.09,7,6),mat(0x3a3a38));m.position.set(25,6.8,-27.4);scene.add(m);
-  const d=new THREE.Mesh(new THREE.CylinderGeometry(1.1,0.2,0.4,18),mat(0x9b9486,'paint'));d.position.set(21.4,3.8,-26.8);d.rotation.set(0.9,0.4,0);scene.add(d);})();
-addBox(24.4,0,-26.8,1.8,1.4,0.8,C.STEEL);crate(20.2,0,-26.9);
+  {const MX=21.6,MZ=-26.4,RT=3.34,pm=mat(0x3a3a38,'steel');addBox(MX,RT,MZ,0.7,0.12,0.7,0x3a3a38,false,false);rod(scene,new V3(MX,RT+0.12,MZ),new V3(MX,RT+1.2,MZ),0.06,pm,8); // base plate and mast on the roof
+    const g=new THREE.Group();g.position.set(MX,RT+1.35,MZ);g.rotation.set(-0.7,0.6,0);scene.add(g);
+    const dish=new THREE.Mesh(new THREE.SphereGeometry(1.0,24,8,0,TAU,0,0.62),new THREE.MeshLambertMaterial({color:weather(0xc8c2b4,'paint'),map:surfTex('paint'),side:THREE.DoubleSide}));dish.rotation.x=Math.PI;dish.position.y=0.78;g.add(dish); // shallow parabolic bowl
+    const rim=new THREE.Mesh(new THREE.TorusGeometry(0.58,0.02,4,28),pm);rim.rotation.x=Math.PI/2;rim.position.y=0.2;g.add(rim);
+    for(let k=0;k<3;k++){const a=k/3*TAU;rod(g,new V3(Math.cos(a)*0.56,0.2,Math.sin(a)*0.56),new V3(0,0.85,0),0.012,pm,4);}const fh=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.07,0.16,8),pm);fh.position.y=0.88;g.add(fh); // feed horn on three struts
+    const yk=new THREE.Mesh(boxGeo,pm);yk.scale.set(0.3,0.25,0.12);yk.position.y=-0.05;g.add(yk);}})();
+{const X=24.4,Z=-26.8,cb=0x5d6150;addCol(X-0.9,0,Z-0.4,X+0.9,1.4,Z+0.4);for(const e of[-0.45,0.45]){vb(X+e,0,Z,0.88,1.4,0.8,cb);vb(X+e,0.1,Z+0.405,0.8,1.2,0.01,0x4a4e40);for(let k=0;k<5;k++)vb(X+e,0.95+k*0.07,Z+0.415,0.5,0.025,0.02,0x2a2a28);vb(X+e+0.32,0.6,Z+0.42,0.03,0.18,0.03,0x9a9890);lamp(X+e-0.3,1.25,Z+0.42,0x40ff60);}
+  vb(X-0.3,1.4,Z,0.6,0.22,0.4,0x2a2a28);dial(X-0.45,1.51,Z+0.21,0,0.04);vb(X+0.35,1.4,Z,0.5,0.14,0.36,0x3f5a78);rod(scene,new V3(X+0.2,1.4,Z-0.2),new V3(X+0.2,3.1,Z-0.38),0.025,mat(0x1c1c1a,'steel'),5);} // radio racks with vents, lamps and a set on topcrate(20.2,0,-26.9);
 
 // ---- RED CONTAINERS (northeast, between the tower and the hangar): walk-through box with cover inside, a stacked pair, forklift ----
-openBox(21,-13.5,true,C.RED,[[-0.2,'crate',1],[0.25,'barrels',-1]]);
-container(28,0,-8,true,C.RED);container(28,2.6,-8.6,true,C.RED);
-forklift(23,-18.6);crate(16.6,0,-17);crate(16.6,0,-15.6);
+openBox(21,-14.4,true,C.RED,[[-0.2,'crate',1],[0.25,'barrels',-1]]);
+container(28,0,-8,true,C.RED);container(28.2,2.6,-8.7,true,C.TAN);
+forklift(28.4,-17.4);crate(15.8,0,-18.6);crate(15.8,0,-20);
 
 // ---- MAINTENANCE (between the tower and the plane): 6 x 5 shed with a ladder to a railed roof ----
 room(-16,-15,-10,-10,3.4,0x6e6655,[['e',-13.4,-11.8,2.4],['s',-14.6,-13,2.4]]);
-addLadder(-13,-15,'z-',0,3.85);railing(-16,-15,-14,-14.85,3.54,4.44);railing(-12,-15,-10,-14.85,3.54,4.44);railing(-16,-15,-15.85,-10,3.54,4.44);railing(-10.15,-15,-10,-10,3.54,4.44);railing(-16,-10.15,-10,-10,3.54,4.44);
-crate(-15,0,-14);addBox(-11,0,-14.2,1.6,1.0,0.8,C.STEEL);barrels(-17.6,-12,2,[0x2f4f6e,0x8a2e22]);
+addLadder(-13,-15,'z-',0,3.85);room(-16,-15,-10,-10,2.9,0x6e6655,[['n',-14,-12.4,2.3],['w',-13.6,-11.6,2.0,1.0],['e',-13.6,-11.6,2.0,1.0],['s',-14.6,-12.6,2.0,1.0]],true,3.54);sandbags(-15.3,3.54,-12.6,0.7,0.8,2.2);ammoCan(-10.75,3.54,-10.75,0.5,0.3,0.32);ammoCan(-10.75,3.87,-10.75,0.46,0.28,0.3); // upper storey: a sniper's loft that trades shots with the tower and overlooks A
+crate(-15,0,-14);workbench(-11,-14.2,1.6,0.8,true);barrels(-17.6,-12,2,[0x2f4f6e,0x8a2e22]);
 
 // ---- COURTYARD (west of the tower, facing the plane): low cover only, so the plane and the tower can see each other ----
 sandbags(-8,0,-1,0.8,1.05,3.6);jersey(-14,4,false);jersey(-4,-12,true);
 
 // ---- GENERATORS (east of the tower) with a catwalk across them, and the BUNKER facing the hangar apron ----
-for(const z of[3,7.8]){addBox(20,0,z,5,2.6,2.4,0x5d5a48);const f=addBox(20,2.62,z-0.55,5.2,0.06,1.1,0x4a4638,false,false);f.rotation.x=0.25;const g=addBox(20,2.62,z+0.55,5.2,0.06,1.1,0x4a4638,false,false);g.rotation.x=-0.25;
-  for(const s of[-1,1])pipeX(22.5,23.6,z+s*0.6,1.9,0.14,0x3a3a38,false);}
-slab(17.5,9.3,22.5,10.4,1.25,2.4,0x4a4638);addBox(17.6,0,10.3,0.16,1.25,0.16,C.STEEL);addBox(22.4,0,10.3,0.16,1.25,0.16,C.STEEL);
+for(const z of[3,7.8])genset(20,z,5,2.4,2.6,0x5d6150,true);
+
 barrels(24.4,5.4,3,[0x2f4f6e,0x8a2e22,0x45603a]);
 bagWall(27,-1.6,29.2,-0.8);bagWall(27,-0.8,27.8,2.6);bagWall(27,2.6,29.2,3.4);
 
 // ---- CONTROL ROOM (southeast): 7 x 6, doors north and west, window east, roof reachable from the crates ----
 room(18,12,25,18,3.4,0x6e6655,[['n',20,21.6,2.4],['w',14,15.6,2.4],['e',14.4,16,2.3,1.1]]);
-crate(26,0,16.6);crate(26,0,15.2);crate(26,CS,15.2);addBox(23.6,0,13,1.6,0.9,0.7,C.STEEL);addBox(19,0,16.9,1.4,0.9,0.7,C.STEEL);
+crate(26,0,12.9);crate(26,0,11.5);crate(26,CS,12.9);desk(23.6,13,1.6,0.7,-1);desk(19,16.9,1.4,0.7,-1);
 
 // ---- TRUCK (southwest of the tower): burnt-out flatbed parked along the south road with its load spilled ----
 truck(-12,13);spool(-6.4,16.4,0.6);pallet(-16.6,10.6,1);barrels(-9.4,9.6,2,[0x7f6a52,0x8a2e22]);
@@ -1117,6 +1439,7 @@ openBox(-35,23,true,C.BLUE,[[-0.25,'crate',-1],[0.22,'crate',1]]);container(-35,
 openBox(-25,25,false,C.RED,[[0.2,'barrels',1],[-0.25,'crate',-1]]);
 openBox(-31,31.5,true,C.BLUE,[[0.0,'bags',1]]);
 container(-21,0,34.5,true,C.TAN);container(-41.6,0,32,true,C.GRN);
+openBox(-35,15,false,C.GRN,[[0.12,'crate',1],[-0.2,'bags',-1]]);container(-25.5,0,16,true,C.TAN);crate(-30.5,0,17.2);crate(-30.5,CS,17.2); // north end of the west lane, where the plane's tail used to lie
 crate(-29,0,26.6);crate(-30.4,0,26.6);barrels(-38.6,36.6,3,[0x2f4f6e,0x45603a,0x2f4f6e]);
 
 // ---- DOCK (south middle): raised loading dock with a ramp up the west end, steps at the east, cargo on top ----
@@ -1124,12 +1447,22 @@ slab(-6,29,8,35,0,1.2,C.CONC);
 rampMesh2(-12,-6,30,32.6,0,1.2,C.CONC);ramps.push({x0:-12,x1:-6,z0:30,z1:32.6,y0:0,y1:1.2});
 for(let k=0;k<2;k++)sandbags(8.4+k*0.8,0,32,0.8,(2-k)*0.58,1.6);
 for(let x=-5.4;x<7.6;x+=1.5)addBox(x,1.2,29.1,0.6,0.1,0.18,0x1c1c1a,false,false);
-crate(-4,1.2,33.4);crate(-2.6,1.2,33.4);crate(-3.3,1.2+CS,33.4);pallet(2,31.2,2);crate(5.6,1.2,33.6);
+{vb(1,1.12,28.97,14.06,0.1,0.06,0x3a3a38);vb(8.03,1.12,32,0.06,0.1,6.06,0x3a3a38);for(let x=-4.5;x<8;x+=2.4){vb(x,0.25,28.92,0.42,0.7,0.16,0x1c1c1a);for(const y of[0.35,0.85])vb(x,y,28.83,0.06,0.06,0.02,0x55524a);} // edge angle, rubber dock fenders
+  for(let x=-2.5;x<8;x+=3.5)vb(x,1.2,32,0.03,0.004+0.004,5.98,0x4a463b);for(const x of[-3,2.5,7])vb(x,0.6,28.985,0.4,0.6,0.01,0x5a4a3a);                    // expansion joints, rust streaks under the edge
+  for(const [x,z] of[[-5.2,34.6],[1,34.6],[7.4,34.6]]){const r=new THREE.Mesh(new THREE.TorusGeometry(0.08,0.015,4,10),mat(0x3a3a38,'steel'));r.position.set(x,1.22,z);r.rotation.x=Math.PI/2;scene.add(r);}}
+crate(-4,1.2,33.4);crate(-2.6,1.2,33.4);crate(-3.3,1.2+CS,33.4);crate(2,1.2,31.6);crate(5.6,1.2,33.6);
 forklift(11,27);pallet(13.6,33.6,1);
 
+// ---- fill-in cover for the open stretches the density map showed, each placed on a route rather than scattered ----
+pipeStack(-14,21.6,5.0,true);jersey(10.4,21.2,true);jersey(12.7,21.2,true);crate(-4.2,0,26.6);crate(-4.2,CS,26.6);   // plaza in front of the dock
+container(-42.75,0,-22,true,C.GRN);crate(-24.2,0,-27.4);                                                             // driller's cabin between the derrick and the pump house
+openBox(36,-30.5,true,C.BLUE,[[0.2,'crate',1],[-0.22,'barrels',-1]]);                     // defenders' yard behind the hangar
+bagWall(17.6,-6.6,20.6,-5.8);bagWall(17.6,-5.8,18.4,-4.0);                                                         // bags between the red containers and the generators
+jersey(37.4,27,true);crate(40.6,0,31.4);pallet(44.6,27.4,1);container(46.4,0,30,false,C.BLUE);                                                        // southeast corner of the hangar apron
+bagWall(-7,18.2,-3.4,19);spool(8.6,18.8,0.3);jersey(-9,-8,false);jersey(-5.6,5.4,true);bagWall(-39.6,12.2,-38.8,14.8);container(-17,0,-4,true,C.TAN);container(-17,2.6,-4.3,true,C.GRN);                                                    // west flank by the tail, courtyard edge
 // ---- FUEL DEPOT (southeast): three tanks with round collision and a low pipe run ----
 addCylV(26,28,3.5,5.5,0x7f6a52);addCylV(31,20,2.4,4,0x77624d);addCylV(28,36,2.2,3.5,0x7a6650);
-pipeX(16,32,23.5,0.75,0.38,0x5d4632,true);for(const x of[17,20.5,24,28])addBox(x,0,23.5,0.3,0.4,0.7,C.STEEL);
+pipeX(16,32,23.5,0.75,0.38,0x5d4632,true);for(const x of[17,20.5,24,28]){addBox(x,0,23.5,0.4,0.3,0.8,0x9b9486);vb(x,0.3,23.5,0.3,0.08,0.7,0x3a3a38);const u=new THREE.Mesh(new THREE.TorusGeometry(0.4,0.025,5,14,Math.PI),mat(0x3a3a38,'steel'));u.rotation.y=Math.PI/2;u.position.set(x,0.75,23.5);scene.add(u);}for(const x of[22.2,30.2]){cylX(x-0.04,x+0.04,0.75,23.5,0.48,mat(0x4d3424,'pipe'),18);}
 barrels(19.6,25.6,3,[0x8a2e22,0x8a2e22,0x7f6a52]);crate(33,0,26.4);
 
 // ---- Hangar (east expansion): helicopter on the floor, grating mezzanine on three sides, stairs, side window with an outside ladder ----
@@ -1147,6 +1480,7 @@ const grateTex=(function(){ // welded bar grating: deep bearing bars with lit to
   for(let k=0;k<26;k++){const cx=r()*N,cy=r()*N,rad=6+r()*22;const g=x.createRadialGradient(cx,cy,0,cx,cy,rad);g.addColorStop(0,`rgba(${r()<0.5?'120,62,30':'70,58,44'},${0.25+r()*0.25})`);g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(cx-rad,cy-rad,rad*2,rad*2);} // rust and boot grime
   x.globalCompositeOperation='source-over';
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;return t;})();
+const HANGAR_SEC=sectionMark();
 const grateM=triplanar(new THREE.MeshLambertMaterial({color:0x8f8a80,map:grateTex,alphaTest:0.5,side:THREE.DoubleSide}),1/0.9);
 function grate(x0,z0,x1,z1,y0,y1){const m=new THREE.Mesh(boxGeo,grateM);m.scale.set(x1-x0,y1-y0,z1-z0);m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);m.castShadow=false;m.receiveShadow=true;scene.add(m);worldMeshes.push(m);
   addCol(x0,y0,z0,x1,y1,z1);addBox((x0+x1)/2,y0-0.08,z0+0.04,x1-x0,0.08,0.08,C.STEEL,false,false);addBox((x0+x1)/2,y0-0.08,z1-0.04,x1-x0,0.08,0.08,C.STEEL,false,false);}
@@ -1165,7 +1499,9 @@ function grate(x0,z0,x1,z1,y0,y1){const m=new THREE.Mesh(boxGeo,grateM);m.scale.
   for(let z=Z0+2;z<Z1-1;z+=3.6)addBox((X0+X1)/2,H-0.55,z,X1-X0-0.4,0.35,0.22,C.STEEL,false,false);
   for(let z=Z0+3.8;z<Z1-2;z+=7.2){const l=new THREE.Mesh(boxGeo,new THREE.MeshBasicMaterial({color:0xfff2d0}));l.scale.set(6,0.06,0.5);l.position.set((X0+X1)/2,H-0.05,z);scene.add(l);}
   addBox(X0-0.12,6.4,0,0.22,0.3,12.4,0x9a7a34,false,false); // door header
-  for(const z of[-6.6,6.6])addBox(X0-0.4,0,z,0.6,6.4,0.5,0x5f6a6e,false,false); // rolled-back door leaves
+  for(const z of[-6.6,6.6]){addBox(X0-0.4,0,z,0.6,6.4,0.5,0x5f6a6e,false,false);hazBox(X0-0.72,0,z,0.04,6.2,0.36);}       // rolled-back door leaves, striped edges
+  for(const z of[-6.15,6.15])hazBox(X0-0.05,0,z,0.12,1.4,0.24);                                                                     // bump guards at the jambs
+  sign(signM('HANGAR 2','AUTHORISED ONLY','#d7d0bf','#2a2622'),X0-0.03,7.3,-8.6,2.4,0.9,-Math.PI/2);
   // mezzanine: north, east and south runs of grating with railings, posts down to the floor
   grate(X0+T,Z0+T,X1-T,Z0+T+MD,MZ,MT);grate(X1-T-MD,Z0+T+MD,X1-T,Z1-T-MD,MZ,MT);grate(X0+T,Z1-T-MD,X1-T,Z1-T,MZ,MT);
   for(const x of[37,41,45.2])for(const z of[Z0+T+MD-0.12,Z1-T-MD+0.12])addBox(x,0,z,0.2,MZ,0.2,C.STEEL);
@@ -1199,6 +1535,14 @@ function grate(x0,z0,x1,z1,y0,y1){const m=new THREE.Mesh(boxGeo,grateM);m.scale.
     slab(cx-1.05,cz-4.3,cx+1.05,cz-2.75,0.34,1.3,M);                          // nose
     {const w=addBox(cx,1.98,cz-3.45,2.0,0.08,2.23,0x1d2a30,false,true);w.rotation.x=-0.706;for(const sd of[-1,1]){const sw=addBox(cx+sd*1.0,1.3,cz-3.4,0.06,0.9,1.5,0x1d2a30,false,false);void sw;}addCol(cx-1.0,1.3,cz-4.0,cx+1.0,2.3,cz-2.75);}
     slab(cx-0.35,cz+2.4,cx+0.35,cz+6.6,1.9,2.6,M);                            // tail boom
+    {const GLM=0x1d2a30;for(const sd of[-1,1]){vb(cx+sd*1.165,1.55,cz+1.8,0.012,0.7,0.95,GLM);vb(cx+sd*1.165,1.5,cz-1.75,0.012,0.75,1.4,GLM);vb(cx+sd*1.17,2.6,cz-0.6,0.04,0.05,3.2,0x2a2a28); // windows, sliding-door rail
+        for(const zz of[-1.8,1.6]){rod(scene,new V3(cx+sd*1.0,0.18,cz+zz),new V3(cx+sd*0.75,0.36,cz+zz),0.035,mat(0x2a2a28,'steel'),6);}                                  // skid struts
+        const ex=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.13,0.5,10),mat(0x5d4632,'pipe'));ex.rotation.x=Math.PI/2;ex.position.set(cx+sd*0.45,3.0,cz+1.0);scene.add(ex);}
+      for(let i=0;i<5;i++){const r=new THREE.Mesh(new THREE.TorusGeometry(0.36,0.008,3,12),mat(0x3f4636,'paint'));r.position.set(cx,2.25,cz+2.8+i*0.75);scene.add(r);}  // boom frames
+      const th=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.12,8),mat(0x2a2a28,'steel'));th.rotation.z=Math.PI/2;th.position.set(cx+0.2,2.75,cz+6.45);scene.add(th);
+      for(let b=0;b<2;b++){const t=vb(cx+0.27,2.75,cz+6.45,0.03,1.15,0.1,0x2a2a28);t.position.y=2.75;t.rotation.x=b*Math.PI/2+0.3;}                                          // tail rotor
+      rod(scene,new V3(cx,2.95,cz-1.8),new V3(cx,3.5,cz-2.1),0.012,mat(0x2a2a28,'steel'),4);
+      sign(signM('207','','#56604f','#d7d0bf'),cx+0.354,2.25,cz+4.2,0.5,0.19,Math.PI/2);sign(signM('207','','#56604f','#d7d0bf'),cx-0.354,2.25,cz+4.2,0.5,0.19,-Math.PI/2);}
     addBox(cx,2.2,cz+6.3,0.14,1.7,0.9,M);addBox(cx,2.2,cz+5.8,2.2,0.1,0.6,M,false);  // fin + stabilizer
     addBox(cx+0.095,2.75,cz+6.5,0.05,1.1,0.12,0x2a2a28,false,false);
     addBox(cx,2.95,cz-0.3,1.2,0.5,2.2,0x3f4636);addBox(cx,3.45,cz-0.3,0.2,0.25,0.2,0x2a2a28,false,false); // engine hump + mast
@@ -1206,13 +1550,13 @@ function grate(x0,z0,x1,z1,y0,y1){const m=new THREE.Mesh(boxGeo,grateM);m.scale.
     for(let i=0;i<2;i++)addBox(cx-0.5+i,0.48,cz+1.75,0.45,0.45,0.45,0x7a6440);}  // cargo in the cabin
   // shop clutter around the floor, mostly under the mezzanine
   crate(36,0,-9.2);crate(38.3,0,-9.2);crate(36,CS,-9.2);crate(46.2,0,-8.2);crate(46.2,0,-6.8);crate(46.2,CS,-8.2);
-  addBox(46.4,0,4.6,1.2,1.0,2.6,0x8a2e22);addBox(46.4,1.0,4.6,1.0,0.06,2.4,0x3a3a38,false,false);   // tool chests
-  addBox(46.3,0,-4.7,0.9,0.95,2.4,C.STEEL);                                                     // workbench
+  toolChest(46.4,4.0,1.2,0.6,false);toolChest(46.4,5.4,1.0,0.55,false);                              // tool chests
+  workbench(46.3,-4.7,2.4,0.9,false);                                                    // workbench
   barrels(43.0,9.3,3,[0x8a2e22,0x2f4f6e,0x8a2e22]);pallet(45.8,-2.0,2);
-  addBox(37.0,0,-3.5,1.6,1.2,1.2,0x3a3a38);addCylV(37.0,-1.2,0.45,1.4,0x5d4632);              // engine stand + drum
+  engineStand(37.0,-3.5);addCylV(37.0,-1.2,0.45,1.4,0x5d4632);              // engine stand + drum
   // apron outside the doors: a few low pieces of cover between the yard and the hangar
   jersey(31,-7,false);jersey(31.4,6.5,false);pallet(32.2,0.4,1);
-  addBox(43.5,0,-15.5,4.2,2.2,2.2,0x5d5a48);addBox(43.5,2.2,-15.5,3.6,0.5,1.8,0x3a3a38,false,true); // generator by the north wall
+  genset(43.5,-15.5,4.2,2.2,2.2,0x8a7a4a,true);                                                                     // generator by the north wall
   crate(39,0,15.6);crate(40.4,0,15.6);crate(39.7,CS,15.6);barrels(45.6,16.4,3,[0x7f6a52,0x2f4f6e,0x8a2e22]);
   // enlarge the whole hangar about the middle of its yard-facing door: 30% wider and deeper, 15% taller. Small props keep their size and just move
   {const HS=1.3,VS=1.15,AX=X0,mx=x=>AX+(x-AX)*HS,mz=z=>z*HS;const pm=new Set(),pc=new Set();
@@ -1225,8 +1569,32 @@ function grate(x0,z0,x1,z1,y0,y1){const m=new THREE.Mesh(boxGeo,grateM);m.scale.
     for(const r of ramps.slice(hs.rs)){r.x0=mx(r.x0);r.x1=mx(r.x1);r.z0=mz(r.z0);r.z1=mz(r.z1);r.y0*=VS;r.y1*=VS;}
     for(const l of ladders.slice(hs.ls)){const nx=mx(l.lx),nz=mz(l.lz);l.x0+=nx-l.lx;l.x1+=nx-l.lx;l.z0+=nz-l.lz;l.z1+=nz-l.lz;l.lx=nx;l.lz=nz;l.y0*=VS;l.y1*=VS;}
     HANGAR={x0:mx(X0),x1:mx(X1),z0:mz(Z0),z1:mz(Z1),map:(x,z)=>(x>=X0-0.5&&x<=X1+0.5&&z>=Z0-0.5&&z<=Z1+0.5)?[mx(x),mz(z)]:[x,z]};}
-  container(46.2,0,-29,false,C.RED);container(46.4,0,29,false,C.BLUE);
+  {const hm=HANGAR.map;WINDOWS.push({side:'w',a:hm(X0,-6)[1],b:hm(X0,6)[1],w:hm(X0,0)[0],top:6.4},{side:'s',a:hm(39,Z1)[0],b:hm(42,Z1)[0],w:hm(39,Z1)[1],top:2.6});}
 })();
+moveSection(HANGAR_SEC,0,HANGAR_DZ);HANGAR.z0+=HANGAR_DZ;HANGAR.z1+=HANGAR_DZ;
+// ---- WAREHOUSE (east lane): the close-range indoor route from the attackers' side up to the hangar's south door. Two bays, a door in the partition ----
+room(35.5,13.5,50,24,4.2,0x6e6655,[['n',37,39,2.5],['n',43.5,45.5,2.5],['w',14.5,16.5,2.5],['s',39.6,41.6,2.5],['s',47.2,49.2,2.5]]);
+slab(42.6,13.7,42.8,18,0,4.2,0x6e6655);slab(42.6,20,42.8,23.8,0,4.2,0x6e6655);slab(42.6,18,42.8,20,2.5,4.2,0x6e6655);WINDOWS.push({side:'e',a:18,b:20,w:42.7,top:2.5});
+function rack(x0,z0,x1,z1){const alongX=(x1-x0)>=(z1-z0),cx=(x0+x1)/2,cz=(z0+z1)/2,w=x1-x0,d=z1-z0,RK=0x3f5a78;KIND[RK]='paint'; // pallet rack: blue uprights, orange beams, stock on every level
+  for(const e of[0,1])for(const s of[0,1]){addBox(alongX?(e?x1-0.05:x0+0.05):(s?x1-0.05:x0+0.05),0,alongX?(s?z1-0.05:z0+0.05):(e?z1-0.05:z0+0.05),0.1,2.7,0.1,RK,false,true);}
+  for(const y of[0.95,1.85,2.65]){for(const s of[0,1])addBox(alongX?cx:(s?x1-0.05:x0+0.05),y-0.1,alongX?(s?z1-0.05:z0+0.05):cz,alongX?w:0.08,0.1,alongX?0.08:d,0xb06a2a,false,true);addBox(cx,y,cz,w-0.12,0.04,d-0.12,C.CRATE,false,true);}
+  addCol(x0,0,z0,x1,0.95,z1);addCol(x0,1.85,z0,x1,1.9,z1);addCol(x0,2.65,z0,x1,2.7,z1);for(const ex of[x0,x1-0.1])for(const ez of[z0,z1-0.1])addCol(ex,0,ez,ex+0.1,2.7,ez+0.1);
+  const n=Math.max(1,Math.round((alongX?w:d)/1.1));for(let i=0;i<n;i++){const t=(i+0.5)/n,bx=alongX?x0+t*w:cx,bz=alongX?cz:z0+t*d;
+    addBox(bx,0.02,bz,alongX?w/n-0.12:d-0.25,0.85,alongX?d-0.25:d/n-0.12,i%2?C.CRATE:0x6a5636,false,true);if(i%3!==1)addBox(bx,1.0,bz,alongX?w/n-0.3:d-0.4,0.6,alongX?d-0.4:d/n-0.3,i%2?0x6a5636:0x8a7a5a,false,true);}}
+rack(36,19.6,39.6,20.4);rack(46.1,17.8,48.9,18.6);
+crate(36.4,0,22.9);crate(36.4,CS,22.9);crate(37.8,0,22.9);crate(49,0,14.6);crate(43.6,0,23);
+addBox(41.8,0,14.8,0.8,0.95,2.0,C.STEEL);
+{for(const x of[40.8,47.8])addBox(x,0,13.7+0.13,0.32,4.2,0.26,0x58514a,false,false);for(const x of[37.6,44.8])addBox(x,0,23.8-0.13,0.32,4.2,0.26,0x58514a,false,false); // steel columns, each clear of the doors
+  for(const x of[37.6,40.8,44.8,47.8])addBox(x,3.75,18.75,0.18,0.3,10.05,0x58514a,false,false);                          // roof trusses landing on the columns
+  for(let i=0;i<5;i++)addBox(36.2+i*0.32,0.022,18.75,0.16,0.004,7.6,0xb08a2a,false,false);void 0;                         // painted aisle hatching by the west door
+  addBox(39.3,0.023,18.75,0.08,0.004,9.6,0xb08a2a,false,false);addBox(46.1,0.023,18.75,0.08,0.004,9.6,0xb08a2a,false,false); // aisle lines
+  for(const [x,z] of[[39.2,16.6],[39.2,21],[46.4,16.6],[46.4,21]]){const l=new THREE.Mesh(boxGeo,new THREE.MeshBasicMaterial({color:0xfff0c8}));l.scale.set(1.6,0.05,0.3);l.position.set(x,4.12,z);scene.add(l);addBox(x,4.0,z,1.7,0.08,0.4,0x3a3a38,false,false);}
+  for(const [a,b,side] of[[37,39,'n'],[43.5,45.5,'n'],[39.6,41.6,'s'],[47.2,49.2,'s']]){const zo=side==='n'?13.5-0.26:24+0.26;addBox((a+b)/2,2.62,zo,b-a+0.5,0.42,0.42,0x5d6150,false,false); // roll-up door drum housings
+    for(const e of[a-0.14,b+0.14])hazBox(e,0,side==='n'?13.5-0.09:24+0.09,0.1,1.2,0.04);}
+  hazBox(35.5-0.09,0,14.36,0.04,1.2,0.1);hazBox(35.5-0.09,0,16.64,0.04,1.2,0.1);
+  for(const x of[39,46.5]){addBox(x,4.34,17.2,1.4,0.5,1.0,0x55504a,false,false);addBox(x,4.84,17.2,1.6,0.08,1.2,0x3e3b36,false,false);} // roof vents
+  sign(signM('WAREHOUSE 2','LOADING','#e3dccb','#2a2622'),44.5,3.3,24.025,2.6,0.98,0);sign(signM('WAREHOUSE 2','NO SMOKING','#e3dccb','#2a2622'),41.2,3.3,13.475,2.6,0.98,Math.PI);
+  for(const [x,z,ry] of[[38,24.03,0],[48.2,24.03,0],[38,13.47,Math.PI],[44.5,13.47,Math.PI]]){const lb=addBox(x,3.62,z+(ry?-0.08:0.08),0.32,0.16,0.16,0x3a3a38,false,false);void lb;const g=new THREE.Mesh(boxGeo,new THREE.MeshBasicMaterial({color:0xffe2a0}));g.scale.set(0.22,0.05,0.1);g.position.set(x,3.6,z+(ry?-0.14:0.14));scene.add(g);}} // caged lamps over the doors
 
 (function scaleYard(){ // grow the whole yard by MAP_SCALE, then put the small props back to real size, resting on whatever they stood on
   const k=MAP_SCALE,objs=scene.children.slice(worldStart),orig=colliders.map(c=>({min:c.min.clone(),max:c.max.clone()}));
@@ -1250,6 +1618,22 @@ function grate(x0,z0,x1,z1,y0,y1){const m=new THREE.Mesh(boxGeo,grateM);m.scale.
     let top=-1e9,otop=-1e9;for(let i=r.cs;i<r.ce;i++){const c=colliders[i];c.min.divideScalar(k).sub(A).add(T);c.max.divideScalar(k).sub(A).add(T);top=Math.max(top,c.max.y);otop=Math.max(otop,orig[i].max.y);}
     placed.push({top:otop,newTop:top,F});}
 })();
+(function worldDeZFight(){ // two faces in the same plane facing the same way flicker black: pull the smaller piece back a few millimetres (wall corners, trims, stacked parts)
+  scene.updateMatrixWorld(true);const L=[];
+  for(const o of scene.children.slice(worldFrom))o.traverse(m=>{if(!m.isMesh||m.userData.ray||m===ground)return;const e=m.matrixWorld.elements;for(const k of[0,1,2]){const r=[Math.abs(e[k]),Math.abs(e[4+k]),Math.abs(e[8+k])],mx=Math.max(...r);if(r.filter(v=>v>1e-4*mx).length!==1)return;}
+    const g=m.geometry;if(!g.boundingBox)g.computeBoundingBox();const bb=g.boundingBox.clone().applyMatrix4(m.matrixWorld),sz=new V3();bb.getSize(sz);L.push({m,bb,v:sz.x*sz.y*sz.z+1e-9});});
+  const cell=new Map(),C=4;L.forEach((A,idx)=>{for(let i=Math.floor(A.bb.min.x/C);i<=Math.floor(A.bb.max.x/C);i++)for(let j=Math.floor(A.bb.min.z/C);j<=Math.floor(A.bb.max.z/C);j++){const k=i+','+j;if(!cell.has(k))cell.set(k,[]);cell.get(k).push(idx);}});
+  const seen=new Set(),ax=['x','y','z'],E=0.004,D=0.006,inv=new THREE.Matrix4(),v=new V3();
+  for(const list of cell.values())for(let p=0;p<list.length;p++)for(let q=p+1;q<list.length;q++){const i=Math.min(list[p],list[q]),j=Math.max(list[p],list[q]),key=i*100003+j;if(seen.has(key))continue;seen.add(key);const A=L[i],B=L[j];
+    for(let a=0;a<3;a++){const k0=ax[a],k1=ax[(a+1)%3],k2=ax[(a+2)%3];
+      if(Math.min(A.bb.max[k1],B.bb.max[k1])-Math.max(A.bb.min[k1],B.bb.min[k1])<0.02||Math.min(A.bb.max[k2],B.bb.max[k2])-Math.max(A.bb.min[k2],B.bb.min[k2])<0.02)continue;
+      for(const side of[1,-1]){const fa=side>0?A.bb.max[k0]:A.bb.min[k0],fb=side>0?B.bb.max[k0]:B.bb.min[k0];if(Math.abs(fa-fb)>E)continue;if(a===1&&side<0&&fa<0.02)continue; // bottoms sitting on the ground never show
+        const S=A.v<B.v?A:B,m=S.m;v.set(0,0,0);v[k0]=-side*D;
+        if(m.geometry===boxGeo&&m.parent===scene){const s0=m.scale[k0],len=S.bb.max[k0]-S.bb.min[k0];if(len>3*D){m.scale[k0]=s0*(len-D)/len;}m.position.addScaledVector(v,0.5);} // shrink the shared face back
+        else{inv.copy(m.parent.matrixWorld).invert();const p0=m.getWorldPosition(new V3()).add(v).applyMatrix4(inv);m.position.copy(p0);}
+        m.updateMatrixWorld(true);S.bb.min[k0]-=side<0?-D:0;S.bb.max[k0]-=side>0?D:0;}}}
+})();
+sun.shadow.normalBias=0.035; // stops shadow acne speckling flat faces
 (function mergeWorld(){ // fold the static world into one mesh per surface kind (colour rides along per vertex): same look and collisions, a few dozen draw calls instead of hundreds
   const objs=scene.children.slice(worldFrom);scene.updateMatrixWorld(true);const by=new Map(),wm=new Set(worldMeshes);
   const keyOf=m=>m.material.userData&&m.material.userData.kind?'k:'+m.material.userData.kind:m.material;
@@ -1318,7 +1702,7 @@ function segBlocked(a,b){
   }
   return false;
 }
-const SPAWNS=[[-40,-22],[-42,8],[-43,38],[-31,38.5],[-16,38],[-4,38.5],[10,38.5],[22,38.5],[34,33],[34,-34],[24,-35],[8,-35],[-7.5,-35],[-18,-35],[-27,-25],[-19,-16],[-17,7],[16,-21],[14,21],[-6,25],[3,-23],[32,-15],[32,10],[26,6],[40,-30],[41,-21],[40,30],[46,22],[44,-2.5],[37.5,4]].map(p=>HANGAR.map(p[0],p[1])).map(p=>new V3(p[0]*MAP_SCALE,0,p[1]*MAP_SCALE)).filter(p=>openSpot(p.x,p.z));
+const SPAWNS=[[-24,-34],[-12,-35],[-2,-35],[8,-35],[18,-35],[30,-34],[40,-34.5],[49,-34.5],[-42,-12],[-41,4],[-42,20],[-40,38],[-31,38.5],[-16,38],[-4,38.5],[10,38.5],[22,38.5],[34,37],[47,35],[-19,-16],[-17,7],[-6,25],[3,-23],[15.4,18.8],[33,9],[26,6],[32,-15],[44,9.5],[12.6,-22],[-30,12.5]].map(p=>new V3(p[0]*MAP_SCALE,0,p[1]*MAP_SCALE)).filter(p=>openSpot(p.x,p.z));
 function openSpot(x,z){ // standable, not inside anything, and not boxed in
   if(x<XMIN+1||x>XMAX-1||z<ZMIN+1||z>ZMAX-1)return false;
   if(hitsAt(x,0.05,z,1.85,0.72)||groundAt(x,z,0.4,0.72)>0.01||rampAt(x,z,0.72)>0.05)return false;
@@ -1679,8 +2063,10 @@ const primGroups={};const E=0.025;
 const cuffM=new THREE.MeshLambertMaterial({color:0x2a2a24});
 function fseg(g,a,b,r0,r1){const d=new V3().subVectors(b,a),len=d.length();const m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r0,len,9),gloveM);m.position.copy(a).addScaledVector(d,0.5);m.quaternion.setFromUnitVectors(new V3(0,1,0),d.normalize());g.add(m);handMeshes.push(m);return m;}
 function fball(g,p,r){const m=new THREE.Mesh(new THREE.SphereGeometry(r,9,7),gloveM);m.position.copy(p);g.add(m);handMeshes.push(m);return m;}
-function wrapFinger(g,pts,r){r=r||0.0082;const n=pts.length-1;for(let i=0;i<n;i++){const t0=i/n,t1=(i+1)/n,r0=r*(1.06-0.2*t0),r1=r*(1.06-0.2*t1);fball(g,pts[i],r0*(i?1:1.12));fseg(g,pts[i],pts[i+1],r0,r1);}fball(g,pts[n],r*0.86);}
-function finger(g,a,b,r,curl){r=r||0.0085;fball(g,a,r*1.18); // knuckle
+function wrapFinger(g,pts,r){r=r||0.0082;const n=pts.length-1;for(let i=0;i<n;i++){const t0=i/n,t1=(i+1)/n,r0=r*(1.06-0.2*t0),r1=r*(1.06-0.2*t1);fball(g,pts[i],r0*(i?0.97:1.04));fseg(g,pts[i],pts[i+1],r0,r1);}fball(g,pts[n],r*0.86);}
+function smoothThumb(g,a,b,r){const d=new V3().subVectors(b,a),n=d.clone().normalize(),k=a.clone().addScaledVector(d,0.55);
+  fseg(g,a,k,r*1.12,r*1.02);fseg(g,k,b,r*1.02,r*0.86);fball(g,a,r*1.12);fball(g,k,r*1.02);const t=fball(g,b,r*0.86);t.scale.set(1,0.85,1.15);void n;} // two smooth bones, no knuckle beads
+function finger(g,a,b,r,curl){r=r||0.0085;fball(g,a,r*1.06); // knuckle
   let mid=a.clone().lerp(b,0.55);if(curl)mid.add(curl);else{const d=new V3().subVectors(b,a);mid.addScaledVector(new V3(-d.z,0,d.x).normalize().cross(d).normalize(),-d.length()*0.06);} // a slight natural bend
   const m=fseg(g,a,mid,r*1.05,r*0.98);fball(g,mid,r*0.99);fseg(g,mid,b,r*0.98,r*0.86);fball(g,b,r*0.87);return m;}
 function sleeve(g,wr,el,r){r=r||0.044;const d=new V3().subVectors(el,wr).normalize(),q=new THREE.Quaternion().setFromUnitVectors(new V3(0,1,0),d),len=wr.distanceTo(el);
@@ -1786,7 +2172,7 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   railTop(g,-0.142,-0.38,-0.011,0.024);for(const sx of[-1,1]){put(g,BOX(0.008,0.024,0.24),M.blk,sx*0.028,-0.04,-0.26);for(let z=-0.37;z<-0.15;z+=0.012)put(g,BOX(0.012,0.028,0.006),M.blk,sx*0.028,-0.04,z);}
   put(g,BOX(0.024,0.008,0.24),M.blk,0,-0.069,-0.26);
   put(g,new THREE.CylinderGeometry(0.009,0.0095,0.17,10),M.stl,0,-0.04,-0.46,Math.PI/2);
-  put(g,sideGeo([[-0.392,-0.03],[-0.428,-0.03],[-0.422,0.006],[-0.408,0.006]],null,0.016,0.002),M.blk);put(g,BOX(0.003,0.01,0.003),M.blk,0,0.012,-0.415);put(g,BOX(0.03,0.016,0.03),M.blk,0,-0.04,-0.41); // A2 front sight post on its gas block
+  put(g,sideGeo([[-0.392,-0.03],[-0.428,-0.03],[-0.426,-0.016],[-0.398,-0.016]],null,0.016,0.002),M.blk);put(g,BOX(0.03,0.016,0.03),M.blk,0,-0.04,-0.41); // A2 front sight post on its gas block
   put(g,lathe([[0.007,-0.54],[0.011,-0.54],[0.011,-0.59],[0.007,-0.59]],12),M.blk,0,-0.04,0);for(let i=0;i<4;i++)put(g,BOX(0.003,0.003,0.032),M.hole,0.0105*Math.cos(i*1.57),-0.04+0.0105*Math.sin(i*1.57),-0.57);
   put(g,sideGeo([[-0.075,-0.12],[-0.03,-0.12],[-0.02,-0.2],[-0.042,-0.29],[-0.088,-0.282],[-0.074,-0.2]],null,0.024,0.003),M.drk); // curved 30 rd
   rifleGrip(g,M.rub,M.blk);
@@ -1814,7 +2200,7 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   for(let i=0;i<5;i++)put(g,BOX(0.033,0.004,0.05),M.blk,0,-0.195-i*0.024,-0.08-i*0.009,0.2);put(g,BOX(0.036,0.012,0.064),M.blk,0,-0.322,-0.118,0.24); // grip ribs + base plate
   put(g,new THREE.CylinderGeometry(0.0115,0.0125,0.135,12),M.stl,0,-0.045,-0.667,Math.PI/2);
   put(g,lathe([[0.008,-0.72],[0.0165,-0.72],[0.0165,-0.775],[0.008,-0.775]],14),M.blk,0,-0.045,0);for(let i=0;i<3;i++)put(g,BOX(0.003,0.012,0.02),M.hole,0.0168*Math.cos(i*1.05+0.5),-0.045+0.0168*Math.sin(i*1.05+0.5),-0.745); // A2 birdcage, slots up top
-  put(g,sideGeo([[-0.565,0.0],[-0.595,0.0],[-0.59,0.024],[-0.575,0.024]],null,0.026,0.002),M.blk);                           // flip-up front sight
+  put(g,sideGeo([[-0.558,0.0],[-0.598,0.0],[-0.598,0.007],[-0.56,0.005]],null,0.026,0.002),M.blk);                           // flip-up front sight, folded down under the optic
   rifleGrip(g,M.rub,M.blk);
   put(g,BOX(0.05,0.07,0.05),M.blk,0,-0.06,0.18);                                                                               // folding hinge
   put(g,sideGeo([[0.2,-0.026],[0.34,-0.026],[0.37,-0.012],[0.45,-0.012],[0.475,-0.03],[0.48,-0.06],[0.48,-0.215],[0.455,-0.228],[0.41,-0.2],[0.37,-0.15],[0.33,-0.136],[0.27,-0.132],[0.24,-0.116],[0.2,-0.1]],[[[0.24,-0.06],[0.33,-0.06],[0.36,-0.1],[0.26,-0.104]]],0.05,0.005),M.blk); // Masada stock: stepped comb, thumbhole cut
@@ -1842,7 +2228,7 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   put(g,new THREE.CylinderGeometry(0.013,0.014,0.16,12),M.stl,0,-0.034,-0.48,Math.PI/2);
   put(g,BOX(0.03,0.028,0.03),M.blk,0,-0.036,-0.415);put(g,new THREE.CylinderGeometry(0.006,0.006,0.03,8),M.blk,-0.02,-0.05,-0.415,0,0,Math.PI/2); // gas block + regulator
   put(g,lathe([[0.009,-0.56],[0.018,-0.56],[0.016,-0.64],[0.009,-0.64]],14),M.blk,0,-0.034,0);for(let i=0;i<4;i++)put(g,BOX(0.003,0.003,0.055),M.hole,0.0172*Math.cos(i*1.57+0.78),-0.034+0.0172*Math.sin(i*1.57+0.78),-0.605); // long SCAR flash hider
-  put(g,sideGeo([[-0.375,0.0],[-0.4,0.0],[-0.393,0.028],[-0.382,0.028]],null,0.024,0.002),M.blk);                            // tall flip front sight
+  put(g,sideGeo([[-0.368,0.0],[-0.404,0.0],[-0.404,0.007],[-0.37,0.005]],null,0.024,0.002),M.blk);                            // flip front sight, folded flat under the optic
   rifleGrip(g,M.rub,M.blk);
   // folding stock: hinge, straight comb with a stepped belly, adjustable cheek riser, ribbed butt
   put(g,sideGeo([[0.152,-0.016],[0.205,-0.016],[0.205,-0.12],[0.152,-0.12]],null,0.056,0.004),snpSkin);
@@ -1865,7 +2251,7 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   put(g,BOX(0.03,0.012,0.06),M.blk,0,-0.33,0.275,0.25);
   // raised optic rail on its mount, folding iron sights
   put(g,sideGeo([[0.2,-0.036],[-0.14,-0.04],[-0.13,-0.024],[0.19,-0.02]],null,0.03,0.003),M.drk);railTop(g,0.18,-0.12,-0.016,0.026,0.0);
-  put(g,BOX(0.03,0.03,0.012),M.blk,0,-0.03,-0.4);for(const sx of[-1,1])put(g,BOX(0.004,0.03,0.016),M.blk,sx*0.01,-0.004,-0.4);
+  put(g,BOX(0.03,0.02,0.012),M.blk,0,-0.035,-0.4);for(const sx of[-1,1])put(g,BOX(0.004,0.012,0.022),M.blk,sx*0.01,-0.024,-0.395,-1.2); // folding front sight, laid down
   put(g,BOX(0.066,0.014,0.11),M.drk,0,-0.03,0.34);                                                                            // cheek rest
   for(const sx of[-1,1]){put(g,BOX(0.004,0.03,0.09),M.hole,sx*0.0395,-0.07,0.27);put(g,BOX(0.003,0.004,0.6),M.drk,sx*0.0395,-0.098,0.02);put(g,BOX(0.004,0.012,0.012),M.blk,sx*0.0395,-0.07,0.15);} // ejection ports (ambi), seam, selector
   put(g,BOX(0.016,0.014,0.03),M.blk,-0.04,-0.06,-0.2);                                                                       // charging handle, left side front
@@ -1999,11 +2385,11 @@ function pistolHands(g){ // two-handed grip used by every handgun: right hand on
   hand(g,BOX(0.056,0.1,0.05),H,0.004,-0.152,0.15,-0.33);                                                  // shooting palm: covers the backstrap and both sides of the grip
   const hw=0.019;for(let i=0;i<3;i++){const y=-0.128-i*0.022,f=fz(y),r=0.0078;wrapFinger(g,[new V3(hw-0.004,y,f+0.012),new V3(hw-0.001,y,f-0.003),new V3(0,y,f-r),new V3(-hw+0.001,y,f-0.002),new V3(-hw+0.002,y,f+0.01)],r);}
   finger(g,new V3(0.016,-0.094,0.05),new V3(0.012,-0.094,0.018),0.0068);                      // trigger finger
-  wrapFinger(g,[new V3(-0.019,-0.076,0.126),new V3(-0.0215,-0.069,0.1),new V3(-0.022,-0.068,0.072)],0.0072); // thumbs-forward: shooting thumb crosses to the left side of the frame
+  hand(g,BOX(0.012,0.017,0.054),H,-0.0228,-0.088,0.1,0.07); // thumbs-forward: shooting thumb lies flat along the left of the frame, below the slide
   const L=new THREE.Group();L.userData.isLH=true;g.add(L);
   hand(L,BOX(0.026,0.084,0.07),H,-0.03,-0.16,0.118,-0.3);                                                // support palm against the left grip panel
   for(let i=0;i<3;i++){const y=-0.136-i*0.022,f=fz(y)-0.016,r=0.0074;wrapFinger(L,[new V3(-hw-0.008,y,f+0.022),new V3(-hw-0.004,y,f+0.0),new V3(0,y,f-r+0.001),new V3(hw-0.002,y,f+0.002)],r);} // over the shooting hand's fingers, ending inside the right palm's outline
-  wrapFinger(L,[new V3(-0.028,-0.094,0.1),new V3(-0.026,-0.086,0.08),new V3(-0.0245,-0.084,0.062)],0.0072);               // support thumb tucked under the shooting thumb
+  hand(L,BOX(0.013,0.018,0.052),H,-0.0232,-0.1045,0.088,0.07);                                        // support thumb tucked under the shooting thumb, pointing at the target
   sleeve(g,new V3(0.01,-0.2,0.17),new V3(0.085,-0.4,0.44),0.036);sleeve(L,new V3(-0.03,-0.2,0.15),new V3(-0.12,-0.4,0.42),0.036);
 }
 function secFlash(g,z,y,s){const fl=new THREE.Sprite(flashMat());fl.position.set(0,y,z);fl.scale.set(s,s,1);fl.visible=false;g.add(fl);g.userData.flash=fl;}
@@ -2050,26 +2436,34 @@ function serr(sl,z0,n,w,y,h){for(let i=0;i<n;i++)for(const sx of[-1,1])put(sl,BO
   put(g,BOX(0.032,0.01,0.05),M.blk,0,-0.214,0.14,-0.3);
   pistolHands(g);secFlash(g,-0.18,-0.022,0.3);
 })();
-(function buildUSP(){ // H&K USP .45: chunky squared slide, hammer, rail under the dust cover
-  const g=secRoot('usp'),sl=g.userData.slide,M=pisMats,zf=-0.088;
-  put(sl,sideGeo([[zf,-0.009],[zf+0.006,-0.004],[0.12,-0.004],[0.126,-0.01],[0.126,-0.044],[zf,-0.044]],null,0.031,0.003),pisSkin);
-  serr(sl,0.088,7,0.035,-0.024,0.03);put(sl,BOX(0.003,0.015,0.042),M.port,0.0172,-0.02,0.01);
-  slideSights(sl,zf,0.126);
-  put(g,new THREE.CircleGeometry(0.0068,16),M.port,0,-0.022,zf-0.0035,0,Math.PI,0);
-  pistolLower(g,zf+0.004,{rail:1,w:0.031});
-  put(g,BOX(0.012,0.02,0.014),M.blk,0,-0.036,0.134,-0.4);put(g,BOX(0.004,0.01,0.02),M.blk,-0.017,-0.06,0.11);
+(function buildUSP(){ // H&K USP .45 (MW2): tall, slab-sided slide with a bevelled nose, accessory rail, squared guard with a finger hook, round hammer spur, control lever at the rear of the frame
+  const g=secRoot('usp'),sl=g.userData.slide,M=pisMats,zf=-0.09;
+  put(sl,sideGeo([[zf,-0.014],[zf+0.012,-0.003],[0.118,-0.003],[0.128,-0.011],[0.128,-0.047],[zf,-0.047],[zf-0.003,-0.034]],null,0.034,0.003),pisSkin);  // chunky slide
+  for(const sx of[-1,1])put(sl,BOX(0.002,0.006,0.15),M.port,sx*0.0205,-0.036,0.03);                                       // slide-to-frame line high on the flank
+  serr(sl,0.084,8,0.039,-0.026,0.032);put(sl,BOX(0.003,0.016,0.046),M.port,0.0202,-0.02,0.012);
+  slideSights(sl,zf+0.004,0.128,-0.003);
+  put(g,new THREE.CircleGeometry(0.0072,16),M.port,0,-0.022,zf-0.0035,0,Math.PI,0);put(g,new THREE.CircleGeometry(0.0045,12),M.port,0,-0.054,zf+0.0015,0,Math.PI,0); // muzzle + recoil spring guide
+  pistolLower(g,zf+0.004,{rail:1,w:0.033});
+  put(g,sideGeo([[-0.034,-0.1],[-0.026,-0.1],[-0.032,-0.11],[-0.04,-0.108]],null,0.03,0.001),pisSkin);                  // finger hook on the front of the guard
+  {const hm=new THREE.Group();hm.position.set(0,-0.04,0.13);g.add(hm);put(hm,new THREE.CylinderGeometry(0.009,0.009,0.01,14),M.blk,0,0.006,0.004,0,0,Math.PI/2);put(hm,BOX(0.009,0.016,0.008),M.blk,0,-0.002,0);} // round hammer spur
+  put(g,BOX(0.004,0.012,0.024),M.blk,-0.0185,-0.062,0.098,0.4);put(g,BOX(0.004,0.008,0.02),M.blk,0.0185,-0.062,0.098,0.4); // ambi control lever
+  for(let i=0;i<6;i++)put(g,BOX(0.038,0.003,0.012),M.blk,0,-0.11-i*0.018,0.088+i*0.0062,-0.33);                          // stippled front strap
   pistolHands(g);secFlash(g,-0.12,-0.022,0.24);
 })();
-(function buildM9(){ // Beretta M9: open-top slide showing the barrel, slide-mounted safety, rounded trigger guard
-  const g=secRoot('m9'),sl=g.userData.slide,M=pisMats,zf=-0.094;
-  put(sl,sideGeo([[zf,-0.014],[-0.034,-0.014],[-0.026,-0.004],[0.118,-0.004],[0.126,-0.011],[0.126,-0.044],[zf,-0.044],[zf-0.003,-0.03]],[[[-0.06,-0.024],[-0.03,-0.024],[-0.03,-0.036],[-0.06,-0.036]]],0.03,0.0025),pisSkin);
-  put(g,new THREE.CylinderGeometry(0.0092,0.0092,0.07,14),M.blk,0,-0.026,-0.06,Math.PI/2);
-  serr(sl,0.09,7,0.034,-0.026,0.03);for(const sx of[-1,1])put(sl,BOX(0.006,0.008,0.014),M.blk,sx*0.018,-0.012,0.108);
-  put(sl,BOX(0.003,0.014,0.04),M.port,0.0162,-0.018,0.02);
-  slideSights(sl,zf+0.004,0.126,-0.014);
+(function buildM9(){ // Beretta M9 (MW2): long slide with the open top showing the barrel along its front half, slide-mounted safety levers, rounded guard, curved grip with panels and a lanyard loop
+  const g=secRoot('m9'),sl=g.userData.slide,M=pisMats,zf=-0.106;
+  put(sl,sideGeo([[zf,-0.03],[zf+0.004,-0.024],[-0.038,-0.024],[-0.03,-0.008],[-0.022,-0.004],[0.118,-0.004],[0.126,-0.011],[0.126,-0.043],[zf,-0.043],[zf-0.002,-0.036]],null,0.03,0.002),pisSkin); // open-top slide: low front arms, full height behind the port
+  put(g,new THREE.CylinderGeometry(0.0088,0.0088,0.1,14),M.blk,0,-0.022,-0.064,Math.PI/2);put(g,BOX(0.014,0.004,0.05),M.blk,0,-0.0135,-0.04);   // exposed barrel and its top flat
+  put(g,new THREE.CircleGeometry(0.0062,14),M.port,0,-0.022,zf-0.0035,0,Math.PI,0);
+  serr(sl,0.088,7,0.034,-0.026,0.03);put(sl,BOX(0.003,0.014,0.04),M.port,0.0162,-0.02,-0.005);
+  for(const sx of[-1,1]){put(sl,BOX(0.006,0.007,0.022),M.blk,sx*0.018,-0.012,0.106,0,0,sx*0.25);put(sl,new THREE.CylinderGeometry(0.005,0.005,0.006,10),M.blk,sx*0.017,-0.014,0.096,0,0,Math.PI/2);} // safety / decocker levers
+  slideSights(sl,zf+0.004,0.126,-0.024);
   pistolLower(g,zf+0.004,{round:1,w:0.03});
+  put(g,BOX(0.003,0.006,0.016),M.blk,-0.0165,-0.05,-0.02);                                                                 // takedown lever above the trigger
+  for(const sx of[-1,1])put(g,new THREE.CircleGeometry(0.0055,12),M.blk,sx*0.0185,-0.135,0.118,0,sx*Math.PI/2,0);         // grip panel medallions
+  put(g,new THREE.TorusGeometry(0.006,0.0015,6,12),M.blk,0,-0.214,0.162,0,Math.PI/2,0);                                     // lanyard loop on the heel
   put(g,BOX(0.011,0.02,0.014),M.blk,0,-0.034,0.133,-0.5);
-  pistolHands(g);secFlash(g,-0.13,-0.019,0.24);
+  pistolHands(g);secFlash(g,-0.14,-0.022,0.24);
 })();
 (function buildG18(){ // Glock 18: boxy flat-top slide, selector switch, finger grooves, extended 33-round mag
   const g=secRoot('g18'),sl=g.userData.slide,M=pisMats,zf=-0.078;
@@ -2263,10 +2657,10 @@ function animReload2(R,q,empty,n,el,total,P){
   }else if(st==='pistol'){
     P.rz+=tilt*0.4;P.rx+=tilt*0.32;P.y+=tilt*0.085;P.x-=tilt*0.045;P.z+=tilt*0.04;
     let d=0;if(q<0.22)d=sm(seg(q,0.08,0.22))*0.32;else if(q<0.36)d=0.5;else d=(1-sm(seg(q,0.36,0.55)))*0.3;
-    if(R.mag){R.mag.position.copy(R.dir).multiplyScalar(d);R.mag.visible=!(q>0.22&&q<0.36);}
+    if(R.mag){R.mag.position.copy(R.dir).multiplyScalar(d);R.mag.visible=!(q>0.22&&q<0.4);}
     const away=sm(seg(q,0.12,0.24))*(1-sm(seg(q,0.32,0.4))),carry=sm(seg(q,0.32,0.4))*(1-sm(seg(q,0.56,0.68)));
     if(away>0)lhTo(R,R.lhC.clone().add(new V3(-0.02,-0.25,0.06)),away);
-    if(carry>0&&R.mag){R.mag.updateMatrix();const bot=R.magBot.clone().applyMatrix4(R.mag.matrix).addScaledVector(R.dir,0.012);bot.x-=0.012;bot.z-=0.012;lhTo(R,bot.sub(R.palmOff),carry);}
+    if(carry>0&&R.mag){R.mag.updateMatrix();const bot=R.magBot.clone().applyMatrix4(R.mag.matrix).addScaledVector(R.dir,Math.max(0.026,(R.gloveTop||0)+0.012));bot.x-=0.02;bot.z-=0.016;lhTo(R,bot.sub(R.palmOff),carry);}
     const seat=bump(q,0.55,0.62);P.y+=seat*0.012;P.rx-=seat*0.06;
     if(empty){const sl=bump(q,0.72,0.8);P.rx+=sl*0.12;P.z+=sl*0.015;}
   }else if(st==='revolver'){
@@ -3027,9 +3421,9 @@ function hostEnd(win,reason,fk){const M=MP.M;if(!M||M.ph!=='play')return;M.ph='e
 function hostNuke(who){const M=MP.M;if(!M||M.ph!=='play'||M.nuke||!game.R.streaks)return;M.nuke=[who.id,game.time+10];}
 
 /* ---------------- Search & Destroy ---------------- */
-const SITES=[{id:'A',pos:new V3(-29*MAP_SCALE,0,7*MAP_SCALE)},{id:'B',pos:new V3(47*MAP_SCALE,0,3*MAP_SCALE)}]; // A: the break in the crashed plane, B: hangar floor beside the helicopter
-const SND_SPAWN=[[[6,-35],[0,-35],[12,-35],[-8,-35],[18,-35.5],[24,-35.5],[-12,-35.5],[-18,-35.5],[3,-33.2],[9,-33.2],[15,-33],[-6,-33.2]],   // attackers: behind the pipeline
-                 [[6,38],[0,38],[12,38],[-6,38],[18,38.5],[23,38.5],[-12,38],[-18,38.5],[3,36.8],[10,36.6],[15,36.6],[-9,36.8]]];      // defenders: behind the dock
+const SITES=[{id:'A',pos:new V3(-29*MAP_SCALE,0,(2*PLANE_CZ-7+PLANE_DZ)*MAP_SCALE)},{id:'B',pos:new V3(45*MAP_SCALE,0,(-7+HANGAR_DZ)*MAP_SCALE)}]; // A: the break in the crashed plane, B: hangar floor beside the helicopter
+const SND_SPAWN=[[[6,38],[0,38],[12,38],[-6,38],[18,38.5],[23,38.5],[-12,38],[-18,38.5],[3,36.8],[10,36.6],[15,36.6],[-9,36.8]],   // attackers: the south edge behind the dock
+                 [[6,-35],[0,-35],[12,-35],[-8,-35],[18,-35.5],[24,-35.5],[-12,-35.5],[-18,-35.5],[3,-33.2],[9,-33.2],[15,-33],[-6,-33.2]]];      // defenders: behind the pipeline, between both sites
 function sndSideOf(team){const M=MP.M;if(!M)return 0;return team===M.att?0:1;}
 function sndSpawnFor(e){const side=sndSideOf(teamOf(e));const list=SND_SPAWN[side].map(p=>[p[0]*MAP_SCALE,p[1]*MAP_SCALE]);const used=game.ents.filter(x=>x!==e&&x.alive&&teamOf(x)===teamOf(e));
   let best=list[0],bs=-1;for(const s of list){let m=1e9;for(const u of used)m=Math.min(m,Math.hypot(u.pos.x-s[0],u.pos.z-s[1]));m+=Math.random()*0.5;if(m>bs){bs=m;best=s;}}
