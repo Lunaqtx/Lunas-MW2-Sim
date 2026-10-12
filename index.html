@@ -709,10 +709,12 @@ function slab(x0,z0,x1,z1,y0,y1,color){return addBox((x0+x1)/2,y0,(z0+z1)/2,x1-x
 function addCol(x0,y0,z0,x1,y1,z1){colliders.push({min:new V3(x0,y0,z0),max:new V3(x1,y1,z1)});}
 function addCylV(cx,cz,r,h,color,y0=0){
   const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,28),mat(color));m.position.set(cx,y0+h/2,cz);m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);
-  const s=r;addCol(cx-s,y0,cz-s,cx+s,y0+h,cz+s);
+  cylColV(cx,cz,r,y0,y0+h);
   const cap=new THREE.Mesh(new THREE.CylinderGeometry(r*1.03,r*1.03,0.22,28),mat(0x5b3f2c));cap.position.set(cx,y0+h,cz);scene.add(cap);
   for(let i=0;i<3;i++){const band=new THREE.Mesh(new THREE.CylinderGeometry(r*1.015,r*1.015,0.12,28),mat(0x4d3424));band.position.set(cx,y0+h*(0.25+i*0.25),cz);scene.add(band);}
 }
+function cylColV(cx,cz,r,y0,y1,n){n=n||(r>1.2?10:6);for(let i=0;i<n;i++){const za=-r+2*r*i/n,zb=-r+2*r*(i+1)/n,zm=(za+zb)/2,hw=r*Math.sqrt(Math.max(0,1-(zm/r)**2));addCol(cx-hw,y0,cz+za,cx+hw,y1,cz+zb);}} // a round footprint built from slices, so you can hug the curve
+function cylColZ(cx,yc,z0,z1,r,n){n=n||6;for(let i=0;i<n;i++){const xa=-r+2*r*i/n,xb=-r+2*r*(i+1)/n,xm=(xa+xb)/2,hh=r*Math.sqrt(Math.max(0,1-(xm/r)**2));addCol(cx+xa,Math.max(0,yc-hh),z0,cx+xb,yc+hh,z1);}} // lying along z
 function pipeX(x0,x1,z,yc,r,color,collide){
   const len=x1-x0;const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,16),mat(color,'pipe'));m.rotation.z=Math.PI/2;m.position.set((x0+x1)/2,yc,z);m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);
   if(collide)addCol(x0,yc-r,z-r,x1,yc+r,z+r);
@@ -759,7 +761,7 @@ const worldStart=scene.children.length;
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(300,300),groundMat);
 ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);worldMeshes.push(ground);
 // perimeter fence + dunes well outside it
-let XMIN=-34,XMAX=52.5,ZMIN=-34,ZMAX=34,HANGAR=null;const XMID=(XMIN+XMAX)/2,XW=XMAX-XMIN; // the yard runs further east than the old square: the hangar lives there
+let XMIN=-44,XMAX=52.5,ZMIN=-37,ZMAX=40,HANGAR=null;const XMID=(XMIN+XMAX)/2,XW=XMAX-XMIN; // the yard runs further east than the old square: the hangar lives there
 addBox(XMID,0,ZMIN-0.5,XW+2,3.8,1,C.FENCE);addBox(XMID,0,ZMAX+0.5,XW+2,3.8,1,C.FENCE);addBox(XMIN-0.5,0,0,1,3.8,ZMAX-ZMIN+2,C.FENCE);addBox(XMAX+0.5,0,0,1,3.8,ZMAX-ZMIN+2,C.FENCE);
 addCol(XMIN-3,3.8,ZMIN-3,XMAX+3,60,ZMIN);addCol(XMIN-3,3.8,ZMAX,XMAX+3,60,ZMAX+3);addCol(XMIN-3,3.8,ZMIN-3,XMIN,60,ZMAX+3);addCol(XMAX,3.8,ZMIN-3,XMAX+3,60,ZMAX+3); // nobody vaults the fence
 // ---- beyond the fence: refinery, cranes, towers and rigs give the skyline depth (scenery only: no collision, not shootable) ----
@@ -771,7 +773,7 @@ const outskirtsFrom=scene.children.length;
   const beam=(a,b,r,color)=>{const m=rod(scene,a,b,r,mat(color,'steel'),6);m.castShadow=false;return m;};
   // dirt service road hugging the fence
   const roadM=triplanar(new THREE.MeshLambertMaterial({color:0xa58660,map:surfTex('conc'),polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}),1/4);
-  for(const [x,z,w,d] of[[XMID,-40,XW+12,5],[XMID,40,XW+12,5],[-40,0,5,86],[XMAX+6,0,5,86]]){const g=new THREE.Mesh(new THREE.PlaneGeometry(w,d),roadM);g.rotation.x=-Math.PI/2;g.position.set(x,0.02,z);g.receiveShadow=true;scene.add(g);}
+  for(const [x,z,w,d] of[[XMID,ZMIN-6,XW+12,5],[XMID,ZMAX+6,XW+12,5],[XMIN-6,0,5,ZMAX-ZMIN+16],[XMAX+6,0,5,ZMAX-ZMIN+16]]){const g=new THREE.Mesh(new THREE.PlaneGeometry(w,d),roadM);g.rotation.x=-Math.PI/2;g.position.set(x,0.02,z);g.receiveShadow=true;scene.add(g);}
   // fence posts so the perimeter reads as a built wall, not a slab
   for(let i=XMIN;i<=XMAX+0.1;i+=4.1)for(const pz of[ZMIN-1.05,ZMAX+1.05])deco(i,0,pz,0.35,4.3,0.35,C.STEEL);for(let i=ZMIN;i<=ZMAX+0.1;i+=4.25)for(const px of[XMIN-1.05,XMAX+1.05])deco(px,0,i,0.35,4.3,0.35,C.STEEL);
   // storage tanks (north refinery)
@@ -794,7 +796,7 @@ const outskirtsFrom=scene.children.length;
     for(const s of[-1,1]){const gm=new THREE.Mesh(new THREE.ShapeGeometry(gab),mat(col,'paint'));gm.position.set(0,h,s*d/2);if(s<0)gm.rotation.y=Math.PI;add(gm);}
     bx(0,0,d/2+0.02,w*0.35,h*0.7,0.08,0x2e2a24,'conc');for(let i=-2;i<=2;i++)if(i)bx(i*w/5.5,h*0.62,d/2+0.02,w*0.08,h*0.12,0.06,0x1e1c1a,'steel');
     return g;};
-  shed(-12,54,30,12,9,0x8c8a80);shed(26,50,18,10,7,0x9a7a4a,0.15);shed(-55,-12,14,22,8,0x2f4f6e,Math.PI/2);shed(70,-40,16,12,7.5,0x6e6655,-0.3);
+  shed(-12,54,30,12,9,0x8c8a80);shed(26,50,18,10,7,0x9a7a4a,0.15);shed(-62,-12,14,22,8,0x2f4f6e,Math.PI/2);shed(70,-40,16,12,7.5,0x6e6655,-0.3);
   // container yard east and southwest
   const box=(x,y,z,rot,col)=>{deco(x,y,z,rot?2.45:6.1,2.6,rot?6.1:2.45,col,'paint');};
   [[60,0,6,0,0x8a2e22],[60,2.6,6,0,0x2f4f6e],[60,0,9,0,0x45603a],[67,0,4,1,0x9a7a4a],[60,0,12,0,0x2f4f6e],[60,2.6,12,0,0x8a2e22],[60,5.2,12,0,0x45603a],
@@ -903,6 +905,7 @@ function lattice(cx,cz,y0,h,b,t,color){const L=[[-1,-1],[1,-1],[1,1],[-1,1]],at=
   for(let i=0;i<4;i++){rod(scene,at(i,y0),at(i,y0+h),0.11,mm,6);const p=at(i,y0);addCol(p.x-0.15,y0,p.z-0.15,p.x+0.15,y0+2.2,p.z+0.15);}
   const seg=Math.round(h/2.6);for(let k=0;k<seg;k++){const a=y0+k*h/seg,c=y0+(k+1)*h/seg;for(let i=0;i<4;i++){const j=(i+1)%4;rod(scene,at(i,a),at(j,c),0.045,mm,5);rod(scene,at(i,c),at(j,c),0.05,mm,5);}}}
 
+const TWR={ms:scene.children.length,cs:colliders.length,ls:ladders.length,rs:ramps.length,ps:PROPS.length};
 // ---- Central tower: bigger MW2-style rig. Rusted base room with three doorways, wrap-around deck, mid ring, top crow's nest ----
 const TB=5.8,TH=5.0,TW=0.3;
 slab(-TB,TB-TW,-1.1,TB,0,TH,C.RUSTW);slab(1.1,TB-TW,TB,TB,0,TH,C.RUSTW);slab(-1.1,TB-TW,1.1,TB,2.6,TH,C.RUSTW);           // south door
@@ -919,8 +922,9 @@ slab(-LP,-LP,LP,-1.5,LY,LT,C.DECK);slab(-LP,-1.5,-1.5,LP,LY,LT,C.DECK);slab(1.5,
 slab(-1.5,1.5,-0.7,LP,LY,LT,C.DECK);slab(0.7,1.5,1.5,LP,LY,LT,C.DECK);slab(-0.7,2.8,0.7,LP,LY,LT,C.DECK);slab(-1.5,-1.5,1.5,1.5,LY,LT,C.DECK);
 for(const sx of[-LP+0.25,LP-0.25])for(const sz of[-LP+0.25,LP-0.25])addBox(sx,0,sz,0.4,LY,0.4,C.STEEL);
 for(const sx of[-LP+0.25,LP-0.25])addBox(sx,0,0,0.3,LY,0.3,C.STEEL); // mid-span legs
-railing(-LP,-LP,LP,-LP+0.15,LT,LT+1);railing(LP-0.15,-LP,LP,LP,LT,LT+1);railing(-LP,LP-0.15,LP,LP,LT,LT+1);
-railing(-LP,-LP,-LP+0.15,-2.6,LT,LT+1);railing(-LP,0.85,-LP+0.15,LP,LT,LT+1);
+railing(-LP,-LP,-1.8,-LP+0.15,LT,LT+1);railing(0.2,-LP,LP,-LP+0.15,LT,LT+1);   // north edge, open where the north stair landing meets the deck
+railing(-LP,LP-0.15,-0.2,LP,LT,LT+1);railing(1.8,LP-0.15,LP,LP,LT,LT+1);         // south edge, open for the south stair landing
+railing(LP-0.15,-LP,LP,LP,LT,LT+1);railing(-LP,-LP,-LP+0.15,LP,LT,LT+1);
 addLadder(0,1.5,'z+',0,LT+0.35);
 crate(6.2,LT,-6.2);crate(-5.6,LT,5.6);crate(-5.6,LT+CS,5.6);sandbags(5.3,LT,5.25,2.2,0.9,0.7);
 const UT=13.6,MT=9.4;
@@ -936,95 +940,198 @@ railing(-2.6,-2.6,-0.7,-2.45,UT+0.3,UT+1.3);railing(0.7,-2.6,2.6,-2.45,UT+0.3,UT
 addLadder(0,-0.9,'z-',LT,UT+0.35);
 addCylV(4.6,-4.6,0.6,19,0x4c3a2c,LT);
 lattice(0,0,UT+0.3,6,2.2,0.5,0x3a3a38); // derrick crown above the nest (visual beams, legs collide)
-// exhaust chute walkway from Maintenance (west) up to the lower deck
-const RX0=-LP-12.35,RX1=-LP;
 function rampMesh(x0,x1,z0,z1,y1,color){const sh=new THREE.Shape([new THREE.Vector2(x0,0),new THREE.Vector2(x1,0),new THREE.Vector2(x1,y1)]);
   const g=new THREE.ExtrudeGeometry(sh,{depth:z1-z0,bevelEnabled:false});g.translate(0,-0.04,z0);const m=new THREE.Mesh(g,mat(color));m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);return m;}
-rampMesh(RX0,RX1,-0.75,0.75,LT,C.RUST);ramps.push({x0:RX0,x1:RX1,z0:-0.75,z1:0.75,y0:0,y1:LT});
-for(let x=RX0+1.2;x<RX1;x+=1.0)addBox(x,0,0.78,0.06,LT*(x-RX0)/(RX1-RX0)+1.0,0.06,C.RAIL,false,false);
-(function chute(){const x0=RX0,x1=-LP-0.4,z=-1.65,r=0.8,y0=-r+0.15,y1=LT-r+0.05,dx=x1-x0,dy=y1-y0,len=Math.hypot(dx,dy);
-  const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,22),mat(0x5a3d29,'pipe'));m.position.set((x0+x1)/2,(y0+y1)/2,z);m.rotation.z=-(Math.PI/2-Math.atan2(dy,dx));m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);
-  for(let i=1;i<4;i++){const t=i/4;const band=new THREE.Mesh(new THREE.CylinderGeometry(r*1.04,r*1.04,0.14,22),mat(0x4a2f1f));band.position.set(x0+dx*t,y0+dy*t,z);band.rotation.z=m.rotation.z;scene.add(band);}
-  const sup=new THREE.Shape([new THREE.Vector2(x0,0),new THREE.Vector2(x1,0),new THREE.Vector2(x1,y1),new THREE.Vector2(x0-y0*dx/dy,0)]);
-  const sg2=new THREE.ExtrudeGeometry(sup,{depth:2*r-0.04,bevelEnabled:false});sg2.translate(0,-0.04,z-r+0.02);
-  const sm=new THREE.Mesh(sg2,mat(0x3e2f24));sm.castShadow=sm.receiveShadow=true;scene.add(sm);worldMeshes.push(sm);
-  ramps.push({x0:x0,x1:x1,z0:z-r,z1:z+r,y0:y0+r,y1:y1+r});})();
+// the tower is the map's centrepiece: built at its old size round the origin, then moved east toward the hangar and grown 25% as one piece (small props keep their size)
+const TWR_X=7,TWR_S=1.25;
+(function growTower(){const k=TWR_S,mx=x=>TWR_X+x*k,pm=new Set(),pc=new Set();
+  for(const r of PROPS.slice(TWR.ps)){for(let i=r.ms;i<r.me;i++)pm.add(i);for(let i=r.cs;i<r.ce;i++)pc.add(i);const dx=mx(r.ax)-r.ax,dz=r.az*k-r.az,dy=r.ay>=LT-0.01?LT*(k-1):0; // props ride up with the deck they stand on; ones on the ground (or stacked on ground crates) stay put
+    for(let i=r.ms;i<r.me;i++){const o=scene.children[i];if(o){o.position.x+=dx;o.position.y+=dy;o.position.z+=dz;}}for(let i=r.cs;i<r.ce;i++){const c=colliders[i];c.min.x+=dx;c.max.x+=dx;c.min.y+=dy;c.max.y+=dy;c.min.z+=dz;c.max.z+=dz;}r.ax+=dx;r.ay+=dy;r.az+=dz;}
+  for(let i=TWR.ms;i<scene.children.length;i++){if(pm.has(i))continue;const o=scene.children[i];o.position.set(mx(o.position.x),o.position.y*k,o.position.z*k);o.scale.multiplyScalar(k);}
+  for(let i=TWR.cs;i<colliders.length;i++){if(pc.has(i))continue;const c=colliders[i];c.min.set(mx(c.min.x),c.min.y*k,c.min.z*k);c.max.set(mx(c.max.x),c.max.y*k,c.max.z*k);}
+  for(const l of ladders.slice(TWR.ls)){for(const f of['x0','x1','lx'])l[f]=mx(l[f]);for(const f of['z0','z1','lz','y0','y1'])l[f]*=k;}})();
+// wide steel stairs that wrap along the tower's north and south faces: the north flight starts at the east end, the south flight at the west end,
+// each climbs alongside the deck to a landing that steps straight onto it
+function stairsX(xFoot,xTop,z0,z1,yTop,n,landX){const dir=Math.sign(xTop-xFoot),run=Math.abs(xTop-xFoot),RM=0xb08a2a;KIND[RM]='paint';
+  const pts=[[xFoot,0]];for(let i=0;i<n;i++){const xa=xFoot+(xTop-xFoot)*i/n,xb=xFoot+(xTop-xFoot)*(i+1)/n,y=yTop*(i+1)/n;pts.push([xa,y],[xb,y]);}pts.push([xTop,0]);
+  const sh=new THREE.Shape(dedupe(dir<0?pts.reverse():pts).map(p=>new THREE.Vector2(p[0],p[1])));const g=new THREE.ExtrudeGeometry(sh,{depth:z1-z0,bevelEnabled:false});g.translate(0,0,z0);
+  const body=new THREE.Mesh(g,mat(0x5f6a6e,'paint'));body.castShadow=body.receiveShadow=true;scene.add(body);worldMeshes.push(body);
+  for(let i=0;i<n;i++){const xa=xFoot+(xTop-xFoot)*i/n,y=yTop*(i+1)/n;addBox(xa+dir*0.04,y-0.02,(z0+z1)/2,0.08,0.04,z1-z0,0x9a7a34,false,false);}  // worn yellow nosing
+  ramps.push({x0:Math.min(xFoot,xTop),x1:Math.max(xFoot,xTop),z0,z1,y0:xFoot<xTop?0:yTop,y1:xFoot<xTop?yTop:0});
+  // landing at the top: a plate on legs, open underneath so the doors below stay reachable
+  const lx0=Math.min(xTop,landX),lx1=Math.max(xTop,landX);slab(lx0,z0,lx1,z1,yTop-0.3,yTop,0x5f6a6e);for(const lx of[lx0+0.15,lx1-0.15])for(const lz of[z0+0.15,z1-0.15])addBox(lx,0,lz,0.24,yTop-0.3,0.24,C.STEEL);
+  // railings: both sides of the flight, the outer side and far end of the landing; the landing's deck side stays open
+  const ang=Math.atan2(yTop,run)*dir;
+  for(const zr of[z0+0.04,z1-0.04]){
+    for(let i=0;i<=5;i++){const t=0.03+0.94*i/5,xx=xFoot+(xTop-xFoot)*t;addBox(xx,yTop*t,zr,0.07,1.0,0.07,RM,false,false);}
+    for(const hy of[1.0,0.5]){const b=addBox((xFoot+xTop)/2,yTop/2+hy-0.03,zr,Math.hypot(run,yTop),0.06,0.06,RM,false,false);b.rotation.z=ang;}
+    for(let i=0;i<n;i++){const xa=xFoot+(xTop-xFoot)*i/n,xb=xFoot+(xTop-xFoot)*(i+1)/n,y=yTop*(i+1)/n;addCol(Math.min(xa,xb),y-0.5,zr-0.05,Math.max(xa,xb),y+1.05,zr+0.05);}}
+  const outer=Math.abs(z0)>Math.abs(z1)?z0:z1;
+  railing(lx0,outer<0?outer:outer-0.15,lx1,outer<0?outer+0.15:outer,yTop,yTop+1);
+  const endX=landX;railing(endX<xTop?endX:endX-0.15,z0,endX<xTop?endX+0.15:endX,z1,yTop,yTop+1);}
+{const LTs=LT*TWR_S,LPs=LP*TWR_S,W=3.2;
+  stairsX(TWR_X+LPs,TWR_X+0.2,-LPs-W,-LPs,LTs,24,TWR_X-2.2);   // north face: foot at the east corner, climbing west to a landing in the middle
+  stairsX(TWR_X-LPs,TWR_X-0.2,LPs,LPs+W,LTs,24,TWR_X+2.2);}   // south face: foot at the west corner, climbing east
 
-// ---- Pipeline (north edge, elevated, walkable top 2.6) ----
-function pipeline(x0,x1){pipeX(x0,x1,-28,1.95,0.65,0x6a4a33,false);addCol(x0,1.3,-28.65,x1,2.6,-27.35);
-  for(let x=x0+1.5;x<x1;x+=5){addBox(x,0,-28,0.45,1.3,1.3,C.STEEL);}
-  for(let x=x0+4;x<x1-1;x+=8){const f=new THREE.Mesh(new THREE.CylinderGeometry(0.75,0.75,0.18,20),mat(0x4d3424,'pipe'));f.rotation.z=Math.PI/2;f.position.set(x,1.95,-28);scene.add(f);}}
-pipeline(-30,12);pipeline(15.5,22);
-for(let k=0;k<5;k++)sandbags(-33.6+k*0.8,0,-28,0.8,(k+1)*0.52,1.3);
-for(let k=0;k<5;k++)sandbags(25.6-k*0.8,0,-28,0.8,(k+1)*0.52,1.3);
-addBox(13.75,0,-28,3,0.8,1.8,C.RUSTD);
-pipeX(-33,33,-31.2,0.55,0.5,0x5d4632,true);for(let x=-30;x<=30;x+=6)addBox(x,0,-31.2,0.35,0.22,1.0,C.CONC); // concrete saddles under the ground pipe
-// valve station on the pipeline
-addBox(-12,0,-26,1.6,1.2,1.0,C.STEEL);pipeX(-12.4,-11.6,-26.6,1.0,0.12,0x8a2e22,false);
-// ---- Oil Derrick (raised platform, NW) with a real lattice tower ----
-slab(-21.5,-20.5,-14.5,-13.5,2.5,2.8,C.DECK);
-for(const sx of[-21.3,-14.7])for(const sz of[-20.3,-13.7])addBox(sx,0,sz,0.4,2.5,0.4,C.STEEL);
-slab(-18.6,-27.35,-17.4,-20.5,2.4,2.7,C.DECK);
-addBox(-17,2.8,-17.5,2.6,0.7,0.6,C.STEEL);addBox(-20,2.8,-15.4,0.6,0.7,1.8,C.STEEL);
-lattice(-18,-17,2.8,13,3.0,0.7,0x2f2620);
-container(-22.73,0,-17,true,C.BLUE);crate(-25.3,0,-14.5);
-// ---- Blue containers (west/southwest) ----
-container(-25,0,7,false,C.BLUE);container(-25,2.6,7,false,C.GRN);container(-28.5,0,15,true,C.BLUE);
-(function tunnel(){const cx=-15,cz=15,col=C.BLUE;addBox(cx,0,cz-1.16,6.1,2.6,0.12,col);addBox(cx,0,cz+1.16,6.1,2.6,0.12,col);addBox(cx,2.48,cz,6.1,0.12,2.45,col);})();
-crate(-20,0,10.5);
-// ---- Red containers (east): the near one is open and you can walk inside ----
-(function openContainer(){const x0=14.95,x1=21.05,z0=-11.225,z1=-8.775,h=2.6,T=0.1,col=C.RED;
-  slab(x0,z0,x1,z0+T,0,h,col);slab(x0,z1-T,x1,z1,0,h,col);slab(x0,z0,x0+T,z1,0,h,col);slab(x0,z0,x1,z1,h-0.1,h,col);
-  addBox((x0+x1)/2,0,(z0+z1)/2,x1-x0-0.2,0.06,z1-z0-0.2,0x4a463b,false,true);
-  const rib=0x6e241b;KIND[rib]='paint';for(let i=0;i<7;i++){const t=(i+0.5)/7;addBox(x0+t*(x1-x0),0,z1+0.02,0.2,2.6,0.05,rib,false,false);addBox(x0+t*(x1-x0),0,z0-0.02,0.2,2.6,0.05,rib,false,false);}
-  addBox(x1+0.62,0,z0+0.04,1.2,2.5,0.08,col);                      // left door swung wide open
-  const d2=addBox(x1+0.38,0,z1+0.32,0.08,2.5,1.2,col);d2.rotation.y=0.55;addCol(x1+0.1,0,z1-0.05,x1+0.7,2.5,z1+0.85); // right door half open
-  crate(15.75,0,-10.3);pallet(17.4,-10.45,1);})();
-container(24.5,0,-4,true,C.RED);container(24.5,2.6,-4.6,true,C.RED);
-crate(14.5,0,-12.6);forklift(17.6,-14.4);
-// ---- Loading dock (south) ----
-addBox(-2,0,28,14,2.6,2.45,C.TAN);
-for(const b of[[-11,22,0],[5,21,0],[10.5,24,1],[-5.5,19.5,1]])addBox(b[0],0,b[1],b[2]?0.6:2.6,1.05,b[2]?2.6:0.6,C.CONC);
-container(17,0,29,false,C.GRN);crate(13,0,29.6);
-crate(-13.5,0,27.8);crate(-15,0,27.8);crate(-14.25,CS,27.8);
-pallet(3.2,25.6,2);pallet(-7.6,25.4,1);jersey(4.6,23.2,true);
-// ---- Generators (east of tower) ----
-addBox(12,0,3,5,2.6,2.4,0x5d5a48);addBox(12,0,7.8,5,2.6,2.4,0x5d5a48);
-for(const z of[3,7.8]){const f=addBox(12,2.62,z-0.55,5.2,0.06,1.1,0x4a4638,false,false);f.rotation.x=0.25;const g=addBox(12,2.62,z+0.55,5.2,0.06,1.1,0x4a4638,false,false);g.rotation.x=-0.25;
-  for(const s of[-1,1])pipeX(14.5,15.6,z+s*0.6,1.9,0.14,0x3a3a38,false);}
-slab(9.5,9.3,14.5,10.4,1.25,2.4,0x4a4638);
-addBox(9.6,0,10.3,0.16,1.25,0.16,C.STEEL);addBox(14.4,0,10.3,0.16,1.25,0.16,C.STEEL);
-barrels(16.6,5.2,3,[0x2f4f6e,0x8a2e22,0x45603a]);
-// ---- Control room: now enterable (south door, east window), roof reachable from the crates ----
-room(3.9,11.9,8.1,16.1,3.2,0x6e6655,[['s',4.5,6.0,2.3],['e',13.3,14.9,2.3,1.1],['n',5.2,6.8,2.4,1.2]]);
-crate(3.2,0,15.4);crate(3.2,0,14);crate(3.2,CS,14);addBox(6.9,0,12.6,1.6,0.9,0.7,C.STEEL);
-// ---- Maintenance (west of tower) ----
-addBox(-11,0,-7,3.4,3.2,3.4,C.RUSTD);addLadder(-12.7,-7,'x-',0,3.55);
-addBox(-11,3.2,-8.65,3.4,0.9,0.1,C.RAIL);addBox(-9.35,3.2,-7,0.1,0.9,3.4,C.RAIL);
-crate(-11,0,6);crate(-12.4,0,6);crate(-11.7,0,7.4);crate(-11,CS,6);crate(-8.5,0,8.6);
-barrels(-14.6,-9.6,4,[0x2f4f6e,0x2f4f6e,0x8a2e22]);
-// ---- Fuel depot (southeast corner) ----
-addCylV(25,25,3.5,5.5,0x7f6a52);addCylV(29.5,16,2.4,4,0x77624d);addCylV(26,31.6,2,3.5,0x7a6650);
-pipeX(18,31,20.5,0.75,0.38,0x5d4632,true);for(const x of[19,22,25.5,29])addBox(x,0,20.5,0.3,0.4,0.7,C.STEEL); // pipe stands
-barrels(20.4,20.9,4,[0x8a2e22,0x8a2e22,0x7f6a52]);
-// ---- Comms station: enterable shed, roof reachable up the crate steps ----
-room(22,-22,26,-18,3,0x6a6352,[['s',23.2,24.8,2.3],['e',-21.2,-19.8,2.2,1.1]]);
-slab(18.8,-20.5,19.6,-19.5,0,0.55,C.CRATE);slab(19.6,-20.5,20.4,-19.5,0,1.1,C.CRATE);slab(20.4,-20.5,21.2,-19.5,0,1.65,C.CRATE);slab(21.2,-20.5,22,-19.5,0,2.2,C.CRATE);
-(function antenna(){const m=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.09,7,6),mat(0x3a3a38));m.position.set(24.8,6.6,-20.8);scene.add(m);})();
-crate(28,0,-26);crate(29.5,0,-26.6);crate(27.4,0,-24.4);
-bagWall(26.75,-34,31.25,-31.72,1.05); // sandbagged gate: no dead pocket behind the pipe
-addBox(31.5,0,-33,0.5,4.4,0.5,C.STEEL);addBox(26.5,0,-33,0.5,4.4,0.5,C.STEEL);addBox(29,4.2,-33,5.5,0.3,0.4,C.STEEL,false);
-// ---- low walls / sandbags / barriers ----
-[[-4,0,-15,3.6,1.05,0.8],[7,0,-18,0.8,1.05,3.6],[-29,0,-2,0.8,1.05,4],[0,0,18,3.6,1.05,0.8]].forEach(w=>prop(()=>sandbags(w[0],w[1],w[2],w[3],w[4],w[5]),w[0],0,w[2]));
-bagWall(19.4,-0.6,21.6,0.2);bagWall(19.4,0.2,20.2,2.4);bagWall(19.4,2.4,21.6,3.2); // U bunker east
-jersey(-18,-4.5,false);jersey(13.6,20.2,true);jersey(-24.8,-11.4,true);jersey(-2.6,-18.4,true);
-// ---- clutter: barrels, cable spools, pipe stacks, pallets, a burnt-out truck ----
-barrels(8.6,-9.4,3,[0x8a2e22,0x7f6a52,0x8a2e22]);barrels(-6.6,-11.6,4,[0x2f4f6e,0x2f4f6e,0x45603a,0x2f4f6e]);barrels(12.2,-17,3,[0x45603a,0x8a2e22,0x2f4f6e]);
-barrels(-22.4,-6.4,3,[0x8a2e22,0x2f4f6e,0x8a2e22]);barrels(-10.4,19.8,3,[0x7f6a52,0x8a2e22,0x45603a]);
-spool(2.4,-10.6,0);spool(-8.2,13.2,1.2);spool(19.2,24.2,0.4);
-pipeStack(-28.6,-12.8,4.2,true);
-pallet(-19,-24,2);pallet(31.2,-28.2,1);pallet(-30.4,-4.6,1);
-truck(-6.2,11.0);
+
+// ======== Yard layout: named areas around the tower, built for three lanes between the plane (A, west) and the hangar (B, east) ========
+// attackers come in from the north edge behind the pipeline, defenders from the south behind the dock. Every piece collides the way it looks.
+
+// open-ended shipping container: both door pairs swung flat against the sides, a way straight through, optional cover inside
+function openBox(cx,cz,alongX,col,inside){const L=6.1,W=2.45,H=2.6,T=0.1,rib=((col>>16&255)*0.8<<16)|((col>>8&255)*0.8<<8)|((col&255)*0.8|0);if(!KIND[rib])KIND[rib]='paint';
+  const ax=(a,b)=>alongX?a:b;
+  for(const s of[-1,1]){addBox(cx+ax(0,s*(W/2-T/2)),0,cz+ax(s*(W/2-T/2),0),ax(L,T),H,ax(T,L),col);                                       // long walls
+    for(let i=0;i<7;i++){const t=(i+0.5)/7-0.5;addBox(cx+ax(t*L,s*(W/2+0.02)),0,cz+ax(s*(W/2+0.02),t*L),ax(0.2,0.05),H,ax(0.05,0.2),rib,false,false);}
+    for(const e of[-1,1]){addBox(cx+ax(e*(L/2+0.62),s*(W/2+0.07)),0,cz+ax(s*(W/2+0.07),e*(L/2+0.62)),ax(1.2,0.06),H-0.1,ax(0.06,1.2),col);}} // doors folded back along the sides
+  addBox(cx,H-T,cz,ax(L,W),T,ax(W,L),col);addBox(cx,0,cz,ax(L-0.1,W-0.2),0.06,ax(W-0.2,L-0.1),0x4a463b,false,true);
+  for(const [t,kind,side] of(inside||[])){const px=cx+ax(t*L,side*0.55),pz=cz+ax(side*0.55,t*L);if(kind==='crate')crate(px,0,pz);else if(kind==='barrels')barrels(px-0.3,pz-0.3,2,[0x2f4f6e,0x8a2e22]);else if(kind==='bags')sandbags(px,0,pz,ax(0.8,1.2),0.9,ax(1.2,0.8));}}
+
+// ---- PLANE (A site): crashed cargo plane west of the tower. Hold, nose and tail are all walk-through shells; nothing collides where you can't see something ----
+const hullMats={};function hullMat(col){return hullMats[col]||(hullMats[col]=triplanar(new THREE.MeshLambertMaterial({color:weather(col,'steel'),map:surfTex('steel'),side:THREE.DoubleSide}),SURF_SCALE.steel));}
+function hullShell(par,cx,yc,cz0,cz1,R,t0,tl,col,R1){const m=new THREE.Mesh(new THREE.CylinderGeometry(R1==null?R:R1,R,cz1-cz0,28,1,true,t0,tl),hullMat(col));m.rotation.x=Math.PI/2;m.position.set(cx,yc,(cz0+cz1)/2);m.castShadow=m.receiveShadow=true;m.userData.keep=true;par.add(m);worldMeshes.push(m);return m;}
+(function crashedPlane(){
+  const HULL=0x7d8076,HULLD=0x4f524c,BURN=0x2e2a24,GLASS=0x1d2a30,R=2.2,YC=1.6,CX=-29,HZ0=-7,HZ1=5;KIND[HULL]='steel';KIND[HULLD]='steel';
+  const top=Math.PI*2-1.24,DOOR_E=[1,3],DOOR_W=[-5,-3.2];
+  const ring=(z,r,col,t)=>{const sm=new THREE.Mesh(new THREE.TorusGeometry(r,t||0.018,3,32,top),mat(col,'steel'));sm.rotation.set(0,0,0.62-Math.PI/2);sm.position.set(CX,YC,z);scene.add(sm);};
+  // cargo hold: belly in the sand, both broken ends open, a side door each side, clear floor
+  for(const [a,b] of[[HZ0,DOOR_W[0]],[DOOR_W[0],DOOR_W[1]],[DOOR_W[1],DOOR_E[0]],[DOOR_E[0],DOOR_E[1]],[DOOR_E[1],HZ1]]){
+    if(a===DOOR_E[0])hullShell(scene,CX,YC,a,b,R,2.04,Math.PI*2-0.62-2.04,HULL);else if(a===DOOR_W[0])hullShell(scene,CX,YC,a,b,R,0.62,Math.PI*2-2.04-0.62,HULL);else hullShell(scene,CX,YC,a,b,R,0.62,top,HULL);}
+  for(let z=HZ0+1;z<HZ1;z+=1.6)ring(z,R-0.06,HULLD,0.07);for(let z=HZ0+0.6;z<HZ1;z+=1.2)ring(z,R+0.012,HULLD);for(const z of[HZ0+0.18,HZ1-0.18])ring(z,R+0.02,BURN,0.22);
+  for(const sx of[-1,1])for(let z=HZ0+0.9;z<HZ1-0.4;z+=1.8){if((sx>0&&z>DOOR_E[0]-0.4&&z<DOOR_E[1]+0.4)||(sx<0&&z>DOOR_W[0]-0.4&&z<DOOR_W[1]+0.4))continue;const w=new THREE.Mesh(new THREE.CircleGeometry(0.17,12),mat(GLASS,'steel'));w.position.set(CX+sx*(R+0.015)*Math.cos(0.42),YC+R*Math.sin(0.42)+0.02,z);w.lookAt(CX+sx*10,YC+2.5,z);scene.add(w);}
+  slab(CX-1.84,HZ0,CX+1.84,HZ1,0,0.4,0x4a463b);
+  addCol(CX-2.3,0.4,HZ0,CX-1.84,3.8,DOOR_W[0]);addCol(CX-2.3,0.4,DOOR_W[1],CX-1.84,3.8,HZ1);addCol(CX-2.3,2.6,DOOR_W[0],CX-1.84,3.8,DOOR_W[1]);
+  addCol(CX+1.84,0.4,HZ0,CX+2.3,3.8,DOOR_E[0]);addCol(CX+1.84,0.4,DOOR_E[1],CX+2.3,3.8,HZ1);addCol(CX+1.84,2.6,DOOR_E[0],CX+2.3,3.8,DOOR_E[1]);
+  addCol(CX-1.84,3.5,HZ0,CX+1.84,3.9,HZ1);
+  for(const sx of[-1,1]){addBox(CX+sx*1.55,0.4,(HZ0+HZ1)/2,0.4,0.08,9.5,0x5d4632,false,false);addBox(CX+sx*1.72,0.85,(HZ0+HZ1)/2,0.06,0.5,9.5,0x5d4632,false,false);} // web benches (flat to the walls)
+  crate(CX+0.9,0.4,-1.2);                                                                                       // one crate of spilled cargo for cover mid-hold
+  // NOSE: open at the break so you can walk into the flight deck; tapered nose with a proper band of cockpit windows, instrument panel and seats
+  {const NZ0=-16.8,NZC=-13.8,NZ1=-8.6,NR=2.1,NY=1.55,NF=1.15;
+    hullShell(scene,CX,NY,NZC,NZ1,NR,0.6,Math.PI*2-1.2,HULL);
+    hullShell(scene,CX,NY,NZ0,NZC,NF,0.6,Math.PI*2-1.2,HULL,NR);                                                    // taper down to the nose tip
+    const cap=new THREE.Mesh(new THREE.SphereGeometry(NF,20,10,0,TAU,0,Math.PI/2),hullMat(HULL));cap.rotation.x=-Math.PI/2;cap.scale.set(1,0.55,1);cap.position.set(CX,NY,NZ0);cap.userData.keep=true;scene.add(cap);worldMeshes.push(cap); // nose tip, solid from inside too
+    for(const z of[NZC+0.2,NZ1-0.2])ring(z,NR+0.02,z>NZC+1?BURN:HULLD,z>NZC+1?0.22:0.03);
+    for(const [ph,zz,yo] of[[-1.0,-15.5,0],[-0.6,-15.9,0.06],[-0.2,-16.15,0.1],[0.2,-16.15,0.1],[0.6,-15.9,0.06],[1.0,-15.5,0],[-1.25,-14.7,-0.2],[1.25,-14.7,-0.2]]){ // cockpit glazing: front panes plus the side "eyebrow" windows
+      const t=(zz-NZ0)/(NZC-NZ0),r=NF+(NR-NF)*t+0.02,w=new THREE.Mesh(boxGeo,mat(GLASS,'steel'));w.scale.set(0.62,0.46,0.04);w.position.set(CX+Math.sin(ph)*r,NY+Math.cos(ph)*r*0.94+yo,zz);w.lookAt(CX+Math.sin(ph)*r*4,NY+Math.cos(ph)*r*3.4,zz-2.4);scene.add(w);
+      const fr=new THREE.Mesh(boxGeo,mat(HULLD,'steel'));fr.scale.set(0.7,0.54,0.03);fr.position.copy(w.position);fr.quaternion.copy(w.quaternion);fr.translateZ(-0.01);scene.add(fr);}
+    slab(CX-1.7,-16.2,CX+1.7,NZ1,0,0.4,0x4a463b);
+    addBox(CX,0.4,-15.9,2.2,0.9,0.4,0x2a2a28);addBox(CX,1.3,-15.75,2.2,0.08,0.5,0x3a3a38,false,false);       // instrument panel + glare shield
+    for(const sx of[-0.62,0.62]){addBox(CX+sx,0.4,-14.7,0.6,0.5,0.6,0x3a3a38);addBox(CX+sx,0.9,-14.42,0.6,0.7,0.12,0x3a3a38,false,false);} // pilot seats
+    for(const sx of[-1,1]){addCol(CX+sx*1.72-(sx>0?0:0.46),0.4,NZC,CX+sx*1.72+(sx>0?0.46:0),3.6,NZ1);addCol(CX+sx*1.32-(sx>0?0:0.6),0.4,-15.3,CX+sx*1.32+(sx>0?0.6:0),3.3,NZC);addCol(CX+sx*1.0-(sx>0?0:0.6),0.4,NZ0,CX+sx*1.0+(sx>0?0.6:0),2.9,-15.3);}
+    addCol(CX-1.7,3.3,NZC,CX+1.7,3.7,NZ1);addCol(CX-1.4,3.0,NZ0,CX+1.4,3.4,NZC);addCol(CX-1.2,0,NZ0-0.6,CX+1.2,2.4,NZ0);}
+  // TAIL: open at the break and through the lowered rear ramp, fin and stabilisers squared up so their collision is exactly what you see
+  {const TZ0=9,TZ1=16.4,TR0=2.15,TR1=1.5;
+    hullShell(scene,CX,YC,TZ0,TZ1,TR0,0.6,Math.PI*2-1.2,HULL,TR1);ring(TZ0+0.18,TR0+0.02,BURN,0.22);
+    slab(CX-1.8,TZ0,CX+1.8,TZ1,0,0.4,0x4a463b);
+    for(const sx of[-1,1]){addCol(CX+sx*1.92-(sx>0?0:0.4),0.4,TZ0,CX+sx*1.92+(sx>0?0.4:0),3.7,12.7);addCol(CX+sx*1.68-(sx>0?0:0.4),0.4,12.7,CX+sx*1.68+(sx>0?0.4:0),3.2,TZ1);}
+    addCol(CX-1.9,3.4,TZ0,CX+1.9,3.8,12.7);addCol(CX-1.7,2.95,12.7,CX+1.7,3.35,TZ1);
+    const fin=new THREE.Mesh(sideGeo([[11.2,3.0],[16.4,3.0],[16.6,9.6],[15.0,9.8]],null,0.36,0),mat(HULL,'steel'));fin.position.x=CX;fin.castShadow=true;scene.add(fin);worldMeshes.push(fin);
+    const band=new THREE.Mesh(sideGeo([[14.6,8.2],[16.55,8.2],[16.57,8.9],[14.8,8.9]],null,0.4,0),mat(0x8a2e22,'paint'));band.position.x=CX;scene.add(band);
+    addCol(CX-0.18,3.0,11.6,CX+0.18,9.6,16.5);
+    slab(CX-6.4,14.2,CX-1.4,16.2,2.95,3.2,HULL);slab(CX+1.4,14.2,CX+3.6,16.2,2.95,3.2,HULL);                     // stabilisers, the right one snapped short
+    const rmp=rampMesh2z(CX-1.3,CX+1.3,TZ1,19.6,0.4,0,HULLD);ramps.push({axis:'z',x0:CX-1.3,x1:CX+1.3,z0:TZ1,z1:19.6,y0:0.4,y1:0});}
+  // left wing: torn off, lying flat along the west side, both engines still slung under it
+  slab(-38.6,-9.1,-35.4,5.1,0,0.95,HULL);
+  for(const z of[-6.2,1.4]){const n=new THREE.Mesh(new THREE.CylinderGeometry(0.62,0.7,3.4,16),mat(HULLD,'steel'));n.rotation.x=Math.PI/2;n.position.set(-34.5,0.7,z);n.castShadow=true;scene.add(n);worldMeshes.push(n);cylColZ(-34.5,0.7,z-1.7,z+1.7,0.7,5);
+    const hub=new THREE.Mesh(new THREE.SphereGeometry(0.3,10,8),mat(BURN,'steel'));hub.position.set(-34.5,0.7,z-1.8);scene.add(hub);
+    for(let b=0;b<4;b++){const bl=addBox(-34.5,0,z-1.85,0.18,1.6,0.06,0x2a2a28,false,false);bl.position.y=0.7;bl.rotation.set(0.3*(b%2?1:-1),0,b*Math.PI/2+0.4);}}
+  // right wing: still attached at the roof, bent down into the sand: a ramp up onto the fuselage, engine crushed under its tip
+  {const x0=-26.7,y0=3.7,x1=-20.6,y1=0.35,z0=-4,z1=-0.8,sl=(y1-y0)/(x1-x0),xr=-27.6,xt=-20.3,L=Math.hypot(xt-xr,(xt-xr)*sl),xm=(xr+xt)/2,ym=y0+(xm-x0)*sl-0.16;
+    const w=new THREE.Mesh(boxGeo,mat(HULL,'steel'));w.scale.set(L,0.32,z1-z0);w.position.set(xm,ym,(z0+z1)/2);w.rotation.z=Math.atan(sl);w.castShadow=w.receiveShadow=true;scene.add(w);worldMeshes.push(w);
+    ramps.push({x0,x1,z0,z1,y0,y1});
+    const n=new THREE.Mesh(new THREE.CylinderGeometry(0.62,0.7,4.2,16),mat(HULLD,'steel'));n.rotation.x=Math.PI/2;n.position.set(-23,0.7,-2.4);n.castShadow=true;scene.add(n);worldMeshes.push(n);cylColZ(-23,0.7,-4.5,-0.3,0.7,5);
+    for(let b=0;b<4;b++){const bl=addBox(-23,0,-4.6,0.18,1.5,0.06,0x2a2a28,false,false);bl.position.y=0.7;bl.rotation.set(0.5,0.2,b*Math.PI/2+0.9);}}
+  // the break between hold and tail is the A site: main gear, a hasty sandbag nest on each flank, skin panels in the sand
+  for(const z of[7.4,8.4]){const t=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.55,0.4,16),mat(0x1c1c1a,'steel'));t.rotation.z=Math.PI/2;t.position.set(-32.6,0.55,z);scene.add(t);worldMeshes.push(t);}addCol(-32.8,0,6.85,-32.4,1.1,8.95);
+  bagWall(-35,5.8,-34.2,8.6);bagWall(-24.8,9.8,-22,10.6);
+  for(const [x,z,ry] of[[-24.4,-7.4,0.4],[-33.6,-14,1.1],[-22.5,4.6,2.2],[-35.4,11,0.7],[-27,-19.2,1.6]]){const p=addBox(x,0,z,1.8,0.1,1.2,HULLD,false,false);p.rotation.set(0.12,ry,0.08);}
+})();
+function dedupe(pts){return pts.filter((p,i)=>{const q=pts[(i+pts.length-1)%pts.length];return Math.abs(p[0]-q[0])>1e-6||Math.abs(p[1]-q[1])>1e-6;});} // a zero-length edge turns into NaN vertices when extruded
+function rampMesh2z(x0,x1,z0,z1,ya,yb,color){const m=new THREE.Mesh(sideGeo(dedupe([[z0,0],[z1,0],[z1,yb],[z0,ya]]),null,x1-x0,0),mat(color));m.position.x=(x0+x1)/2;m.position.y=-0.02;m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);return m;}
+
+// ---- DERRICK (northwest): raised drilling platform under a lattice tower, ramp down to the east; overlooks the plane's nose ----
+slab(-42,-36,-34,-28,2.5,2.8,C.DECK);
+for(const sx of[-41.8,-34.2])for(const sz of[-35.8,-28.2])addBox(sx,0,sz,0.4,2.5,0.4,C.STEEL);addBox(-38,0,-28.2,0.3,2.5,0.3,C.STEEL);
+lattice(-38,-32.4,2.8,13,3.0,0.7,0x2f2620);
+rampMesh2(-34,-28,-32.2,-30.6,2.8,0,C.DECK);ramps.push({x0:-34,x1:-28,z0:-32.2,z1:-30.6,y0:2.8,y1:0});
+railing(-42,-28.15,-34,-28,2.8,3.8);railing(-42,-36,-41.85,-28,2.8,3.8);railing(-34.15,-36,-34,-32.2,2.8,3.8);railing(-34.15,-30.6,-34,-28,2.8,3.8);
+addBox(-38,2.8,-34.6,2.6,0.7,0.6,C.STEEL);addBox(-40.6,2.8,-31,0.6,0.9,1.8,C.STEEL);crate(-36,2.8,-30);
+pipeStack(-38,-25.5,4.2,true);bagWall(-23.6,-22.4,-20.4,-21.6);bagWall(-20.4,-22.4,-19.6,-19.8); // drill pipe under the platform's lee, an L of bags facing the nose
+
+// ---- PIPELINE (north): walkable elevated pipe with three gaps, each lined up with a route south ----
+function rampMesh2(x0,x1,z0,z1,ya,yb,color){const sh=new THREE.Shape(dedupe([[x0,0],[x1,0],[x1,yb],[x0,ya]]).map(p=>new THREE.Vector2(p[0],p[1])));
+  const g=new THREE.ExtrudeGeometry(sh,{depth:z1-z0,bevelEnabled:false});g.translate(0,-0.03,z0);const m=new THREE.Mesh(g,mat(color));m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);return m;}
+function pipeline(x0,x1,z){pipeX(x0,x1,z,1.95,0.65,0x6a4a33,false);addCol(x0,1.3,z-0.65,x1,2.6,z+0.65); // the pipe itself: collision matches the visible gap under it
+  for(let x=x0+1.5;x<x1;x+=5)addBox(x,0,z,0.45,1.3,1.3,C.STEEL);
+  for(let x=x0+4;x<x1-1;x+=8){const f=new THREE.Mesh(new THREE.CylinderGeometry(0.75,0.75,0.18,20),mat(0x4d3424,'pipe'));f.rotation.z=Math.PI/2;f.position.set(x,1.95,z);scene.add(f);}}
+const PZ=-31;pipeline(-18,-8,PZ);pipeline(0,12,PZ);pipeline(20,30,PZ);           // gaps: x -8..0 (pump house), 12..20 (north stairs), 30+ (hangar side)
+for(let k=0;k<5;k++)sandbags(-21.6+k*0.8,0,PZ,0.8,(k+1)*0.52,1.3);
+for(let k=0;k<5;k++)sandbags(15.6-k*0.8,0,PZ,0.8,(k+1)*0.52,1.3);
+addBox(-12,0,-29,1.6,1.2,1.0,C.STEEL);pipeX(-12.4,-11.6,-28.4,1.0,0.12,0x8a2e22,false);
+jersey(-4,-34.6,true);jersey(16,-34.6,true);jersey(32,-34.6,true);
+
+// ---- PUMP HOUSE (north middle): a real room now, 10 x 8, doors on three sides and a west window ----
+room(-9,-27,1,-19,3.6,0x6a6352,[['n',-5,-3.4,2.4],['s',-2,-0.4,2.4],['e',-24,-22.4,2.4],['w',-24.6,-22.8,2.3,1.1]]);
+addBox(-6.6,0,-25.6,3,1.6,1.6,C.STEEL);pipeX(-8.8,-5.1,-25.6,1.25,0.22,0x5d4632,false);addCylV(-1.4,-25.4,0.6,2.0,0x5d5a48); // pump + header tank along the north wall
+crate(-8,0,-20.2);crate(-8,CS,-20.2);crate(-6.6,0,-20.2);addBox(-1,0,-20.4,1.6,0.9,0.7,C.STEEL);              // crates and a bench along the south wall, the middle left open
+sandbags(-3.4,0,-15,3.6,1.05,0.8);
+
+// ---- COMMS (northeast): 7 x 6 shed, roof reachable up the crate steps, antenna and dish ----
+room(19,-28,26,-22,3.2,0x6a6352,[['s',21,22.6,2.3],['w',-26,-24.4,2.2,1.1],['e',-25.6,-24,2.3]]);
+slab(15.8,-24.4,16.6,-23.4,0,0.6,C.CRATE);slab(16.6,-24.4,17.4,-23.4,0,1.2,C.CRATE);slab(17.4,-24.4,18.2,-23.4,0,1.8,C.CRATE);slab(18.2,-24.4,19,-23.4,0,2.4,C.CRATE);
+(function antenna(){const m=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.09,7,6),mat(0x3a3a38));m.position.set(25,6.8,-27.4);scene.add(m);
+  const d=new THREE.Mesh(new THREE.CylinderGeometry(1.1,0.2,0.4,18),mat(0x9b9486,'paint'));d.position.set(21.4,3.8,-26.8);d.rotation.set(0.9,0.4,0);scene.add(d);})();
+addBox(24.4,0,-26.8,1.8,1.4,0.8,C.STEEL);crate(20.2,0,-26.9);
+
+// ---- RED CONTAINERS (northeast, between the tower and the hangar): walk-through box with cover inside, a stacked pair, forklift ----
+openBox(21,-13.5,true,C.RED,[[-0.2,'crate',1],[0.25,'barrels',-1]]);
+container(28,0,-8,true,C.RED);container(28,2.6,-8.6,true,C.RED);
+forklift(23,-18.6);crate(16.6,0,-17);crate(16.6,0,-15.6);
+
+// ---- MAINTENANCE (between the tower and the plane): 6 x 5 shed with a ladder to a railed roof ----
+room(-16,-15,-10,-10,3.4,0x6e6655,[['e',-13.4,-11.8,2.4],['s',-14.6,-13,2.4]]);
+addLadder(-13,-15,'z-',0,3.85);railing(-16,-15,-14,-14.85,3.54,4.44);railing(-12,-15,-10,-14.85,3.54,4.44);railing(-16,-15,-15.85,-10,3.54,4.44);railing(-10.15,-15,-10,-10,3.54,4.44);railing(-16,-10.15,-10,-10,3.54,4.44);
+crate(-15,0,-14);addBox(-11,0,-14.2,1.6,1.0,0.8,C.STEEL);barrels(-17.6,-12,2,[0x2f4f6e,0x8a2e22]);
+
+// ---- COURTYARD (west of the tower, facing the plane): low cover only, so the plane and the tower can see each other ----
+sandbags(-8,0,-1,0.8,1.05,3.6);jersey(-14,4,false);jersey(-4,-12,true);
+
+// ---- GENERATORS (east of the tower) with a catwalk across them, and the BUNKER facing the hangar apron ----
+for(const z of[3,7.8]){addBox(20,0,z,5,2.6,2.4,0x5d5a48);const f=addBox(20,2.62,z-0.55,5.2,0.06,1.1,0x4a4638,false,false);f.rotation.x=0.25;const g=addBox(20,2.62,z+0.55,5.2,0.06,1.1,0x4a4638,false,false);g.rotation.x=-0.25;
+  for(const s of[-1,1])pipeX(22.5,23.6,z+s*0.6,1.9,0.14,0x3a3a38,false);}
+slab(17.5,9.3,22.5,10.4,1.25,2.4,0x4a4638);addBox(17.6,0,10.3,0.16,1.25,0.16,C.STEEL);addBox(22.4,0,10.3,0.16,1.25,0.16,C.STEEL);
+barrels(24.4,5.4,3,[0x2f4f6e,0x8a2e22,0x45603a]);
+bagWall(27,-1.6,29.2,-0.8);bagWall(27,-0.8,27.8,2.6);bagWall(27,2.6,29.2,3.4);
+
+// ---- CONTROL ROOM (southeast): 7 x 6, doors north and west, window east, roof reachable from the crates ----
+room(18,12,25,18,3.4,0x6e6655,[['n',20,21.6,2.4],['w',14,15.6,2.4],['e',14.4,16,2.3,1.1]]);
+crate(26,0,16.6);crate(26,0,15.2);crate(26,CS,15.2);addBox(23.6,0,13,1.6,0.9,0.7,C.STEEL);addBox(19,0,16.9,1.4,0.9,0.7,C.STEEL);
+
+// ---- TRUCK (southwest of the tower): burnt-out flatbed parked along the south road with its load spilled ----
+truck(-12,13);spool(-6.4,16.4,0.6);pallet(-16.6,10.6,1);barrels(-9.4,9.6,2,[0x7f6a52,0x8a2e22]);
+
+// ---- PLAZA (between the south stairs and the dock): open ground with one line of bags ----
+sandbags(4,0,23.5,3.6,1.05,0.8);jersey(-6,22,true);
+
+// ---- CONTAINER YARD (southwest): walk-through boxes with cover inside, a stacked pair, lanes between them ----
+openBox(-35,23,true,C.BLUE,[[-0.25,'crate',-1],[0.22,'crate',1]]);container(-35,2.6,23,false,C.GRN);
+openBox(-25,25,false,C.RED,[[0.2,'barrels',1],[-0.25,'crate',-1]]);
+openBox(-31,31.5,true,C.BLUE,[[0.0,'bags',1]]);
+container(-21,0,34.5,true,C.TAN);container(-41.6,0,32,true,C.GRN);
+crate(-29,0,26.6);crate(-30.4,0,26.6);barrels(-38.6,36.6,3,[0x2f4f6e,0x45603a,0x2f4f6e]);
+
+// ---- DOCK (south middle): raised loading dock with a ramp up the west end, steps at the east, cargo on top ----
+slab(-6,29,8,35,0,1.2,C.CONC);
+rampMesh2(-12,-6,30,32.6,0,1.2,C.CONC);ramps.push({x0:-12,x1:-6,z0:30,z1:32.6,y0:0,y1:1.2});
+for(let k=0;k<2;k++)sandbags(8.4+k*0.8,0,32,0.8,(2-k)*0.58,1.6);
+for(let x=-5.4;x<7.6;x+=1.5)addBox(x,1.2,29.1,0.6,0.1,0.18,0x1c1c1a,false,false);
+crate(-4,1.2,33.4);crate(-2.6,1.2,33.4);crate(-3.3,1.2+CS,33.4);pallet(2,31.2,2);crate(5.6,1.2,33.6);
+forklift(11,27);pallet(13.6,33.6,1);
+
+// ---- FUEL DEPOT (southeast): three tanks with round collision and a low pipe run ----
+addCylV(26,28,3.5,5.5,0x7f6a52);addCylV(31,20,2.4,4,0x77624d);addCylV(28,36,2.2,3.5,0x7a6650);
+pipeX(16,32,23.5,0.75,0.38,0x5d4632,true);for(const x of[17,20.5,24,28])addBox(x,0,23.5,0.3,0.4,0.7,C.STEEL);
+barrels(19.6,25.6,3,[0x8a2e22,0x8a2e22,0x7f6a52]);crate(33,0,26.4);
+
 // ---- Hangar (east expansion): helicopter on the floor, grating mezzanine on three sides, stairs, side window with an outside ladder ----
 const grateTex=(function(){ // welded bar grating: deep bearing bars with lit top edges, twisted cross rods, worn paint and grime, open gaps you can see through
   const N=128,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),r=mulberry(77);x.clearRect(0,0,N,N);
@@ -1168,10 +1275,10 @@ function grate(x0,z0,x1,z1,y0,y1){const m=new THREE.Mesh(boxGeo,grateM);m.scale.
     const rm=new THREE.Mesh(g,rayM);rm.matrixAutoUpdate=false;rm.userData.ray=true;worldMeshes.push(rm);}
 })();
 /* ---------------- physics ---------------- */
-function rampH(R,x){return R.y0+(R.y1-R.y0)*clamp((x-R.x0)/(R.x1-R.x0),0,1);}
-function rampAt(x,z,r){r=r||0;let h=-1e9;for(const R of ramps){if(x+r>R.x0&&x-r<R.x1&&z+r>R.z0&&z-r<R.z1)h=Math.max(h,rampH(R,clamp(x,R.x0,R.x1)));}return h;}
+function rampH(R,x,z){return R.axis==='z'?R.y0+(R.y1-R.y0)*clamp((z-R.z0)/(R.z1-R.z0),0,1):R.y0+(R.y1-R.y0)*clamp((x-R.x0)/(R.x1-R.x0),0,1);} // ramps rise along x, or along z when axis:'z'
+function rampAt(x,z,r){r=r||0;let h=-1e9;for(const R of ramps){if(x+r>R.x0&&x-r<R.x1&&z+r>R.z0&&z-r<R.z1)h=Math.max(h,rampH(R,clamp(x,R.x0,R.x1),clamp(z,R.z0,R.z1)));}return h;}
 function hitsAt(x,y,z,h,r){
-  for(const R of ramps){if(x+r>R.x0&&x-r<R.x1&&z+r>R.z0&&z-r<R.z1){const rh=rampH(R,clamp(x,R.x0,R.x1));if(y<rh-STEP&&y+h>R.y0-1)return true;}}
+  for(const R of ramps){if(x+r>R.x0&&x-r<R.x1&&z+r>R.z0&&z-r<R.z1){const rh=rampH(R,clamp(x,R.x0,R.x1),clamp(z,R.z0,R.z1));if(y<rh-STEP&&y+h>Math.min(R.y0,R.y1)-1)return true;}}
   for(const c of colliders){if(x+r>c.min.x&&x-r<c.max.x&&z+r>c.min.z&&z-r<c.max.z&&y+h>c.min.y+0.001&&y<c.max.y-0.001)return true;}
   return false;
 }
@@ -1211,7 +1318,7 @@ function segBlocked(a,b){
   }
   return false;
 }
-const SPAWNS=[[28,-31],[31,-24],[-28,31],[-31,24],[0,31.5],[31,9],[-31,-9],[-6,-31],[11,31.5],[-31.5,1],[9,-22],[-20,25],[-27,-22],[20,17],[-31,-18],[31,-15],[-16,31.5],[24,31.5],[-2,-22],[-14,-22],[16,-30],[-24,0],[22,10],[-22,30],[31,1],[-31,9],[40,-30],[41,-21],[40,30],[46,22],[33,-17],[33,18],[44,-2.5],[37.5,4]].map(p=>HANGAR.map(p[0],p[1])).map(p=>new V3(p[0]*MAP_SCALE,0,p[1]*MAP_SCALE)).filter(p=>openSpot(p.x,p.z));
+const SPAWNS=[[-40,-22],[-42,8],[-43,38],[-31,38.5],[-16,38],[-4,38.5],[10,38.5],[22,38.5],[34,33],[34,-34],[24,-35],[8,-35],[-7.5,-35],[-18,-35],[-27,-25],[-19,-16],[-17,7],[16,-21],[14,21],[-6,25],[3,-23],[32,-15],[32,10],[26,6],[40,-30],[41,-21],[40,30],[46,22],[44,-2.5],[37.5,4]].map(p=>HANGAR.map(p[0],p[1])).map(p=>new V3(p[0]*MAP_SCALE,0,p[1]*MAP_SCALE)).filter(p=>openSpot(p.x,p.z));
 function openSpot(x,z){ // standable, not inside anything, and not boxed in
   if(x<XMIN+1||x>XMAX-1||z<ZMIN+1||z>ZMAX-1)return false;
   if(hitsAt(x,0.05,z,1.85,0.72)||groundAt(x,z,0.4,0.72)>0.01||rampAt(x,z,0.72)>0.05)return false;
@@ -1357,7 +1464,7 @@ const gloveTex=(function(){ // dark synthetic glove: leather palm grain, knuckle
   x.strokeStyle='rgba(20,18,14,.55)';x.lineWidth=1;for(let i=8;i<N;i+=16){x.beginPath();x.moveTo(0,i);x.lineTo(N,i);x.stroke();}
   x.strokeStyle='rgba(120,112,96,.25)';for(let i=10;i<N;i+=16){x.beginPath();x.moveTo(0,i);x.lineTo(N,i);x.stroke();}
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,2);return t;})();
-const sleeveM=new THREE.MeshLambertMaterial({map:sleeveTex}), gloveM=new THREE.MeshLambertMaterial({map:gloveTex});
+const sleeveM=new THREE.MeshLambertMaterial({map:sleeveTex}), gloveM=new THREE.MeshLambertMaterial({map:gloveTex,color:0x8a8272}); // tinted down: dark tactical gloves, not bare skin
 
 /* ---------------- camos ---------------- */
 const CAMOS=[['factory','Factory'],['desert','Desert'],['arctic','Arctic'],['woodland','Woodland'],['digital','Digital'],['urban','Urban'],['redtiger','Red Tiger'],['bluetiger','Blue Tiger'],['fall','Fall'],
@@ -1572,6 +1679,7 @@ const primGroups={};const E=0.025;
 const cuffM=new THREE.MeshLambertMaterial({color:0x2a2a24});
 function fseg(g,a,b,r0,r1){const d=new V3().subVectors(b,a),len=d.length();const m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r0,len,9),gloveM);m.position.copy(a).addScaledVector(d,0.5);m.quaternion.setFromUnitVectors(new V3(0,1,0),d.normalize());g.add(m);handMeshes.push(m);return m;}
 function fball(g,p,r){const m=new THREE.Mesh(new THREE.SphereGeometry(r,9,7),gloveM);m.position.copy(p);g.add(m);handMeshes.push(m);return m;}
+function wrapFinger(g,pts,r){r=r||0.0082;const n=pts.length-1;for(let i=0;i<n;i++){const t0=i/n,t1=(i+1)/n,r0=r*(1.06-0.2*t0),r1=r*(1.06-0.2*t1);fball(g,pts[i],r0*(i?1:1.12));fseg(g,pts[i],pts[i+1],r0,r1);}fball(g,pts[n],r*0.86);}
 function finger(g,a,b,r,curl){r=r||0.0085;fball(g,a,r*1.18); // knuckle
   let mid=a.clone().lerp(b,0.55);if(curl)mid.add(curl);else{const d=new V3().subVectors(b,a);mid.addScaledVector(new V3(-d.z,0,d.x).normalize().cross(d).normalize(),-d.length()*0.06);} // a slight natural bend
   const m=fseg(g,a,mid,r*1.05,r*0.98);fball(g,mid,r*0.99);fseg(g,mid,b,r*0.98,r*0.86);fball(g,b,r*0.87);return m;}
@@ -1586,18 +1694,30 @@ function rifleHands(g){ // right hand on the pistol grip: palm, four fingers wra
   hand(g,BOX(0.05,0.098,0.066),gloveM,0.004,-0.214,0.172,-0.42);
   hand(g,BOX(0.054,0.04,0.03),gloveM,0.004,-0.178,0.2,-0.42); // back of the hand / web
   hand(g,BOX(0.03,0.07,0.02),cuffM,0.032,-0.2,0.18,-0.42); // knuckle pad
-  for(let i=0;i<4;i++){const y=-0.186-i*0.022,z=0.123+(-0.19-y)*0.31-0.012;finger(g,new V3(0.03,y,z+0.01),new V3(-0.022,y-0.002,z),0.0088-i*0.0005);}
+  for(let i=0;i<4;i++){const y=-0.19-i*0.021,zf=0.126+(-0.19-y)*0.309,hw=0.023,r=0.0086-i*0.0005; // round the front strap: right side, across the front, back along the left side
+    wrapFinger(g,[new V3(hw-0.003,y,zf+0.022),new V3(hw+r*0.5,y,zf-0.002),new V3(0,y-0.002,zf-r-0.001),new V3(-hw-r*0.5,y-0.002,zf+0.002),new V3(-hw-r*0.3,y-0.002,zf+0.02)],r);}
   finger(g,new V3(0.02,-0.164,0.122),new V3(0.012,-0.166,0.082),0.0075);                    // trigger finger
   finger(g,new V3(-0.024,-0.17,0.17),new V3(-0.028,-0.156,0.118),0.0085);                     // thumb
   sleeve(g,new V3(0.03,-0.255,0.215),new V3(0.13,-0.39,0.56),0.045);
 }
-function leftHand(g0,z,yb,vert){ // support hand under the handguard (or wrapped round a vertical grip) with the forearm running back to the lower left; lives in its own group so reloads can move it
+function gunExtent(root,z,y0,y1,skip){ // half-width and underside of the gun at a station along its length, measured from the parts already built
+  root.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(root.matrixWorld).invert(),M4=new THREE.Matrix4(),bb=new THREE.Box3();let hw=0,bot=1;
+  root.traverse(o=>{if(!o.isMesh||handMeshes.includes(o)||o.isSprite||(skip&&skip(o)))return;const g=o.geometry;if(!g.boundingBox)g.computeBoundingBox();M4.multiplyMatrices(inv,o.matrixWorld);bb.copy(g.boundingBox).applyMatrix4(M4);
+    if(bb.min.z>z+0.025||bb.max.z<z-0.025)return;if(bb.max.y<y0||bb.min.y>y1)return;if(Math.abs(bb.min.x)>0.06||Math.abs(bb.max.x)>0.06)return;hw=Math.max(hw,-bb.min.x,bb.max.x);if(Math.abs((bb.min.x+bb.max.x)/2)<0.012)bot=Math.min(bot,bb.min.y);});
+  return{hw:hw||0.025,bot};}
+function leftHand(g0,z,yb,vert,root){ // support hand under the handguard (or wrapped round a vertical grip) with the forearm running back to the lower left; lives in its own group so reloads can move it
   const g=new THREE.Group();g.userData.isLH=true;g0.add(g);
-  if(vert){hand(g,BOX(0.046,0.066,0.054),gloveM,-0.006,yb-0.034,z+0.012);for(let i=0;i<4;i++){const y=yb-0.012-i*0.02;finger(g,new V3(-0.026,y,z+0.02),new V3(0.022,y,z-0.022),0.008);}finger(g,new V3(-0.026,yb+0.002,z+0.01),new V3(0.0,yb+0.012,z-0.022),0.0078);}
-  else{hand(g,BOX(0.056,0.024,0.086),gloveM,-0.004,yb-0.016,z,0,0,-0.12);
-    for(let i=0;i<4;i++){const zz=z-0.03+i*0.02;finger(g,new V3(0.022,yb-0.022,zz),new V3(0.034,yb+0.016,zz-0.004),0.0078);} // fingers curl up the right side
-    finger(g,new V3(-0.026,yb-0.018,z+0.02),new V3(-0.036,yb+0.014,z-0.012),0.0085);}                          // thumb up the left side
-  if(vert)sleeve(g,new V3(-0.03,yb-0.05,z+0.03),new V3(-0.25,yb-0.25,z+0.3),0.042); // angled out so the forearm clears the mag behind the grip
+  if(vert){ // a fist round the vertical grip: palm behind it, fingers round the front from the left, thumb over the right side
+    const E=gunExtent(root||g0,z,yb-0.1,yb-0.02),hw=Math.min(0.026,E.hw),zr=z+0.022,zfr=z-0.022;
+    hand(g,BOX(0.044,0.074,0.026),gloveM,-0.004,yb-0.048,zr+0.012);
+    for(let i=0;i<4;i++){const y=yb-0.018-i*0.02,r=0.0082-i*0.0004;wrapFinger(g,[new V3(-hw-0.002,y,zr+0.004),new V3(-hw-r*0.5,y,zfr+0.004),new V3(0,y-0.002,zfr-r),new V3(hw+r*0.5,y-0.002,zfr+0.006),new V3(hw+r*0.4,y-0.003,z+0.006)],r);}
+    wrapFinger(g,[new V3(hw*0.4,yb-0.012,zr+0.012),new V3(hw+0.008,yb-0.006,zr-0.006),new V3(hw+0.009,yb-0.004,z-0.004)],0.0085);}
+  else{ // palm under the handguard, fingers curling up its right side, thumb up the left: sized to the handguard so nothing sinks into it
+    const E=gunExtent(root||g0,z,yb-0.01,yb+0.07),hw=Math.max(0.02,Math.min(0.045,E.hw));if(E.bot<1)yb=Math.min(yb,E.bot-0.002);
+    hand(g,BOX(Math.min(0.07,hw*2+0.006),0.024,0.086),gloveM,0,yb-0.016,z);
+    for(let i=0;i<4;i++){const zz=z-0.03+i*0.02,r=0.0078;wrapFinger(g,[new V3(hw-0.008,yb-0.02,zz),new V3(hw+r*0.7,yb-0.006,zz-0.002),new V3(hw+r*0.7,yb+0.016,zz-0.004),new V3(hw+r*0.2,yb+0.03,zz-0.005)],r);}
+    wrapFinger(g,[new V3(-hw+0.008,yb-0.018,z+0.03),new V3(-hw-0.007,yb-0.006,z+0.012),new V3(-hw-0.008,yb+0.0,z-0.024)],0.0086);}
+  if(vert)sleeve(g,new V3(-0.01,yb-0.1,z+0.024),new V3(-0.23,yb-0.38,z+0.24),0.042); // angled out so the forearm clears the mag behind the grip
   else sleeve(g,new V3(-0.02,yb-0.04,z+0.045),new V3(-0.2,yb-0.27,z+0.36),0.042);
   return g;}
 rifleHands(primGroups.int); // the Intervention gets the same hands as the rest of the roster
@@ -1676,72 +1796,84 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   redDot(g,-0.035);
   leftHand(g,-0.28,-0.068);rifleHands(g);gunFlash(g,-0.62,-0.04,0.36);})();
 
-/* ---- ACR ---- */
+/* ---- ACR (MW2 Masada): black polymer, fat tapered handguard with a rounded nose and side vents, forward charging handle, PMAG, stepped folding stock ---- */
 (function buildACR(){const M=gunMats,g=new THREE.Group();g.position.y=-0.025;snpModel.add(g);primGroups.acr=g;
-  put(g,sideGeo([[-0.26,-0.01],[0.15,-0.01],[0.155,-0.024],[0.155,-0.078],[-0.26,-0.078],[-0.265,-0.06],[-0.265,-0.024]],null,0.06,0.005),snpSkin); // monolithic upper
-  railTop(g,0.15,-0.62,-0.004,0.028,-0.08);
-  for(const sx of[-1,1])put(g,BOX(0.004,0.016,0.4),M.drk,sx*0.0318,-0.044,-0.06);
-  put(g,BOX(0.004,0.016,0.05),M.hole,0.0322,-0.04,0.0);put(g,BOX(0.014,0.014,0.03),M.blk,-0.038,-0.022,-0.22);
-  put(g,sideGeo([[-0.13,-0.078],[0.155,-0.078],[0.155,-0.146],[0.04,-0.15],[-0.02,-0.168],[-0.1,-0.168],[-0.13,-0.12]],null,0.062,0.005),snpSkin); // polymer lower with flared magwell
-  for(const sx of[-1,1])put(g,BOX(0.004,0.014,0.02),M.blk,sx*0.033,-0.13,-0.02); // ambi mag release
-  put(g,sideGeo([[-0.04,-0.16],[-0.11,-0.16],[-0.145,-0.31],[-0.09,-0.325],[-0.03,-0.17]],null,0.03,0.003),M.drk); // curved PMAG
-  for(let i=0;i<4;i++)put(g,BOX(0.034,0.004,0.05),M.blk,0,-0.19-i*0.03,-0.08-i*0.008,0.2);
-  // fat polymer handguard with a sloped nose
-  put(g,sideGeo([[-0.26,-0.006],[-0.56,-0.006],[-0.6,-0.022],[-0.61,-0.05],[-0.585,-0.086],[-0.3,-0.094],[-0.26,-0.088]],null,0.062,0.006),snpSkin); // tapered polymer handguard
-  for(const sx of[-1,1]){put(g,BOX(0.006,0.016,0.14),M.blk,sx*0.034,-0.04,-0.5);for(let z=-0.565;z<-0.435;z+=0.012)put(g,BOX(0.009,0.02,0.005),M.blk,sx*0.034,-0.04,z);for(let i=0;i<3;i++)put(g,BOX(0.003,0.03,0.05),M.hole,sx*0.0315,-0.06,-0.3-i*0.065);}
-  put(g,BOX(0.03,0.01,0.03),M.blk,0,0.0,-0.6);for(const sx of[-1,1])put(g,BOX(0.004,0.03,0.016),M.blk,sx*0.011,0.016,-0.6); // folding front sight
-  put(g,new THREE.CylinderGeometry(0.0115,0.0125,0.18,12),M.stl,0,-0.045,-0.69,Math.PI/2);
-  put(g,lathe([[0.008,-0.78],[0.0165,-0.78],[0.0165,-0.83],[0.008,-0.83]],14),M.blk,0,-0.045,0);for(let i=0;i<3;i++)put(g,BOX(0.003,0.01,0.02),M.hole,0.0168,-0.045,-0.79-i*0.012);
+  put(g,sideGeo([[-0.2,-0.01],[0.15,-0.01],[0.155,-0.022],[0.155,-0.074],[-0.2,-0.074]],null,0.056,0.004),snpSkin);             // aluminium upper
+  railTop(g,0.15,-0.585,-0.004,0.026,-0.085);
+  put(g,BOX(0.004,0.017,0.055),M.hole,0.0335,-0.044,0.005);put(g,BOX(0.003,0.02,0.064),M.drk,0.0325,-0.044,0.005);            // ejection port + cover
+  put(g,BOX(0.014,0.016,0.03),M.blk,-0.034,-0.028,-0.175);put(g,BOX(0.03,0.01,0.012),M.blk,-0.05,-0.026,-0.17,0,0.25,0);      // non-reciprocating charging handle, folded forward
+  // tapered polymer handguard: deep belly, rounded nose, three long vents a side
+  put(g,sideGeo([[-0.2,-0.008],[-0.55,-0.008],[-0.582,-0.018],[-0.6,-0.04],[-0.596,-0.068],[-0.575,-0.094],[-0.52,-0.106],[-0.26,-0.108],[-0.215,-0.1],[-0.2,-0.088]],null,0.064,0.008),snpSkin);
+  for(const sx of[-1,1])for(let i=0;i<3;i++){const z=-0.29-i*0.085;put(g,sideGeo([[z,-0.045],[z-0.06,-0.045],[z-0.066,-0.056],[z-0.06,-0.067],[z,-0.067],[z+0.006,-0.056]],null,0.004,0),M.hole,sx*0.0405,0,0);}
+  put(g,BOX(0.03,0.006,0.1),M.blk,0,-0.11,-0.47);for(let z=-0.515;z<-0.43;z+=0.012)put(g,BOX(0.034,0.004,0.006),M.blk,0,-0.114,z); // short bottom rail section
+  // lower: integral trigger guard, sloped front into a flared magwell
+  put(g,sideGeo([[-0.14,-0.074],[0.155,-0.074],[0.155,-0.128],[0.06,-0.136],[0.02,-0.152],[-0.022,-0.172],[-0.118,-0.172],[-0.142,-0.13]],null,0.058,0.005),snpSkin);
+  put(g,sideGeo([[-0.02,-0.16],[-0.122,-0.16],[-0.128,-0.176],[-0.016,-0.176]],null,0.064,0.002),snpSkin);                   // magwell lip
+  for(const sx of[-1,1]){put(g,BOX(0.004,0.014,0.02),M.blk,sx*0.0355,-0.125,-0.012);put(g,BOX(0.004,0.01,0.016),M.blk,sx*0.0355,-0.1,0.07);} // ambi mag release + bolt catch
+  put(g,sideGeo([[-0.03,-0.17],[-0.11,-0.17],[-0.145,-0.31],[-0.09,-0.325],[-0.038,-0.18]],null,0.03,0.003),M.drk);           // curved PMAG
+  for(let i=0;i<5;i++)put(g,BOX(0.033,0.004,0.05),M.blk,0,-0.195-i*0.024,-0.08-i*0.009,0.2);put(g,BOX(0.036,0.012,0.064),M.blk,0,-0.322,-0.118,0.24); // grip ribs + base plate
+  put(g,new THREE.CylinderGeometry(0.0115,0.0125,0.135,12),M.stl,0,-0.045,-0.667,Math.PI/2);
+  put(g,lathe([[0.008,-0.72],[0.0165,-0.72],[0.0165,-0.775],[0.008,-0.775]],14),M.blk,0,-0.045,0);for(let i=0;i<3;i++)put(g,BOX(0.003,0.012,0.02),M.hole,0.0168*Math.cos(i*1.05+0.5),-0.045+0.0168*Math.sin(i*1.05+0.5),-0.745); // A2 birdcage, slots up top
+  put(g,sideGeo([[-0.565,0.0],[-0.595,0.0],[-0.59,0.024],[-0.575,0.024]],null,0.026,0.002),M.blk);                           // flip-up front sight
   rifleGrip(g,M.rub,M.blk);
-  put(g,BOX(0.05,0.07,0.05),snpSkin,0,-0.06,0.18); // folding-stock hinge
-  put(g,sideGeo([[0.2,-0.028],[0.33,-0.028],[0.36,-0.012],[0.44,-0.012],[0.47,-0.03],[0.475,-0.06],[0.475,-0.215],[0.445,-0.228],[0.39,-0.2],[0.3,-0.172],[0.24,-0.128],[0.2,-0.1]],null,0.05,0.005),snpSkin); // solid Masada stock, stepped comb
-  for(const sx of[-1,1]){put(g,BOX(0.003,0.05,0.13),M.blk,sx*0.0262,-0.1,0.33);for(let i=0;i<5;i++)put(g,BOX(0.004,0.008,0.012),M.blk,sx*0.0265,-0.06,0.25+i*0.03);} // length-of-pull slots
-  put(g,BOX(0.056,0.2,0.026),M.rub,0,-0.13,0.485);
+  put(g,BOX(0.05,0.07,0.05),M.blk,0,-0.06,0.18);                                                                               // folding hinge
+  put(g,sideGeo([[0.2,-0.026],[0.34,-0.026],[0.37,-0.012],[0.45,-0.012],[0.475,-0.03],[0.48,-0.06],[0.48,-0.215],[0.455,-0.228],[0.41,-0.2],[0.37,-0.15],[0.33,-0.136],[0.27,-0.132],[0.24,-0.116],[0.2,-0.1]],[[[0.24,-0.06],[0.33,-0.06],[0.36,-0.1],[0.26,-0.104]]],0.05,0.005),M.blk); // Masada stock: stepped comb, thumbhole cut
+  for(const sx of[-1,1])for(let i=0;i<5;i++)put(g,BOX(0.004,0.008,0.012),M.drk,sx*0.031,-0.04,0.25+i*0.03);                 // length-of-pull detents
+  put(g,BOX(0.056,0.2,0.026),M.rub,0,-0.13,0.49);
   holoSight(g,-0.04,0.0);
-  leftHand(g,-0.4,-0.1);rifleHands(g);gunFlash(g,-0.87,-0.045,0.4);})();
+  leftHand(g,-0.4,-0.112);rifleHands(g);gunFlash(g,-0.8,-0.045,0.4);})();
 
-/* ---- SCAR-H ---- */
+/* ---- SCAR-H (MW2): flat dark earth, long rail-topped upper with side and bottom rails, reciprocating side charger, angular flared magwell, folding stock with cheek riser ---- */
 (function buildSCAR(){const M=gunMats,g=new THREE.Group();g.position.y=-0.025;snpModel.add(g);primGroups.scar=g;
-  put(g,sideGeo([[-0.4,-0.008],[0.14,-0.008],[0.15,-0.02],[0.15,-0.07],[-0.14,-0.07],[-0.16,-0.06],[-0.4,-0.06],[-0.41,-0.045],[-0.41,-0.02]],null,0.058,0.005),snpSkin); // long aluminium upper
-  railTop(g,0.14,-0.41,-0.003,0.026,-0.07);for(const sx of[-1,1]){put(g,BOX(0.006,0.018,0.2),M.blk,sx*0.032,-0.04,-0.3);for(let z=-0.39;z<-0.21;z+=0.012)put(g,BOX(0.01,0.022,0.005),M.blk,sx*0.032,-0.04,z);}
-  put(g,BOX(0.024,0.007,0.2),M.blk,0,-0.064,-0.3);
-  put(g,BOX(0.012,0.014,0.03),M.blk,-0.036,-0.03,-0.12);put(g,BOX(0.026,0.008,0.01),M.blk,-0.046,-0.03,-0.12);
-  put(g,BOX(0.004,0.016,0.06),M.hole,0.031,-0.045,0.04);
-  put(g,sideGeo([[-0.13,-0.07],[0.15,-0.07],[0.155,-0.09],[0.155,-0.14],[0.04,-0.144],[-0.02,-0.15],[-0.1,-0.15],[-0.13,-0.11]],null,0.054,0.005),snpSkin); // polymer lower
-  put(g,sideGeo([[-0.03,-0.145],[-0.105,-0.145],[-0.118,-0.28],[-0.05,-0.285]],null,0.03,0.003),M.drk); // straight 7.62 mag
-  for(let i=0;i<3;i++)put(g,BOX(0.034,0.004,0.06),M.blk,0,-0.18-i*0.032,-0.075);
-  put(g,new THREE.CylinderGeometry(0.013,0.014,0.17,12),M.stl,0,-0.035,-0.49,Math.PI/2);
-  put(g,lathe([[0.009,-0.575],[0.017,-0.575],[0.017,-0.64],[0.009,-0.64]],14),M.blk,0,-0.035,0);for(let i=0;i<4;i++)put(g,BOX(0.003,0.003,0.04),M.hole,0.017*Math.cos(i*1.57+0.78),-0.035+0.017*Math.sin(i*1.57+0.78),-0.61);
-  put(g,BOX(0.012,0.024,0.014),M.blk,0,0.012,-0.38);
+  put(g,sideGeo([[-0.14,-0.008],[0.14,-0.008],[0.152,-0.018],[0.152,-0.072],[-0.14,-0.072]],null,0.058,0.004),snpSkin);         // receiver section
+  put(g,sideGeo([[-0.14,-0.008],[-0.39,-0.008],[-0.4,-0.02],[-0.4,-0.058],[-0.39,-0.064],[-0.15,-0.064],[-0.14,-0.072]],null,0.052,0.004),snpSkin); // slimmer forend section of the same upper
+  railTop(g,0.14,-0.4,-0.003,0.026,-0.075);
+  for(const sx of[-1,1]){put(g,BOX(0.006,0.018,0.17),M.blk,sx*0.032,-0.036,-0.3);for(let z=-0.38;z<-0.22;z+=0.012)put(g,BOX(0.01,0.022,0.005),M.blk,sx*0.034,-0.036,z);} // side rails
+  put(g,BOX(0.024,0.007,0.18),M.blk,0,-0.066,-0.3);for(let z=-0.385;z<-0.215;z+=0.012)put(g,BOX(0.028,0.004,0.005),M.blk,0,-0.071,z);  // bottom rail
+  put(g,BOX(0.016,0.016,0.036),M.blk,-0.034,-0.026,-0.075);put(g,BOX(0.03,0.01,0.012),M.blk,-0.052,-0.02,-0.065,0,0,0.5);        // side charging handle, knob angled up and out
+  put(g,BOX(0.003,0.014,0.07),M.hole,-0.0335,-0.028,-0.03);                                                                  // charging slot
+  put(g,BOX(0.004,0.017,0.06),M.hole,0.0335,-0.046,0.04);                                                                     // ejection port
+  // polymer lower: stepped trigger housing and a big forward-raked magwell flare
+  put(g,sideGeo([[-0.06,-0.072],[0.152,-0.072],[0.152,-0.13],[0.05,-0.138],[0.0,-0.146],[-0.03,-0.15]],null,0.054,0.005),snpSkin);
+  put(g,sideGeo([[-0.02,-0.072],[-0.135,-0.072],[-0.15,-0.098],[-0.15,-0.168],[-0.118,-0.172],[-0.03,-0.165],[-0.02,-0.14]],null,0.06,0.005),snpSkin); // flared magwell
+  for(const sx of[-1,1])put(g,BOX(0.004,0.03,0.05),M.drk,sx*0.0365,-0.11,-0.075);                                            // raised mag release pads
+  put(g,sideGeo([[-0.04,-0.165],[-0.115,-0.165],[-0.126,-0.29],[-0.052,-0.292]],null,0.03,0.003),M.drk);                     // straight 20 rd 7.62 mag
+  for(let i=0;i<4;i++)put(g,BOX(0.034,0.004,0.066),M.blk,0,-0.188-i*0.026,-0.081-i*0.0018);put(g,BOX(0.036,0.012,0.08),M.blk,0,-0.296,-0.089);
+  put(g,new THREE.CylinderGeometry(0.013,0.014,0.16,12),M.stl,0,-0.034,-0.48,Math.PI/2);
+  put(g,BOX(0.03,0.028,0.03),M.blk,0,-0.036,-0.415);put(g,new THREE.CylinderGeometry(0.006,0.006,0.03,8),M.blk,-0.02,-0.05,-0.415,0,0,Math.PI/2); // gas block + regulator
+  put(g,lathe([[0.009,-0.56],[0.018,-0.56],[0.016,-0.64],[0.009,-0.64]],14),M.blk,0,-0.034,0);for(let i=0;i<4;i++)put(g,BOX(0.003,0.003,0.055),M.hole,0.0172*Math.cos(i*1.57+0.78),-0.034+0.0172*Math.sin(i*1.57+0.78),-0.605); // long SCAR flash hider
+  put(g,sideGeo([[-0.375,0.0],[-0.4,0.0],[-0.393,0.028],[-0.382,0.028]],null,0.024,0.002),M.blk);                            // tall flip front sight
   rifleGrip(g,M.rub,M.blk);
-  // side-folding stock with cheek riser
-  put(g,sideGeo([[0.15,-0.02],[0.215,-0.02],[0.215,-0.13],[0.15,-0.13]],null,0.056,0.004),snpSkin);                // hinge block
-  put(g,sideGeo([[0.21,-0.028],[0.44,-0.035],[0.44,-0.062],[0.21,-0.058]],null,0.036,0.004),snpSkin);                 // top bar
-  put(g,sideGeo([[0.25,-0.003],[0.4,-0.003],[0.41,-0.015],[0.41,-0.036],[0.25,-0.034],[0.24,-0.018]],null,0.034,0.004),snpSkin); // adjustable cheek riser
-  for(const z of[0.27,0.38])put(g,BOX(0.03,0.01,0.012),M.blk,0,-0.04,z);
-  rod(g,new V3(0,-0.125,0.21),new V3(0,-0.2,0.43),0.011,snpSkin,8);                                                   // lower strut
-  put(g,sideGeo([[0.43,-0.03],[0.465,-0.035],[0.47,-0.06],[0.47,-0.24],[0.445,-0.25],[0.43,-0.22]],null,0.048,0.005),snpSkin); // butt
-  put(g,BOX(0.05,0.2,0.016),M.rub,0,-0.14,0.474);
+  // folding stock: hinge, straight comb with a stepped belly, adjustable cheek riser, ribbed butt
+  put(g,sideGeo([[0.152,-0.016],[0.205,-0.016],[0.205,-0.12],[0.152,-0.12]],null,0.056,0.004),snpSkin);
+  put(g,sideGeo([[0.2,-0.022],[0.425,-0.028],[0.448,-0.038],[0.455,-0.06],[0.455,-0.238],[0.432,-0.25],[0.4,-0.226],[0.35,-0.14],[0.32,-0.094],[0.2,-0.086]],[[[0.24,-0.05],[0.31,-0.05],[0.32,-0.072],[0.25,-0.072]]],0.046,0.005),snpSkin);
+  put(g,sideGeo([[0.25,-0.022],[0.41,-0.026],[0.41,-0.006],[0.27,-0.0],[0.25,-0.01]],null,0.03,0.004),snpSkin);            // cheek riser
+  for(const sx of[-1,1])put(g,BOX(0.004,0.01,0.01),M.blk,sx*0.0195,-0.012,0.33);
+  put(g,BOX(0.05,0.2,0.016),M.rub,0,-0.145,0.46);for(let i=0;i<6;i++)put(g,BOX(0.052,0.004,0.018),M.blk,0,-0.065-i*0.032,0.462);
   holoSight(g,-0.03,0.0);
-  leftHand(g,-0.3,-0.07);rifleHands(g);gunFlash(g,-0.68,-0.035,0.42);})();
+  leftHand(g,-0.3,-0.075);rifleHands(g);gunFlash(g,-0.66,-0.034,0.42);})();
 
-/* ---- TAR-21 (bullpup) ---- */
+/* ---- TAR-21 (bullpup): long polymer housing, deep ribbed forend ending in a hand-stop lip, full-hand trigger guard, mag behind the grip, raised optic rail ---- */
 (function buildTAR(){const M=gunMats,g=new THREE.Group();g.position.y=-0.025;snpModel.add(g);primGroups.tar=g;
-  put(g,sideGeo([[-0.43,-0.058],[-0.36,-0.046],[-0.2,-0.036],[0.22,-0.032],[0.3,-0.026],[0.4,-0.034],[0.44,-0.065],[0.445,-0.2],[0.41,-0.218],[0.32,-0.196],[0.22,-0.152],[0.15,-0.142],[-0.06,-0.138],[-0.22,-0.124],[-0.36,-0.108],[-0.435,-0.088]],null,0.064,0.009),snpSkin);
-  put(g,BOX(0.05,0.02,0.08),M.drk,0,-0.105,-0.37);
-  put(g,sideGeo([[-0.06,-0.14],[0.02,-0.14],[0.04,-0.155],[0.03,-0.29],[0.2,-0.29],[0.2,-0.305],[0.02,-0.305],[-0.01,-0.28],[0.0,-0.16],[-0.06,-0.15]],null,0.022,0.004),M.drk); // full-hand trigger guard
-  put(g,sideGeo([[0.3,-0.17],[0.235,-0.17],[0.22,-0.27],[0.25,-0.33],[0.3,-0.325],[0.29,-0.26]],null,0.026,0.003),M.drk); // mag behind the grip
-  railTop(g,0.18,-0.12,-0.026,0.026,0.0);
-  put(g,BOX(0.066,0.012,0.1),M.drk,0,-0.028,0.33);  // cheek rest
-  for(const sx of[-1,1])for(let i=0;i<4;i++)put(g,BOX(0.003,0.02,0.04),M.hole,sx*0.0362,-0.075,-0.33+i*0.05);
-  put(g,BOX(0.004,0.02,0.07),M.hole,0.036,-0.07,0.25);
-  put(g,new THREE.CylinderGeometry(0.0115,0.0125,0.1,12),M.stl,0,-0.065,-0.45,Math.PI/2);put(g,lathe([[0.008,-0.5],[0.015,-0.5],[0.015,-0.545],[0.008,-0.545]],14),M.blk,0,-0.065,0);
-  put(g,BOX(0.072,0.06,0.03),M.rub,0,-0.135,0.445);
+  put(g,sideGeo([[-0.43,-0.062],[-0.36,-0.05],[-0.2,-0.04],[0.2,-0.036],[0.3,-0.03],[0.4,-0.036],[0.44,-0.066],[0.445,-0.205],[0.41,-0.222],[0.33,-0.2],[0.3,-0.17],[0.2,-0.15],[0.06,-0.142],[-0.04,-0.1],[-0.43,-0.1]],null,0.062,0.008),snpSkin); // housing
+  // forend: deeper than the housing, finger ribs, drops into a hand stop at the muzzle end
+  put(g,sideGeo([[-0.04,-0.096],[-0.385,-0.096],[-0.408,-0.11],[-0.414,-0.152],[-0.398,-0.192],[-0.366,-0.196],[-0.35,-0.172],[-0.13,-0.164],[-0.06,-0.154]],null,0.068,0.008),snpSkin);
+  for(const sx of[-1,1])for(let i=0;i<7;i++)put(g,BOX(0.003,0.034,0.008),M.hole,sx*0.0425,-0.132,-0.31+i*0.028);
+  // full-hand trigger guard sweeping from the forend down and back to the grip heel
+  put(g,sideGeo([[-0.075,-0.15],[-0.035,-0.15],[-0.024,-0.27],[0.19,-0.283],[0.206,-0.298],[0.19,-0.312],[-0.032,-0.31],[-0.064,-0.292],[-0.078,-0.22]],null,0.026,0.005),M.drk);
+  put(g,sideGeo([[0.3,-0.17],[0.235,-0.17],[0.22,-0.27],[0.25,-0.33],[0.3,-0.325],[0.29,-0.26]],null,0.026,0.003),M.drk);    // mag behind the grip
+  put(g,BOX(0.03,0.012,0.06),M.blk,0,-0.33,0.275,0.25);
+  // raised optic rail on its mount, folding iron sights
+  put(g,sideGeo([[0.2,-0.036],[-0.14,-0.04],[-0.13,-0.024],[0.19,-0.02]],null,0.03,0.003),M.drk);railTop(g,0.18,-0.12,-0.016,0.026,0.0);
+  put(g,BOX(0.03,0.03,0.012),M.blk,0,-0.03,-0.4);for(const sx of[-1,1])put(g,BOX(0.004,0.03,0.016),M.blk,sx*0.01,-0.004,-0.4);
+  put(g,BOX(0.066,0.014,0.11),M.drk,0,-0.03,0.34);                                                                            // cheek rest
+  for(const sx of[-1,1]){put(g,BOX(0.004,0.03,0.09),M.hole,sx*0.0395,-0.07,0.27);put(g,BOX(0.003,0.004,0.6),M.drk,sx*0.0395,-0.098,0.02);put(g,BOX(0.004,0.012,0.012),M.blk,sx*0.0395,-0.07,0.15);} // ejection ports (ambi), seam, selector
+  put(g,BOX(0.016,0.014,0.03),M.blk,-0.04,-0.06,-0.2);                                                                       // charging handle, left side front
+  put(g,new THREE.CylinderGeometry(0.0115,0.0125,0.08,12),M.stl,0,-0.065,-0.46,Math.PI/2);put(g,lathe([[0.008,-0.5],[0.015,-0.5],[0.015,-0.545],[0.008,-0.545]],14),M.blk,0,-0.065,0);
+  put(g,BOX(0.072,0.18,0.028),M.rub,0,-0.13,0.452);
   rifleGrip(g,M.rub,M.blk);
-  redDot(g,0.04,-0.018);
-  for(const sx of[-1,1]){put(g,BOX(0.002,0.004,0.78),M.drk,sx*0.0365,-0.098,0.0);put(g,BOX(0.002,0.05,0.12),M.drk,sx*0.0365,-0.07,0.08);put(g,BOX(0.004,0.012,0.012),M.blk,sx*0.034,-0.05,0.18);} // housing seam, side panel, selector
-  put(g,BOX(0.03,0.04,0.012),M.blk,0,-0.04,-0.42);for(const sx of[-1,1])put(g,BOX(0.004,0.03,0.016),M.blk,sx*0.01,-0.012,-0.42); // folding front sight
-  leftHand(g,-0.28,-0.125);rifleHands(g);gunFlash(g,-0.58,-0.065,0.36);})();
+  redDot(g,0.04,-0.012);
+  leftHand(g,-0.29,-0.168);rifleHands(g);gunFlash(g,-0.58,-0.065,0.36);})();
 
 /* ---- FAL ---- */
 (function buildFAL(){const M=gunMats,g=new THREE.Group();g.position.y=-0.025;snpModel.add(g);primGroups.fal=g;
@@ -1753,7 +1885,7 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   put(g,sideGeo([[-0.27,-0.032],[-0.6,-0.04],[-0.61,-0.05],[-0.61,-0.09],[-0.6,-0.1],[-0.27,-0.104]],null,0.056,0.006),snpSkin);
   for(const sx of[-1,1])for(let i=0;i<7;i++)put(g,BOX(0.003,0.034,0.014),M.hole,sx*0.0342,-0.07,-0.31-i*0.04);
   put(g,new THREE.CylinderGeometry(0.009,0.009,0.42,10),M.stl,0,-0.025,-0.47,Math.PI/2);put(g,new THREE.CylinderGeometry(0.014,0.014,0.04,12),M.blk,0,-0.03,-0.66,Math.PI/2);
-  put(g,new THREE.CylinderGeometry(0.0125,0.0135,0.4,12),M.stl,0,-0.065,-0.78,Math.PI/2);
+  put(g,new THREE.CylinderGeometry(0.0125,0.0135,0.415,12),M.stl,0,-0.065,-0.787,Math.PI/2);
   put(g,BOX(0.03,0.05,0.03),M.blk,0,-0.04,-0.85);for(const sx of[-1,1])put(g,BOX(0.005,0.03,0.02),M.blk,sx*0.012,-0.005,-0.85);put(g,BOX(0.003,0.024,0.004),M.blk,0,-0.006,-0.85);
   put(g,lathe([[0.008,-0.98],[0.016,-0.98],[0.016,-1.08],[0.012,-1.085],[0.008,-1.085]],14),M.blk,0,-0.065,0);for(const sx of[-1,1])put(g,BOX(0.004,0.008,0.07),M.hole,sx*0.0162,-0.065,-1.04);
   put(g,BOX(0.032,0.16,0.068),M.drk,0,-0.185,-0.04,0.12);put(g,BOX(0.034,0.012,0.074),M.blk,0,-0.265,-0.05,0.12);for(let i=0;i<3;i++)put(g,BOX(0.034,0.004,0.06),M.blk,0,-0.14-i*0.03,-0.036-i*0.004,0.12);
@@ -1778,7 +1910,7 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   put(g,sideGeo([[0.17,-0.03],[0.4,-0.04],[0.43,-0.055],[0.43,-0.225],[0.405,-0.235],[0.36,-0.2],[0.2,-0.13],[0.17,-0.1]],[[[0.22,-0.06],[0.37,-0.066],[0.38,-0.17],[0.34,-0.165],[0.23,-0.11]]],0.044,0.005),snpSkin); // UMP folding polymer stock
   put(g,BOX(0.05,0.19,0.02),M.rub,0,-0.135,0.436);
   redDot(g,-0.04,-0.011);
-  leftHand(g,-0.17,-0.13);rifleHands(g);gunFlash(g,-0.39,-0.06,0.3);})();
+  leftHand(g,-0.2,-0.13);rifleHands(g);gunFlash(g,-0.39,-0.06,0.3);})();
 
 /* ---- MP5K ---- */
 (function buildMP5K(){const M=gunMats,g=new THREE.Group();g.position.y=-0.025;snpModel.add(g);primGroups.mp5k=g;
@@ -1787,7 +1919,7 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   put(g,new THREE.CylinderGeometry(0.0135,0.0135,0.27,14),snpSkin,0,-0.026,-0.03,Math.PI/2);                     // cocking tube
   put(g,BOX(0.008,0.016,0.026),M.blk,-0.028,-0.024,-0.13);put(g,BOX(0.026,0.008,0.008),M.blk,-0.042,-0.02,-0.13); // cocking handle
   put(g,sideGeo([[-0.152,-0.052],[-0.21,-0.052],[-0.222,-0.066],[-0.222,-0.118],[-0.2,-0.122],[-0.152,-0.11]],null,0.05,0.005),snpSkin); // nose / handstop block
-  for(const sx of[-1,1])put(g,BOX(0.004,0.03,0.008),M.blk,sx*0.012,-0.028,-0.205);put(g,lathe([[0.012,-0.198],[0.016,-0.2],[0.016,-0.214],[0.012,-0.216]],16),M.blk,0,-0.018,0); // front sight hood
+  for(const sx of[-1,1])put(g,BOX(0.005,0.03,0.008),M.blk,sx*0.0115,-0.03,-0.207);put(g,lathe([[0.012,-0.198],[0.016,-0.2],[0.016,-0.214],[0.012,-0.216]],16),M.blk,0,-0.018,0); // front sight hood
   put(g,new THREE.CylinderGeometry(0.0105,0.0105,0.07,14),M.stl,0,-0.064,-0.255,Math.PI/2);
   put(g,lathe([[0.008,-0.262],[0.0145,-0.262],[0.0145,-0.296],[0.011,-0.3],[0.008,-0.3]],16),M.blk,0,-0.064,0);   // tri-lug
   for(let i=0;i<3;i++){const a=i/3*TAU;put(g,BOX(0.004,0.004,0.01),M.blk,Math.cos(a)*0.016,-0.064+Math.sin(a)*0.016,-0.268);}
@@ -1843,10 +1975,12 @@ let spasPump=null;
   for(let i=0;i<8;i++)put(spasPump,BOX(0.06,0.003,0.012),M.blk,0,-0.1425,-0.31-i*0.028);
   for(const sx of[-1,1])for(let i=0;i<8;i++)put(spasPump,BOX(0.002,0.036,0.01),M.blk,sx*0.0422,-0.1,-0.31-i*0.028);
   rifleGrip(g,M.rub,M.blk);put(g,BOX(0.05,0.022,0.12),snpSkin,0,-0.138,0.095); // grip mount under the receiver
-  rod(g,new V3(0.024,-0.035,0.13),new V3(0.024,-0.02,-0.2),0.006,M.blk);rod(g,new V3(-0.024,-0.035,0.13),new V3(-0.024,-0.02,-0.2),0.006,M.blk);
+  put(g,sideGeo([[0.155,-0.032],[0.178,-0.04],[0.196,-0.06],[0.198,-0.1],[0.176,-0.13],[0.155,-0.13]],null,0.054,0.004),snpSkin);              // rounded rear of the receiver
+  put(g,BOX(0.062,0.026,0.034),M.blk,0,-0.034,0.178);put(g,new THREE.CylinderGeometry(0.007,0.007,0.07,10),M.stl,0,-0.034,0.188,0,0,Math.PI/2);    // stock hinge with its pin
+  rod(g,new V3(0.026,-0.03,0.18),new V3(0.026,-0.02,-0.2),0.006,M.blk);rod(g,new V3(-0.026,-0.03,0.18),new V3(-0.026,-0.02,-0.2),0.006,M.blk);        // folded stock arms along the top
   put(g,BOX(0.054,0.02,0.04),M.blk,0,-0.02,-0.21);put(g,BOX(0.054,0.05,0.012),M.blk,0,-0.04,-0.232,0.2);
   redDot(g,0.05,-0.03);
-  {const lh=new THREE.Group();spasPump.add(lh);leftHand(lh,-0.41,-0.135);}
+  {const lh=new THREE.Group();spasPump.add(lh);leftHand(lh,-0.41,-0.135,false,spasPump);}
   rifleHands(g);gunFlash(g,-0.8,-0.05,0.5);})();
 // default finishes: the Intervention keeps its tan, everything else ships in black, the RPD in wood
 const FACTORY_FINISH={int:'factory',bar:'polymer',m4:'polymer',acr:'polymer',scar:'factory',tar:'polymer',fal:'polymer',ump:'polymer',mp5k:'polymer',rpd:'woodstock',spas:'polymer'};
@@ -1862,22 +1996,23 @@ const pisMats=(()=>{const blk=new THREE.MeshPhongMaterial({color:0x121314,shinin
 function secRoot(id){const g=new THREE.Group();g.name=id;pisModel.add(g);secGroups[id]=g;g.userData.slide=new THREE.Group();g.add(g.userData.slide);return g;}
 function pistolHands(g){ // two-handed grip used by every handgun: right hand on the grip, left hand cupping it with its fingers over the right
   const H=gloveM,fz=y=>0.074+(-0.098-y)*0.298;
-  hand(g,BOX(0.042,0.098,0.042),H,0.004,-0.15,0.152,-0.33);
-  for(let i=0;i<3;i++){const y=-0.13-i*0.022;finger(g,new V3(0.026,y,fz(y)+0.004),new V3(-0.018,y-0.002,fz(y)-0.01),0.0082);}
+  hand(g,BOX(0.056,0.1,0.05),H,0.004,-0.152,0.15,-0.33);                                                  // shooting palm: covers the backstrap and both sides of the grip
+  const hw=0.019;for(let i=0;i<3;i++){const y=-0.128-i*0.022,f=fz(y),r=0.0078;wrapFinger(g,[new V3(hw-0.004,y,f+0.012),new V3(hw-0.001,y,f-0.003),new V3(0,y,f-r),new V3(-hw+0.001,y,f-0.002),new V3(-hw+0.002,y,f+0.01)],r);}
   finger(g,new V3(0.016,-0.094,0.05),new V3(0.012,-0.094,0.018),0.0068);                      // trigger finger
-  finger(g,new V3(0.024,-0.075,0.12),new V3(0.022,-0.068,0.07),0.0078);                        // right thumb high on the frame
+  wrapFinger(g,[new V3(-0.019,-0.076,0.126),new V3(-0.0215,-0.069,0.1),new V3(-0.022,-0.068,0.072)],0.0072); // thumbs-forward: shooting thumb crosses to the left side of the frame
   const L=new THREE.Group();L.userData.isLH=true;g.add(L);
-  hand(L,BOX(0.02,0.082,0.066),H,-0.027,-0.16,0.115,-0.3);
-  for(let i=0;i<3;i++){const y=-0.14-i*0.021;finger(L,new V3(-0.03,y,fz(y)-0.004),new V3(0.026,y,fz(y)-0.016),0.0078);}
-  finger(L,new V3(-0.024,-0.08,0.085),new V3(-0.022,-0.07,0.035),0.0078);                       // support thumb forward along the frame
+  hand(L,BOX(0.026,0.084,0.07),H,-0.03,-0.16,0.118,-0.3);                                                // support palm against the left grip panel
+  for(let i=0;i<3;i++){const y=-0.136-i*0.022,f=fz(y)-0.016,r=0.0074;wrapFinger(L,[new V3(-hw-0.008,y,f+0.022),new V3(-hw-0.004,y,f+0.0),new V3(0,y,f-r+0.001),new V3(hw-0.002,y,f+0.002)],r);} // over the shooting hand's fingers, ending inside the right palm's outline
+  wrapFinger(L,[new V3(-0.028,-0.094,0.1),new V3(-0.026,-0.086,0.08),new V3(-0.0245,-0.084,0.062)],0.0072);               // support thumb tucked under the shooting thumb
   sleeve(g,new V3(0.01,-0.2,0.17),new V3(0.085,-0.4,0.44),0.036);sleeve(L,new V3(-0.03,-0.2,0.15),new V3(-0.12,-0.4,0.42),0.036);
 }
 function secFlash(g,z,y,s){const fl=new THREE.Sprite(flashMat());fl.position.set(0,y,z);fl.scale.set(s,s,1);fl.visible=false;g.add(fl);g.userData.flash=fl;}
 // common lower half for the compact pistols: frame with trigger guard, grip panels, trigger, mag base
 function pistolLower(g,zf,o){const M=pisMats;o=o||{};
-  const guard=o.round?[[-0.03,-0.079],[0.034,-0.079],[0.03,-0.104],[0.012,-0.116],[-0.016,-0.114],[-0.028,-0.098]]:[[-0.032,-0.079],[0.034,-0.079],[0.028,-0.114],[-0.026,-0.114]];
-  const outer=o.round?[[zf,-0.044],[0.125,-0.044],[0.13,-0.066],[0.11,-0.072],[0.072,-0.072],[0.05,-0.076],[0.042,-0.11],[0.018,-0.126],[-0.02,-0.124],[-0.04,-0.106],[-0.046,-0.08],[-0.056,-0.072],[zf,-0.062]]
-    :[[zf,-0.044],[0.125,-0.044],[0.13,-0.066],[0.11,-0.072],[0.072,-0.072],[0.05,-0.076],[0.038,-0.124],[-0.04,-0.126],[-0.052,-0.112],[-0.048,-0.095],[-0.058,-0.075],[zf,-0.064]];
+  // trigger guards sized to a real gloved finger: about a third of the slide long, barely deeper than the slide
+  const guard=o.round?[[-0.02,-0.078],[0.04,-0.078],[0.036,-0.095],[0.022,-0.103],[-0.004,-0.102],[-0.015,-0.093]]:[[-0.022,-0.078],[0.04,-0.078],[0.036,-0.1],[-0.016,-0.1]];
+  const outer=o.round?[[zf,-0.044],[0.125,-0.044],[0.13,-0.066],[0.11,-0.072],[0.072,-0.072],[0.054,-0.076],[0.047,-0.099],[0.026,-0.111],[-0.008,-0.11],[-0.028,-0.098],[-0.034,-0.08],[-0.044,-0.072],[zf,-0.062]]
+    :[[zf,-0.044],[0.125,-0.044],[0.13,-0.066],[0.11,-0.072],[0.072,-0.072],[0.054,-0.076],[0.046,-0.108],[-0.026,-0.109],[-0.034,-0.1],[-0.032,-0.088],[-0.042,-0.074],[zf,-0.062]];
   put(g,sideGeo(outer,[guard],o.w||0.03,0.002),o.frameM||pisSkin);
   put(g,sideGeo([[0.06,-0.072],[0.13,-0.072],[0.172,-0.198],[0.165,-0.212],[0.108,-0.212],[0.074,-0.098]],null,o.w||0.03,0.003),o.frameM||pisSkin);
   if(o.grooves)for(let i=0;i<3;i++)put(g,BOX((o.w||0.03)+0.002,0.004,0.012),M.blk,0,-0.118-i*0.028,0.082+i*0.012,-0.35);
@@ -1905,8 +2040,8 @@ function serr(sl,z0,n,w,y,h){for(let i=0;i<n;i++)for(const sx of[-1,1])put(sl,BO
   put(g,BOX(0.005,0.018,0.012),M.blk,0,0.005,-0.138);
   put(g,new THREE.CircleGeometry(0.0072,18),M.port,0,-0.022,-0.1546,0,Math.PI,0);
   for(const sx of[-1,1])put(g,BOX(0.002,0.006,0.1),M.blk,sx*0.0152,-0.03,-0.085); // side flutes on the barrel block
-  put(g,sideGeo([[-0.148,-0.048],[0.128,-0.048],[0.135,-0.07],[0.11,-0.075],[0.072,-0.075],[0.05,-0.078],[0.038,-0.128],[-0.04,-0.13],[-0.052,-0.115],[-0.048,-0.098],[-0.06,-0.078],[-0.148,-0.068]],
-    [[[-0.032,-0.081],[0.034,-0.081],[0.028,-0.118],[-0.026,-0.118]]],0.03,0.002),pisSkin);
+  put(g,sideGeo([[-0.148,-0.048],[0.128,-0.048],[0.135,-0.07],[0.11,-0.075],[0.072,-0.075],[0.054,-0.078],[0.046,-0.112],[-0.028,-0.114],[-0.038,-0.104],[-0.036,-0.09],[-0.048,-0.076],[-0.148,-0.068]],
+    [[[-0.022,-0.081],[0.04,-0.081],[0.036,-0.104],[-0.016,-0.104]]],0.03,0.002),pisSkin);
   put(g,sideGeo([[0.06,-0.074],[0.13,-0.074],[0.175,-0.2],[0.168,-0.214],[0.11,-0.214],[0.075,-0.1]],null,0.03,0.003),pisSkin);
   put(g,sideGeo([[0.075,-0.085],[0.122,-0.08],[0.165,-0.198],[0.114,-0.205]],null,0.036,0.002),M.grip);
   put(g,BOX(0.006,0.026,0.008),M.blk,0,-0.093,0.012,0.25);
@@ -1965,26 +2100,31 @@ let mag44Cyl=null;
   put(mag44Cyl,new THREE.CylinderGeometry(0.0045,0.0045,0.094,10),pisMats.blk,0,0,0,Math.PI/2);  // ejector rod / axle
   for(let i=0;i<6;i++){const a=i/6*TAU+Math.PI/6;put(mag44Cyl,BOX(0.006,0.004,0.056),M.blk,Math.cos(a)*0.0262,Math.sin(a)*0.0262,0,0,0,a+Math.PI/2);
     put(mag44Cyl,new THREE.CircleGeometry(0.0062,12),M.port,Math.cos(a+Math.PI/6)*0.0145,Math.sin(a+Math.PI/6)*0.0145,-0.0445,0,Math.PI,0);}
-  put(g,sideGeo([[-0.03,-0.068],[0.06,-0.068],[0.052,-0.1],[0.03,-0.122],[-0.004,-0.124],[-0.024,-0.106],[-0.032,-0.084]],[[[-0.02,-0.074],[0.046,-0.074],[0.04,-0.097],[0.024,-0.112],[0.0,-0.113],[-0.016,-0.1]]],0.012,0.001),pisSkin);
+  put(g,sideGeo([[-0.016,-0.068],[0.06,-0.068],[0.054,-0.093],[0.036,-0.108],[0.008,-0.11],[-0.01,-0.098],[-0.018,-0.08]],[[[-0.006,-0.073],[0.048,-0.073],[0.043,-0.09],[0.03,-0.1],[0.01,-0.101],[-0.002,-0.092]]],0.012,0.001),pisSkin);
   put(g,BOX(0.006,0.03,0.008),M.blk,0,-0.088,0.018,0.3);
   put(g,sideGeo([[0.07,-0.066],[0.13,-0.066],[0.176,-0.196],[0.17,-0.216],[0.112,-0.218],[0.078,-0.1]],null,0.036,0.006),M.wood);
   {const hm=new THREE.Group();hm.position.set(0,-0.03,0.118);g.add(hm);put(hm,BOX(0.009,0.03,0.012),M.blk,0,0.012,0,-0.35);put(hm,BOX(0.014,0.006,0.02),M.blk,0,0.028,0.012,-0.2);g.userData.hammer=hm;}
   put(g,BOX(0.004,0.008,0.016),M.blk,-0.017,-0.044,0.07); // cylinder release
   pistolHands(g);secFlash(g,-0.235,-0.014,0.34);
 })();
-(function buildPP2000(){ // PP2000: polymer receiver, huge forward trigger guard, top rail with flip sights, mag in the grip
+(function buildPP2000(){ // PP2000 (MW2): stubby polymer receiver, solid front grip moulded into the trigger guard, short top rail, T charging handle at the rear, mag in the raked grip
   const g=secRoot('pp2k'),M=pisMats;
-  put(g,sideGeo([[-0.15,-0.012],[0.128,-0.012],[0.142,-0.024],[0.142,-0.072],[-0.135,-0.072],[-0.152,-0.056],[-0.152,-0.024]],null,0.038,0.004),pisSkin);
-  for(let i=0;i<4;i++)for(const sx of[-1,1])put(g,BOX(0.002,0.022,0.008),M.port,sx*0.0205,-0.045,-0.12+i*0.016); // vents
-  put(g,BOX(0.024,0.006,0.24),M.blk,0,-0.008,-0.005);for(let z=-0.115;z<0.11;z+=0.014)put(g,BOX(0.028,0.004,0.006),M.blk,0,-0.004,z);
-  put(g,sideGeo([[-0.122,-0.004],[-0.11,-0.004],[-0.112,0.014],[-0.118,0.014]],null,0.005,0),M.blk);for(const sx of[-1,1])put(g,BOX(0.004,0.016,0.008),M.blk,sx*0.007,0.004,-0.116);
-  for(const sx of[-1,1])put(g,BOX(0.009,0.018,0.01),M.blk,sx*0.009,0.005,0.112);
-  put(g,new THREE.CylinderGeometry(0.0095,0.0095,0.04,12),M.blk,0,-0.036,-0.17,Math.PI/2);put(g,new THREE.CircleGeometry(0.0055,12),M.port,0,-0.036,-0.1905,0,Math.PI,0);
-  put(g,BOX(0.03,0.01,0.018),M.blk,0,-0.016,0.135);put(g,BOX(0.05,0.006,0.012),M.blk,0,-0.012,0.142); // T charging handle
-  put(g,sideGeo([[-0.13,-0.072],[0.07,-0.072],[0.055,-0.13],[0.03,-0.135],[-0.04,-0.135],[-0.13,-0.122],[-0.142,-0.1]],[[[-0.115,-0.08],[0.04,-0.08],[0.035,-0.12],[-0.04,-0.125],[-0.115,-0.112]]],0.028,0.003),pisSkin);
-  put(g,sideGeo([[0.06,-0.072],[0.14,-0.072],[0.176,-0.2],[0.168,-0.214],[0.108,-0.214],[0.074,-0.098]],null,0.032,0.003),pisSkin);
-  for(let i=0;i<5;i++)put(g,BOX(0.034,0.003,0.01),M.blk,0,-0.11-i*0.02,0.09+i*0.009,-0.33);
-  put(g,BOX(0.006,0.026,0.008),M.blk,0,-0.093,0.012,0.25);put(g,BOX(0.03,0.05,0.046),M.blk,0,-0.232,0.148,-0.3); // mag base sticking out
+  put(g,sideGeo([[-0.13,-0.014],[0.115,-0.014],[0.138,-0.026],[0.142,-0.07],[-0.12,-0.07],[-0.135,-0.052],[-0.135,-0.028]],null,0.036,0.004),pisSkin);       // receiver
+  put(g,sideGeo([[0.142,-0.03],[0.168,-0.034],[0.172,-0.052],[0.142,-0.062]],[[[0.149,-0.039],[0.162,-0.041],[0.163,-0.05],[0.149,-0.053]]],0.022,0.002),pisSkin); // rear sling / stock lug
+  for(let i=0;i<5;i++)for(const sx of[-1,1])put(g,BOX(0.002,0.018,0.007),M.port,sx*0.0225,-0.042,-0.1+i*0.013);                     // cooling slots
+  put(g,BOX(0.022,0.006,0.17),M.blk,0,-0.01,-0.005);for(let z=-0.085;z<0.08;z+=0.013)put(g,BOX(0.026,0.004,0.006),M.blk,0,-0.006,z); // short top rail
+  put(g,sideGeo([[-0.09,-0.006],[-0.078,-0.006],[-0.08,0.012],[-0.086,0.012]],null,0.005,0),M.blk);for(const sx of[-1,1])put(g,BOX(0.004,0.014,0.008),M.blk,sx*0.007,0.002,-0.084); // flip front sight
+  for(const sx of[-1,1])put(g,BOX(0.008,0.016,0.01),M.blk,sx*0.008,0.003,0.075);
+  put(g,new THREE.CylinderGeometry(0.0092,0.0092,0.04,12),M.blk,0,-0.036,-0.152,Math.PI/2);put(g,lathe([[0.006,-0.172],[0.0105,-0.172],[0.0105,-0.19],[0.006,-0.19]],12),M.blk,0,-0.036,0);
+  put(g,new THREE.CircleGeometry(0.0055,12),M.port,0,-0.036,-0.1905,0,Math.PI,0);
+  put(g,BOX(0.03,0.01,0.018),M.blk,0,-0.016,0.128);put(g,BOX(0.048,0.007,0.012),M.blk,0,-0.012,0.135);                                // T charging handle
+  // lower: solid front grip moulded into the guard, finger-sized trigger opening
+  put(g,sideGeo([[-0.122,-0.07],[0.07,-0.07],[0.056,-0.08],[0.048,-0.106],[0.0,-0.112],[-0.04,-0.114],[-0.06,-0.13],[-0.1,-0.134],[-0.124,-0.124],[-0.134,-0.098]],[[[-0.03,-0.078],[0.042,-0.078],[0.038,-0.1],[-0.024,-0.104]]],0.03,0.004),pisSkin);
+  for(let i=0;i<3;i++)put(g,BOX(0.032,0.006,0.008),M.blk,0,-0.128+i*0.002,-0.11+i*0.022);                                            // finger ridges under the front grip
+  put(g,sideGeo([[0.062,-0.07],[0.13,-0.07],[0.168,-0.196],[0.16,-0.21],[0.106,-0.21],[0.074,-0.096]],null,0.032,0.004),pisSkin);   // raked grip
+  for(let i=0;i<5;i++)put(g,BOX(0.036,0.003,0.01),M.blk,0,-0.105-i*0.02,0.09+i*0.009,-0.33);
+  put(g,BOX(0.006,0.024,0.008),M.blk,0,-0.091,0.012,0.25);put(g,BOX(0.03,0.04,0.044),M.blk,0,-0.226,0.146,-0.3);                       // trigger, mag base
+  for(const sx of[-1,1])put(g,BOX(0.004,0.012,0.014),M.blk,sx*0.019,-0.06,0.06);                                                     // ambi safety
   pistolHands(g);secFlash(g,-0.21,-0.036,0.26);
 })();
 let m1887Lever=null;
@@ -2058,11 +2198,13 @@ function buildRig(id,grp){
   if(cfg.lid){const P=new THREE.Group(),L=pick(cfg.lid);P.position.set(...cfg.lidPivot);F.add(P);for(const o of L)P.attach(o);R.lid=P;}
   F.traverse(o=>{if(o.userData&&o.userData.isLH&&!R.lh)R.lh=o;});
   if(!R.lh){const L=new THREE.Group();L.userData.isLH=true;L.userData.temp=true;F.add(L); // gun without a visible support hand: one appears for the reload
-    F.remove(L);const H=leftHand(F,0.02,-0.4);H.userData.temp=true;H.visible=false;R.lh=H;R.lhRest=H.position.clone();}
+    F.remove(L);const H=leftHand(F,0.02,-0.4);H.position.set(-0.1,-0.02,0.08); // parked low and to the left so its way in and out never crosses the mag
+   H.userData.temp=true;H.visible=false;R.lh=H;R.lhRest=H.position.clone();}
   else R.lhRest=R.lh.position.clone();
   R.lhC=centerOf(R.lh).clone().sub(R.lh.position).add(R.lhRest);
   {const gb=new THREE.Box3(),tb=new THREE.Box3();R.lh.traverse(o=>{if(o.isMesh&&o.material===gloveM){tb.setFromObject(o);gb.union(tb);}}); // the glove itself, so targets put the palm (not the middle of the forearm) where it should be
     if(gb.isEmpty()){R.palmOff=new V3();R.gloveTop=0;}else{const pc=new V3();gb.getCenter(pc);const cw=pc.clone();pc.applyMatrix4(inv).sub(R.lh.position).add(R.lhRest);R.palmOff=pc.sub(R.lhC);
+      {let mx=-1e9;for(const x of[gb.min.x,gb.max.x])for(const y of[gb.min.y,gb.max.y])for(const z of[gb.min.z,gb.max.z])mx=Math.max(mx,new V3(x,y,z).applyMatrix4(inv).x);const c0=new V3();gb.getCenter(c0);R.reach=mx-c0.applyMatrix4(inv).x;} // how far the fingers stick out to the right of the palm
       let top=0;for(const x of[gb.min.x,gb.max.x])for(const y of[gb.min.y,gb.max.y])for(const z of[gb.min.z,gb.max.z])top=Math.max(top,new V3(x,y,z).sub(cw).applyMatrix4(new THREE.Matrix4().extractRotation(inv)).dot(R.dir)*-1);R.gloveTop=top;}}
   if(R.mag){const mb=new THREE.Box3().setFromObject(R.mag),cs=[];for(const x of[mb.min.x,mb.max.x])for(const y of[mb.min.y,mb.max.y])for(const z of[mb.min.z,mb.max.z])cs.push(new V3(x,y,z).applyMatrix4(inv));
     const ctr=cs.reduce((a,b)=>a.add(b),new V3()).multiplyScalar(1/8);let far=-1e9;for(const p of cs)far=Math.max(far,p.clone().sub(ctr).dot(R.dir));R.magBot=ctr.clone().addScaledVector(R.dir,far);R.magW=mb.getSize(new V3()).x;R.magZ=ctr.z;R.magFront=Math.min(...cs.map(p=>p.z));} // centre of the mag's base
@@ -2071,7 +2213,11 @@ function buildRig(id,grp){
   if(R.style==='shell'||R.style==='bolt'){const pr=new THREE.Group();R.lh.add(pr);const sh=R.style==='shell';
     const body=new THREE.Mesh(new THREE.CylinderGeometry(sh?0.011:0.0065,sh?0.011:0.0065,sh?0.055:0.07,10),new THREE.MeshPhongMaterial({color:sh?0x9a2418:0xb08a3a,shininess:50}));body.rotation.x=Math.PI/2;pr.add(body);
     const cap=new THREE.Mesh(new THREE.CylinderGeometry(sh?0.0115:0.0068,sh?0.0115:0.0068,sh?0.012:0.012,10),new THREE.MeshPhongMaterial({color:0xc9a24a,shininess:80}));cap.rotation.x=Math.PI/2;cap.position.z=sh?0.03:0.04;pr.add(cap);
-    pr.position.copy(R.lhC).sub(R.lhRest).add(new V3(0.0,0.03,-0.02));pr.visible=false;R.prop=pr;}
+    pr.position.copy(R.lhC).add(R.palmOff).sub(R.lhRest).add(new V3(0.0,0.02,-0.01));pr.visible=false;R.prop=pr;}
+  if(R.style==='revolver'){const pr=new THREE.Group();R.lh.add(pr); // speedloader: knurled body with six rounds pointing forward
+    put(pr,new THREE.CylinderGeometry(0.019,0.019,0.016,16),gunMats.blk,0,0,0.012,Math.PI/2);put(pr,new THREE.CylinderGeometry(0.008,0.008,0.012,10),gunMats.stl,0,0,0.024,Math.PI/2);
+    for(let i=0;i<6;i++){const a=i/6*TAU+Math.PI/6;put(pr,new THREE.CylinderGeometry(0.0046,0.0046,0.03,8),new THREE.MeshPhongMaterial({color:0xb08a3a,shininess:70}),Math.cos(a)*0.0145,Math.sin(a)*0.0145,-0.011,Math.PI/2);}
+    pr.position.copy(R.lhC).add(R.palmOff).sub(R.lhRest).add(new V3(0.0,0.016,-0.022));pr.visible=false;R.prop=pr;}
   return R;
 }
 for(const k in primGroups)RIGS[k]=buildRig(k,primGroups[k]);
@@ -2108,12 +2254,12 @@ function animReload2(R,q,empty,n,el,total,P){
     if(R.mag&&grab>0){R.mag.updateMatrix();const wide=R.magW>0.042?0.028:0; // a box too wide to wrap: cup it from underneath, fingers below the base
       const off=sm(seg(q,0.6,0.68)),side=sm(seg(q,0.63,0.72)),fwd=sm(seg(q,0.65,0.75)),appr=1-sm(seg(q,a0-0.03,a0+0.06)); // reach in from below and in front, leave the same way // letting go: drop off the base first, then out to the left, so the fingers never sweep back through it
       const cup=R.gloveTop>0.035?R.gloveTop+0.004:(st==='lmg'?0.012:0.008)+wide; // a tall grip-hand can't wrap the base, so it sits fully under it
-      const bot=R.magBot.clone().applyMatrix4(R.mag.matrix).addScaledVector(R.dir,cup+off*0.045);bot.x-=side*0.07;bot.addScaledVector(R.dir,0.07*appr);const fz=Math.min(bot.z,R.magFront+R.mag.position.z-0.07);bot.z+=(fz-bot.z)*Math.max(appr,fwd);lhTo(R,bot.sub(R.palmOff),grab);} // palm cups the base, fingers up the side
+      const bot=R.magBot.clone().applyMatrix4(R.mag.matrix).addScaledVector(R.dir,cup+off*0.045);bot.x=bot.x+(Math.min(bot.x,-(R.magW||0.03)/2-(R.reach||0.04)-0.012)-bot.x)*side;bot.addScaledVector(R.dir,0.07*appr);const fz=Math.min(bot.z,R.magFront+R.mag.position.z-0.07);bot.z+=(fz-bot.z)*Math.max(appr,fwd);lhTo(R,bot.sub(R.palmOff),grab);} // palm cups the base, fingers up the side
     const seat=bump(q,0.6,0.67);P.y+=seat*(heavy?0.02:0.014);P.rx-=seat*0.05;
     if(empty&&R.id==='int'){ // work the bolt to chamber the fresh mag: lift, rip back, slam home
       const k=seg(q,0.68,0.9),up=k<0.25?k/0.25:k<0.75?1:1-(k-0.75)/0.25,back=k<0.25?0:k<0.45?(k-0.25)/0.2:k<0.6?1:k<0.75?1-(k-0.6)/0.15:0;
       boltPivot.rotation.x=-sm(up)*1.2;boltPivot.position.z=BOLT_Z+back*0.09;const tl=bump(q,0.66,0.92);P.rz+=tl*0.3;P.rx+=tl*0.05;P.z+=bump(q,0.78,0.84)*0.015;}
-    else if(empty&&st!=='lmg'){const ch=bump(q,0.7,0.86);P.rz+=ch*0.35;P.x+=ch*0.02;P.z+=bump(q,0.76,0.82)*0.02;if(ch>0){const hk=R.id==='ump'||R.id==='mp5k',pr=R.lhC.clone().add(R.palmOff);lhTo(R,(hk?new V3(-0.07,-0.04,pr.z+0.05):new V3(-0.075,-0.07,(R.magZ||0)+0.03)).sub(R.palmOff),ch);}} // bolt release, or the HK slap on the cocking tube // slap the bolt release on the left side
+    else if(empty&&st!=='lmg'){const ch=bump(q,0.7,0.86);P.rz+=ch*0.35;P.x+=ch*0.02;P.z+=bump(q,0.76,0.82)*0.02;if(ch>0){const hk=R.id==='ump'||R.id==='mp5k',pr=R.lhC.clone().add(R.palmOff);const sx=-0.036-(R.reach||0.04);lhTo(R,(hk?new V3(sx,-0.04,pr.z+0.05):new V3(sx,-0.07,(R.magZ||0)+0.03)).sub(R.palmOff),ch);}} // bolt release, or the HK slap on the cocking tube // slap the bolt release on the left side
   }else if(st==='pistol'){
     P.rz+=tilt*0.4;P.rx+=tilt*0.32;P.y+=tilt*0.085;P.x-=tilt*0.045;P.z+=tilt*0.04;
     let d=0;if(q<0.22)d=sm(seg(q,0.08,0.22))*0.32;else if(q<0.36)d=0.5;else d=(1-sm(seg(q,0.36,0.55)))*0.3;
@@ -2127,20 +2273,22 @@ function animReload2(R,q,empty,n,el,total,P){
     P.rz+=tilt*0.62;P.rx+=tilt*0.16;P.y+=tilt*0.08;P.x-=tilt*0.04;P.z+=tilt*0.03;
     const open=sm(seg(q,0.1,0.2))*(1-sm(seg(q,0.68,0.74)));if(mag44Cyl){mag44Cyl.position.x=-0.036*open;mag44Cyl.position.y=-0.032-0.012*open;}
     const up=bump(q,0.2,0.4);P.rx+=up*0.75;P.y+=up*0.03;
-    const load=sm(seg(q,0.4,0.5))*(1-sm(seg(q,0.64,0.72)));lhTo(R,R.port.clone().add(new V3(-0.036,-0.01,-0.07)),load,new V3(0,0,-0.02*bump(q,0.52,0.62)));
+    const push=bump(q,0.05,0.22);if(push>0)lhTo(R,new V3(-0.056,-0.046,0.03).sub(R.palmOff),push); // thumb the cylinder out from the left side
+    const load=sm(seg(q,0.4,0.5))*(1-sm(seg(q,0.64,0.72))),seat=sm(seg(q,0.5,0.58));                 // speedloader up to the back of the swung-out cylinder, rounds pushed home
+    lhTo(R,new V3(-0.036,-0.062,0.135-0.04*seat).sub(R.palmOff),load);if(R.prop)R.prop.visible=load>0.25&&q<0.6;
     const flick=bump(q,0.68,0.76);P.rz-=flick*0.45;
   }else if(st==='bolt'){
     P.rz-=tilt*0.42;P.rx+=tilt*0.14;P.ry+=tilt*0.15;P.y+=tilt*0.04;P.x-=tilt*0.05;
     const open=sm(seg(q,0.08,0.18))*(1-sm(seg(q,0.82,0.92)));const up=Math.min(1,open*2),back=Math.max(0,open*2-1);
     boltPivot.rotation.x=-up*1.2;boltPivot.position.z=BOLT_Z+back*0.09;
     const k=Math.max(1,n),t=seg(q,0.2,0.8),ph=(t*k)%1,on=sm(seg(q,0.14,0.22))*(1-sm(seg(q,0.78,0.86)));
-    lhTo(R,R.port,on,new V3(0,-0.035*(1-Math.sin(ph*Math.PI)),0.02*Math.sin(ph*Math.PI)));if(R.prop)R.prop.visible=on>0.3&&ph<0.7;
+    lhTo(R,R.port.clone().sub(R.palmOff),on,new V3(0,-0.035*(1-Math.sin(ph*Math.PI)),0.02*Math.sin(ph*Math.PI)));if(R.prop)R.prop.visible=on>0.3&&ph<0.7;
     P.y-=on*0.01*Math.sin(ph*Math.PI);
   }else if(st==='shell'){
     const T=SHELL_T[R.id];P.rz-=tilt*0.7;P.rx+=tilt*0.18;P.ry+=tilt*0.2;P.y+=tilt*0.05;P.x-=tilt*0.05;
     const t0=T.start,t1=T.start+T.per*n,on=sm(clamp((el-t0*0.5)/(t0*0.5),0,1))*(1-sm(clamp((el-t1)/T.end,0,1)));
     const ph=n?clamp((el-t0)/T.per,0,n)%1:0,push=Math.sin(ph*Math.PI);
-    lhTo(R,R.port,on,new V3(0,-0.06*(1-push),0.03*(1-push)));if(R.prop)R.prop.visible=on>0.3&&ph<0.75&&el<t1;
+    lhTo(R,R.port.clone().add(new V3(0,-0.024,0.004)).sub(R.palmOff),on,new V3(0,-0.05*(1-push),0.03*(1-push)));if(R.prop)R.prop.visible=on>0.3&&ph<0.75&&el<t1; // palm under the loading port, thumb pushes each shell up and in
     P.y-=push*on*0.008;P.rz-=push*on*0.03;
     if(empty&&el>t1+T.end*0.5){const k=clamp((el-t1-T.end*0.5)/T.pump,0,1),w=Math.sin(k*Math.PI);
       if(R.id==='spas'&&spasPump)spasPump.position.z=w*0.085;if(R.id==='m1887'&&m1887Lever)m1887Lever.rotation.x=w*0.85;P.rx+=w*0.05;}
@@ -2879,9 +3027,9 @@ function hostEnd(win,reason,fk){const M=MP.M;if(!M||M.ph!=='play')return;M.ph='e
 function hostNuke(who){const M=MP.M;if(!M||M.ph!=='play'||M.nuke||!game.R.streaks)return;M.nuke=[who.id,game.time+10];}
 
 /* ---------------- Search & Destroy ---------------- */
-const SITES=[{id:'A',pos:new V3(20.5*MAP_SCALE,0,13.5*MAP_SCALE)},{id:'B',pos:new V3(-20.5*MAP_SCALE,0,20.5*MAP_SCALE)}];
-const SND_SPAWN=[[[0,-25.5],[-6,-21],[6,-21],[-9,-25.5],[9,-25.5],[-15,-24],[15,-24],[-24,-25.5],[24,-25.5],[-30,-21],[30,-21],[-30,-25.5]],
-                 [[0,21],[-6,30],[6,30],[9,21],[-15,25.5],[15,25.5],[-24,21],[-21,30],[21,30],[30,22.5],[-30,30],[30,30]]];
+const SITES=[{id:'A',pos:new V3(-29*MAP_SCALE,0,7*MAP_SCALE)},{id:'B',pos:new V3(47*MAP_SCALE,0,3*MAP_SCALE)}]; // A: the break in the crashed plane, B: hangar floor beside the helicopter
+const SND_SPAWN=[[[6,-35],[0,-35],[12,-35],[-8,-35],[18,-35.5],[24,-35.5],[-12,-35.5],[-18,-35.5],[3,-33.2],[9,-33.2],[15,-33],[-6,-33.2]],   // attackers: behind the pipeline
+                 [[6,38],[0,38],[12,38],[-6,38],[18,38.5],[23,38.5],[-12,38],[-18,38.5],[3,36.8],[10,36.6],[15,36.6],[-9,36.8]]];      // defenders: behind the dock
 function sndSideOf(team){const M=MP.M;if(!M)return 0;return team===M.att?0:1;}
 function sndSpawnFor(e){const side=sndSideOf(teamOf(e));const list=SND_SPAWN[side].map(p=>[p[0]*MAP_SCALE,p[1]*MAP_SCALE]);const used=game.ents.filter(x=>x!==e&&x.alive&&teamOf(x)===teamOf(e));
   let best=list[0],bs=-1;for(const s of list){let m=1e9;for(const u of used)m=Math.min(m,Math.hypot(u.pos.x-s[0],u.pos.z-s[1]));m+=Math.random()*0.5;if(m>bs){bs=m;best=s;}}
