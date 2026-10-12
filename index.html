@@ -1026,10 +1026,21 @@ pipeStack(-28.6,-12.8,4.2,true);
 pallet(-19,-24,2);pallet(31.2,-28.2,1);pallet(-30.4,-4.6,1);
 truck(-6.2,11.0);
 // ---- Hangar (east expansion): helicopter on the floor, grating mezzanine on three sides, stairs, side window with an outside ladder ----
-const grateTex=(function(){const N=64,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,N,N);
-  x.clearRect(0,0,N,N);x.fillStyle='#d8d4cc';for(let i=0;i<N;i+=16){x.fillRect(i,0,4,N);}for(let j=0;j<N;j+=8)x.fillRect(0,j,N,2);
-  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;})();
-const grateM=triplanar(new THREE.MeshLambertMaterial({color:0x8a857a,map:grateTex,alphaTest:0.5,side:THREE.DoubleSide}),1/0.45);
+const grateTex=(function(){ // welded bar grating: deep bearing bars with lit top edges, twisted cross rods, worn paint and grime, open gaps you can see through
+  const N=128,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),r=mulberry(77);x.clearRect(0,0,N,N);
+  const BP=8,BW=3.2,CP=32;
+  for(let i=0;i<N;i+=BP){const g=x.createLinearGradient(i,0,i+BW,0);g.addColorStop(0,'#f2ede4');g.addColorStop(0.35,'#d9d3c8');g.addColorStop(1,'#8e877b');x.fillStyle=g;x.fillRect(i,0,BW,N);}
+  for(let j=0;j<N;j+=CP){x.fillStyle='#bdb6aa';x.fillRect(0,j,N,2.2);x.fillStyle='rgba(255,255,250,.5)';x.fillRect(0,j,N,0.7);
+    for(let i=0;i<N;i+=BP){x.fillStyle='rgba(60,50,40,.45)';x.fillRect(i-0.6,j-0.6,BW+1.2,3.4);x.fillStyle='#cfc8bc';x.fillRect(i,j,BW,2.2);}} // weld beads where rods cross bars
+  const im=x.getImageData(0,0,N,N),d=im.data;
+  for(let p=0;p<N*N;p++){if(d[p*4+3]<10)continue;const px=p%N,py=(p/N)|0,n=(r()-0.5)*26,wear=Math.sin(px*0.11+py*0.05)*Math.sin(py*0.07)*14;
+    d[p*4]=Math.max(0,Math.min(255,d[p*4]+n+wear));d[p*4+1]=Math.max(0,Math.min(255,d[p*4+1]+n*0.95+wear*0.9));d[p*4+2]=Math.max(0,Math.min(255,d[p*4+2]+n*0.85+wear*0.7));}
+  x.putImageData(im,0,0);
+  x.globalCompositeOperation='source-atop';
+  for(let k=0;k<26;k++){const cx=r()*N,cy=r()*N,rad=6+r()*22;const g=x.createRadialGradient(cx,cy,0,cx,cy,rad);g.addColorStop(0,`rgba(${r()<0.5?'120,62,30':'70,58,44'},${0.25+r()*0.25})`);g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(cx-rad,cy-rad,rad*2,rad*2);} // rust and boot grime
+  x.globalCompositeOperation='source-over';
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;return t;})();
+const grateM=triplanar(new THREE.MeshLambertMaterial({color:0x8f8a80,map:grateTex,alphaTest:0.5,side:THREE.DoubleSide}),1/0.9);
 function grate(x0,z0,x1,z1,y0,y1){const m=new THREE.Mesh(boxGeo,grateM);m.scale.set(x1-x0,y1-y0,z1-z0);m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);m.castShadow=false;m.receiveShadow=true;scene.add(m);worldMeshes.push(m);
   addCol(x0,y0,z0,x1,y1,z1);addBox((x0+x1)/2,y0-0.08,z0+0.04,x1-x0,0.08,0.08,C.STEEL,false,false);addBox((x0+x1)/2,y0-0.08,z1-0.04,x1-x0,0.08,0.08,C.STEEL,false,false);}
 (function hangar(){
@@ -1057,16 +1068,17 @@ function grate(x0,z0,x1,z1,y0,y1){const m=new THREE.Mesh(boxGeo,grateM);m.scale.
   railing(41.6,Z1-T-MD,X1-T-MD,Z1-T-MD+0.12,MT,MT+1.0);railing(X0+T,Z1-T-MD,36.0,Z1-T-MD+0.12,MT,MT+1.0);
   railing(X0+T,Z0+T,X0+T+0.12,Z0+T+MD,MT,MT+1.0);railing(X0+T,Z1-T-MD,X0+T+0.12,Z1-T,MT,MT+1.0);
   // stairs up to the south run (rises toward +x, steps up onto the mezzanine at its top)
-  {const sx0=36.0,sx1=41.6,sz0=Z1-T-MD-1.25,sz1=Z1-T-MD;ramps.push({x0:sx0,x1:sx1,z0:sz0,z1:sz1,y0:0,y1:MT});
+  {const sx0=36.0,sx1=41.6,sz0=Z1-T-MD-1.9,sz1=Z1-T-MD;ramps.push({x0:sx0,x1:sx1,z0:sz0,z1:sz1,y0:0,y1:MT});
     const n=12;for(let i=0;i<n;i++){const xa=sx0+(sx1-sx0)*i/n,xb=sx0+(sx1-sx0)*(i+1)/n,yy=MT*(i+1)/n;addBox((xa+xb)/2,yy-0.08,(sz0+sz1)/2,xb-xa+0.02,0.08,sz1-sz0,C.STEEL,false,true);}
     {const pts=[new THREE.Vector2(sx0,0)];for(let i=0;i<n;i++){const xa=sx0+(sx1-sx0)*i/n,xb=sx0+(sx1-sx0)*(i+1)/n,yy=MT*(i+1)/n-0.08;pts.push(new THREE.Vector2(xa,yy),new THREE.Vector2(xb,yy));}pts.push(new THREE.Vector2(sx1,0));
       const g=new THREE.ExtrudeGeometry(new THREE.Shape(pts),{depth:sz1-sz0-0.04,bevelEnabled:false});g.translate(0,0,sz0+0.02);const m=new THREE.Mesh(g,mat(0x5f6a6e,'paint'));m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m); // solid stepped body, closed back and sides
       for(let i=0;i<n;i++){const xa=sx0+(sx1-sx0)*i/n;addBox(xa+0.03,MT*(i+1)/n-0.16,sz0+0.01,0.06,0.08,0.03,0x9a7a34,false,false);} // worn yellow nosing on the open side
       // railing down the open side: posts, a sloped handrail and mid rail, and a stepped collider so nobody walks off the edge
       const rz=sz0+0.05,run=sx1-sx0,ang=Math.atan2(MT,run),hl=Math.hypot(run,MT);
-      for(let i=0;i<=4;i++){const px=sx0+0.15+(run-0.3)*i/4,py=MT*Math.min(1,(px-sx0)/run);addBox(px,py,rz,0.07,1.0,0.07,C.STEEL,false,false);}
-      for(const hy of[1.0,0.5]){const b=addBox((sx0+sx1)/2,MT/2+hy-0.03,rz,hl,0.06,0.06,C.STEEL,false,false);b.rotation.z=ang;b.userData.slope=[run,MT];}
-      for(let i=0;i<n;i++){const xa=sx0+(sx1-sx0)*i/n,xb=sx0+(sx1-sx0)*(i+1)/n,yy=MT*(i+1)/n;addCol(xa,yy-0.5,rz-0.04,xb,yy+1.05,rz+0.04);}}}
+      const RM=0xb08a2a;for(let i=0;i<=4;i++){const px=sx0+0.15+(run-0.06-0.15)*i/4,py=MT*Math.min(1,(px-sx0)/run);addBox(px,py,rz,0.07,1.0,0.07,RM,false,false);}
+      for(const hy of[1.0,0.5]){const b=addBox((sx0+sx1)/2,MT/2+hy-0.03,rz,hl,0.06,0.06,RM,false,false);b.rotation.z=ang;b.userData.slope=[run,MT];}
+      for(let i=0;i<n;i++){const xa=sx0+(sx1-sx0)*i/n,xb=sx0+(sx1-sx0)*(i+1)/n,yy=MT*(i+1)/n;addCol(xa,yy-0.5,rz-0.04,xb,yy+1.05,rz+0.04);}
+      railing(sx1-0.03,rz-0.03,sx1+0.09,sz1+0.12,MT,MT+1.0);}} // back rail across the top: joins the stair rail to the walkway rail so there's no gap to fall through
   // outside ladder up the north wall to the window
   addLadder(40.6,Z0,'z-',0,MT+0.35);
   // helicopter in the middle bay (walk-through cabin, both side doors open)
@@ -1474,7 +1486,9 @@ function sideGeo(outline,holes,depth,bevel){ // outline in (z,y) gun space, extr
 function put(par,geo,m,x,y,z,rx,ry,rz){const me=new THREE.Mesh(geo,m);me.position.set(x||0,y||0,z||0);me.rotation.set(rx||0,ry||0,rz||0);par.add(me);return me;}
 function rod(par,a,b,r,m,seg){const d=new V3().subVectors(b,a);const len=d.length();const me=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,seg||10),m);
   me.position.copy(a).addScaledVector(d,0.5);me.quaternion.setFromUnitVectors(new V3(0,1,0),d.clone().normalize());par.add(me);return me;}
-function hand(par,geo,m,x,y,z,rx,ry,rz){const me=put(par,geo,m,x,y,z,rx,ry,rz);handMeshes.push(me);return me;}
+const rboxCache={};function RBOX(w,h,d){const k=w+'|'+h+'|'+d;if(rboxCache[k])return rboxCache[k];const g=new THREE.SphereGeometry(1,14,10),P=g.attributes.position; // squared-off ellipsoid: a padded glove block with smooth shading
+  for(let i=0;i<P.count;i++){const f=v=>Math.sign(v)*Math.pow(Math.abs(v),0.42);P.setXYZ(i,f(P.getX(i))*w/2,f(P.getY(i))*h/2,f(P.getZ(i))*d/2);}g.computeVertexNormals();return rboxCache[k]=g;}
+function hand(par,geo,m,x,y,z,rx,ry,rz){if(m===gloveM&&geo.type==='BoxGeometry'){const p=geo.parameters;geo=RBOX(p.width,p.height,p.depth);}const me=put(par,geo,m,x,y,z,rx,ry,rz);handMeshes.push(me);return me;}
 const BOLT_Z=0.12;
 function camoUV(me,tile){ // per-triangle box projection in the gun's own space, constant texel size across every part
   let g=me.geometry;if(g.index)g=g.toNonIndexed();me.updateMatrix();
@@ -1550,23 +1564,28 @@ function camoAll(root,skin,tile){root.traverse(o=>{if(o.isMesh&&o.material===ski
   put(boltPivot,new THREE.SphereGeometry(0.0175,16,12),blk,0.06,0,0);
   put(g,new THREE.CylinderGeometry(0.014,0.014,0.03,14),stl,0.0,-0.09,0.15,Math.PI/2);
   // gloves + sleeves
-  hand(g,BOX(0.064,0.1,0.075),gloveM,0.002,-0.215,0.168,-0.42);
-  hand(g,BOX(0.018,0.026,0.06),gloveM,-0.028,-0.162,0.12,0,0.1,0);
-  hand(g,BOX(0.014,0.014,0.05),gloveM,0.006,-0.165,0.09,0.25);
-  hand(g,BOX(0.09,0.09,0.36),sleeveM,0.075,-0.31,0.37,0.55,-0.35,0);
   const fl=new THREE.Sprite(flashMat());fl.position.set(0,-0.1,-1.32);fl.scale.set(0.42,0.42,1);fl.visible=false;g.add(fl);snpModel.userData.flash=fl;
 })();
 /* ---------------- arsenal: every primary sits in the Intervention's frame (eye line at local y=E, grip under the same hand) ---------------- */
 const primGroups={};const E=0.025;
 (function wrapIntervention(){const ig=new THREE.Group();ig.name='int';for(const c of snpModel.children.slice()){snpModel.remove(c);ig.add(c);}snpModel.add(ig);primGroups.int=ig;ig.userData.flash=snpModel.userData.flash;})();
 const cuffM=new THREE.MeshLambertMaterial({color:0x2a2a24});
-function finger(g,a,b,r){const m=rod(g,a,b,r||0.0085,gloveM,7);handMeshes.push(m);const tip=new THREE.Mesh(new THREE.SphereGeometry((r||0.0085)*1.02,7,5),gloveM);tip.position.copy(b);g.add(tip);handMeshes.push(tip);return m;}
-function sleeve(g,wr,el,r){const s=rod(g,wr,el,r||0.044,sleeveM,12);handMeshes.push(s);const d=new V3().subVectors(el,wr).normalize();
-  const c=new THREE.Mesh(new THREE.CylinderGeometry((r||0.044)*0.82,(r||0.044)*0.82,0.035,12),cuffM);c.position.copy(wr).addScaledVector(d,0.012);c.quaternion.setFromUnitVectors(new V3(0,1,0),d);g.add(c);handMeshes.push(c);
-  for(const t of[0.3,0.55]){const f=new THREE.Mesh(new THREE.TorusGeometry((r||0.044)*1.0,0.004,5,14),sleeveM);f.position.copy(wr).lerp(el,t);f.quaternion.setFromUnitVectors(new V3(0,0,1),d);g.add(f);handMeshes.push(f);}} // fabric folds
+function fseg(g,a,b,r0,r1){const d=new V3().subVectors(b,a),len=d.length();const m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r0,len,9),gloveM);m.position.copy(a).addScaledVector(d,0.5);m.quaternion.setFromUnitVectors(new V3(0,1,0),d.normalize());g.add(m);handMeshes.push(m);return m;}
+function fball(g,p,r){const m=new THREE.Mesh(new THREE.SphereGeometry(r,9,7),gloveM);m.position.copy(p);g.add(m);handMeshes.push(m);return m;}
+function finger(g,a,b,r,curl){r=r||0.0085;fball(g,a,r*1.18); // knuckle
+  let mid=a.clone().lerp(b,0.55);if(curl)mid.add(curl);else{const d=new V3().subVectors(b,a);mid.addScaledVector(new V3(-d.z,0,d.x).normalize().cross(d).normalize(),-d.length()*0.06);} // a slight natural bend
+  const m=fseg(g,a,mid,r*1.05,r*0.98);fball(g,mid,r*0.99);fseg(g,mid,b,r*0.98,r*0.86);fball(g,b,r*0.87);return m;}
+function sleeve(g,wr,el,r){r=r||0.044;const d=new V3().subVectors(el,wr).normalize(),q=new THREE.Quaternion().setFromUnitVectors(new V3(0,1,0),d),len=wr.distanceTo(el);
+  const s=new THREE.Mesh(new THREE.CylinderGeometry(r*1.16,r*0.92,len,14),sleeveM);s.position.copy(wr).lerp(el,0.5);s.quaternion.copy(q);g.add(s);handMeshes.push(s); // forearm swells toward the elbow
+  const add=(geo,m,t)=>{const o=new THREE.Mesh(geo,m);o.position.copy(wr).addScaledVector(d,t);o.quaternion.copy(q);g.add(o);handMeshes.push(o);return o;};
+  add(new THREE.CylinderGeometry(r*0.9,r*0.74,0.07,14),gloveM,0.008);                                          // glove gauntlet over the wrist
+  add(new THREE.CylinderGeometry(r*0.93,r*0.93,0.014,14),cuffM,0.022);                                          // velcro strap
+  add(new THREE.CylinderGeometry(r*0.97,r*0.95,0.03,14),cuffM,0.05);                                            // sleeve cuff
+  for(const t of[0.3,0.55]){const f=new THREE.Mesh(new THREE.TorusGeometry(r*(0.93+0.24*t),0.0045,5,16),sleeveM);f.position.copy(wr).lerp(el,t);f.quaternion.setFromUnitVectors(new V3(0,0,1),d);g.add(f);handMeshes.push(f);}} // fabric folds
 function rifleHands(g){ // right hand on the pistol grip: palm, four fingers wrapped round the front strap, trigger finger, thumb over the top, cuffed sleeve
   hand(g,BOX(0.05,0.098,0.066),gloveM,0.004,-0.214,0.172,-0.42);
   hand(g,BOX(0.054,0.04,0.03),gloveM,0.004,-0.178,0.2,-0.42); // back of the hand / web
+  hand(g,BOX(0.03,0.07,0.02),cuffM,0.032,-0.2,0.18,-0.42); // knuckle pad
   for(let i=0;i<4;i++){const y=-0.186-i*0.022,z=0.123+(-0.19-y)*0.31-0.012;finger(g,new V3(0.03,y,z+0.01),new V3(-0.022,y-0.002,z),0.0088-i*0.0005);}
   finger(g,new V3(0.02,-0.164,0.122),new V3(0.012,-0.166,0.082),0.0075);                    // trigger finger
   finger(g,new V3(-0.024,-0.17,0.17),new V3(-0.028,-0.156,0.118),0.0085);                     // thumb
@@ -1578,8 +1597,10 @@ function leftHand(g0,z,yb,vert){ // support hand under the handguard (or wrapped
   else{hand(g,BOX(0.056,0.024,0.086),gloveM,-0.004,yb-0.016,z,0,0,-0.12);
     for(let i=0;i<4;i++){const zz=z-0.03+i*0.02;finger(g,new V3(0.022,yb-0.022,zz),new V3(0.034,yb+0.016,zz-0.004),0.0078);} // fingers curl up the right side
     finger(g,new V3(-0.026,yb-0.018,z+0.02),new V3(-0.036,yb+0.014,z-0.012),0.0085);}                          // thumb up the left side
-  sleeve(g,new V3(-0.02,yb-0.04,z+0.045),new V3(-0.2,yb-0.27,z+0.36),0.042);
-}
+  if(vert)sleeve(g,new V3(-0.03,yb-0.05,z+0.03),new V3(-0.25,yb-0.25,z+0.3),0.042); // angled out so the forearm clears the mag behind the grip
+  else sleeve(g,new V3(-0.02,yb-0.04,z+0.045),new V3(-0.2,yb-0.27,z+0.36),0.042);
+  return g;}
+rifleHands(primGroups.int); // the Intervention gets the same hands as the rest of the roster
 function rifleGrip(g,rub,blk){
   put(g,sideGeo([[0.04,-0.146],[0.122,-0.146],[0.122,-0.156],[0.106,-0.19],[0.05,-0.19],[0.04,-0.172]],[[[0.056,-0.152],[0.1,-0.152],[0.094,-0.18],[0.058,-0.18]]],0.012,0),blk);
   put(g,BOX(0.006,0.024,0.008),blk,0,-0.162,0.075,0.3);
@@ -1849,8 +1870,7 @@ function pistolHands(g){ // two-handed grip used by every handgun: right hand on
   hand(L,BOX(0.02,0.082,0.066),H,-0.027,-0.16,0.115,-0.3);
   for(let i=0;i<3;i++){const y=-0.14-i*0.021;finger(L,new V3(-0.03,y,fz(y)-0.004),new V3(0.026,y,fz(y)-0.016),0.0078);}
   finger(L,new V3(-0.024,-0.08,0.085),new V3(-0.022,-0.07,0.035),0.0078);                       // support thumb forward along the frame
-  const s1=rod(g,new V3(0.01,-0.2,0.17),new V3(0.085,-0.4,0.44),0.034,sleeveM,12),s2=rod(L,new V3(-0.03,-0.2,0.15),new V3(-0.12,-0.4,0.42),0.034,sleeveM,12);handMeshes.push(s1,s2);
-  for(const [par,a,b] of[[g,new V3(0.01,-0.2,0.17),new V3(0.085,-0.4,0.44)],[L,new V3(-0.03,-0.2,0.15),new V3(-0.12,-0.4,0.42)]]){const d=new V3().subVectors(b,a).normalize();const c=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.03,12),cuffM);c.position.copy(a).addScaledVector(d,0.01);c.quaternion.setFromUnitVectors(new V3(0,1,0),d);par.add(c);handMeshes.push(c);}
+  sleeve(g,new V3(0.01,-0.2,0.17),new V3(0.085,-0.4,0.44),0.036);sleeve(L,new V3(-0.03,-0.2,0.15),new V3(-0.12,-0.4,0.42),0.036);
 }
 function secFlash(g,z,y,s){const fl=new THREE.Sprite(flashMat());fl.position.set(0,y,z);fl.scale.set(s,s,1);fl.visible=false;g.add(fl);g.userData.flash=fl;}
 // common lower half for the compact pistols: frame with trigger guard, grip panels, trigger, mag base
@@ -2038,10 +2058,14 @@ function buildRig(id,grp){
   if(cfg.lid){const P=new THREE.Group(),L=pick(cfg.lid);P.position.set(...cfg.lidPivot);F.add(P);for(const o of L)P.attach(o);R.lid=P;}
   F.traverse(o=>{if(o.userData&&o.userData.isLH&&!R.lh)R.lh=o;});
   if(!R.lh){const L=new THREE.Group();L.userData.isLH=true;L.userData.temp=true;F.add(L); // gun without a visible support hand: one appears for the reload
-    hand(L,BOX(0.06,0.035,0.085),gloveM,0,0,0);hand(L,BOX(0.016,0.04,0.06),gloveM,-0.03,0.015,0);const s=rod(L,new V3(-0.02,-0.03,0.04),new V3(-0.2,-0.28,0.36),0.042,sleeveM,10);handMeshes.push(s);
-    L.position.set(-0.05,-0.42,0.05);L.visible=false;R.lh=L;R.lhRest=L.position.clone();}
+    F.remove(L);const H=leftHand(F,0.02,-0.4);H.userData.temp=true;H.visible=false;R.lh=H;R.lhRest=H.position.clone();}
   else R.lhRest=R.lh.position.clone();
   R.lhC=centerOf(R.lh).clone().sub(R.lh.position).add(R.lhRest);
+  {const gb=new THREE.Box3(),tb=new THREE.Box3();R.lh.traverse(o=>{if(o.isMesh&&o.material===gloveM){tb.setFromObject(o);gb.union(tb);}}); // the glove itself, so targets put the palm (not the middle of the forearm) where it should be
+    if(gb.isEmpty()){R.palmOff=new V3();R.gloveTop=0;}else{const pc=new V3();gb.getCenter(pc);const cw=pc.clone();pc.applyMatrix4(inv).sub(R.lh.position).add(R.lhRest);R.palmOff=pc.sub(R.lhC);
+      let top=0;for(const x of[gb.min.x,gb.max.x])for(const y of[gb.min.y,gb.max.y])for(const z of[gb.min.z,gb.max.z])top=Math.max(top,new V3(x,y,z).sub(cw).applyMatrix4(new THREE.Matrix4().extractRotation(inv)).dot(R.dir)*-1);R.gloveTop=top;}}
+  if(R.mag){const mb=new THREE.Box3().setFromObject(R.mag),cs=[];for(const x of[mb.min.x,mb.max.x])for(const y of[mb.min.y,mb.max.y])for(const z of[mb.min.z,mb.max.z])cs.push(new V3(x,y,z).applyMatrix4(inv));
+    const ctr=cs.reduce((a,b)=>a.add(b),new V3()).multiplyScalar(1/8);let far=-1e9;for(const p of cs)far=Math.max(far,p.clone().sub(ctr).dot(R.dir));R.magBot=ctr.clone().addScaledVector(R.dir,far);R.magW=mb.getSize(new V3()).x;R.magZ=ctr.z;R.magFront=Math.min(...cs.map(p=>p.z));} // centre of the mag's base
   {const P=new THREE.Group();P.position.copy(R.lhC);R.lh.parent.add(P);P.attach(R.lh);R.node=P;R.nodeRest=P.position.clone();} // pivot at the hand so the forearm can swing clear of the gun
   if(cfg.port)R.port=new V3(...cfg.port);
   if(R.style==='shell'||R.style==='bolt'){const pr=new THREE.Group();R.lh.add(pr);const sh=R.style==='shell';
@@ -2063,6 +2087,7 @@ function lhApply(R){const W=R.accW;if(W<=0)return;const d=R.accD.clone();if(W>1)
   R.node.position.copy(R.nodeRest).add(d);
   // swing the forearm out to the left and down as the hand travels back toward the grip, so it never passes through the stock or the right hand
   const back=clamp(d.z/0.3,0,1);R.node.rotation.set(0.3*back*w,-0.32*back*w,0.12*back*w);
+  if(R.palmOff){const po=R.palmOff.clone();R.node.position.add(po).sub(po.applyEuler(R.node.rotation));} // swing about the palm, so the hand stays on its target
   if(R.lh.userData.temp)R.lh.visible=w>0.02;}
 // q: 0..1 through the reload, el/total: seconds (shell reloads), n: rounds going in, P: pose deltas to add to the gun
 function animReload(R,q,empty,n,el,total,P){
@@ -2079,21 +2104,23 @@ function animReload2(R,q,empty,n,el,total,P){
     const a0=st==='lmg'?0.18:0.12,a1=st==='lmg'?0.36:0.3,b0=st==='lmg'?0.46:0.45,b1=0.6;
     if(q<a1)out=sm(seg(q,a0,a1))*0.24;else if(q<b0)out=0.24+Math.sin(seg(q,a1,b0)*Math.PI)*0.4;else out=(1-sm(seg(q,b0,b1)))*0.24;
     if(R.mag){R.mag.position.copy(R.dir).multiplyScalar(out);R.mag.rotation.x=out*(R.id==='tar'?0.3:-0.5);}
-    const grab=sm(seg(q,a0-0.07,a0+0.02))*(1-sm(seg(q,0.66,0.78)));
-    if(R.mag){const tgt=R.magC.clone().add(R.mag.position).add(new V3(-0.005,-0.035,0.0));lhTo(R,tgt,grab);}
-    if(st==='lmg'&&R.lid){const w=bump(q,0.6,0.72);if(w>0)lhTo(R,new V3(0,0.02,0.02),w);} // lays the belt in the tray
+    const grab=sm(seg(q,a0-0.07,a0+0.02))*(1-sm(seg(q,0.72,0.84)));
+    if(R.mag&&grab>0){R.mag.updateMatrix();const wide=R.magW>0.042?0.028:0; // a box too wide to wrap: cup it from underneath, fingers below the base
+      const off=sm(seg(q,0.6,0.68)),side=sm(seg(q,0.63,0.72)),fwd=sm(seg(q,0.65,0.75)),appr=1-sm(seg(q,a0-0.03,a0+0.06)); // reach in from below and in front, leave the same way // letting go: drop off the base first, then out to the left, so the fingers never sweep back through it
+      const cup=R.gloveTop>0.035?R.gloveTop+0.004:(st==='lmg'?0.012:0.008)+wide; // a tall grip-hand can't wrap the base, so it sits fully under it
+      const bot=R.magBot.clone().applyMatrix4(R.mag.matrix).addScaledVector(R.dir,cup+off*0.045);bot.x-=side*0.07;bot.addScaledVector(R.dir,0.07*appr);const fz=Math.min(bot.z,R.magFront+R.mag.position.z-0.07);bot.z+=(fz-bot.z)*Math.max(appr,fwd);lhTo(R,bot.sub(R.palmOff),grab);} // palm cups the base, fingers up the side
     const seat=bump(q,0.6,0.67);P.y+=seat*(heavy?0.02:0.014);P.rx-=seat*0.05;
     if(empty&&R.id==='int'){ // work the bolt to chamber the fresh mag: lift, rip back, slam home
       const k=seg(q,0.68,0.9),up=k<0.25?k/0.25:k<0.75?1:1-(k-0.75)/0.25,back=k<0.25?0:k<0.45?(k-0.25)/0.2:k<0.6?1:k<0.75?1-(k-0.6)/0.15:0;
       boltPivot.rotation.x=-sm(up)*1.2;boltPivot.position.z=BOLT_Z+back*0.09;const tl=bump(q,0.66,0.92);P.rz+=tl*0.3;P.rx+=tl*0.05;P.z+=bump(q,0.78,0.84)*0.015;}
-    else if(empty){const ch=bump(q,0.7,0.86);P.rz+=ch*0.35;P.x+=ch*0.02;P.z+=bump(q,0.76,0.82)*0.02;if(ch>0)lhTo(R,new V3(-0.042,-0.075,R.id==='tar'?0.22:0.0),ch);} // slap the bolt release on the left side
+    else if(empty&&st!=='lmg'){const ch=bump(q,0.7,0.86);P.rz+=ch*0.35;P.x+=ch*0.02;P.z+=bump(q,0.76,0.82)*0.02;if(ch>0){const hk=R.id==='ump'||R.id==='mp5k',pr=R.lhC.clone().add(R.palmOff);lhTo(R,(hk?new V3(-0.07,-0.04,pr.z+0.05):new V3(-0.075,-0.07,(R.magZ||0)+0.03)).sub(R.palmOff),ch);}} // bolt release, or the HK slap on the cocking tube // slap the bolt release on the left side
   }else if(st==='pistol'){
     P.rz+=tilt*0.4;P.rx+=tilt*0.32;P.y+=tilt*0.085;P.x-=tilt*0.045;P.z+=tilt*0.04;
     let d=0;if(q<0.22)d=sm(seg(q,0.08,0.22))*0.32;else if(q<0.36)d=0.5;else d=(1-sm(seg(q,0.36,0.55)))*0.3;
     if(R.mag){R.mag.position.copy(R.dir).multiplyScalar(d);R.mag.visible=!(q>0.22&&q<0.36);}
     const away=sm(seg(q,0.12,0.24))*(1-sm(seg(q,0.32,0.4))),carry=sm(seg(q,0.32,0.4))*(1-sm(seg(q,0.56,0.68)));
     if(away>0)lhTo(R,R.lhC.clone().add(new V3(-0.02,-0.25,0.06)),away);
-    if(carry>0&&R.mag)lhTo(R,R.magC.clone().add(R.mag.position).add(new V3(0,-0.07,0)),carry);
+    if(carry>0&&R.mag){R.mag.updateMatrix();const bot=R.magBot.clone().applyMatrix4(R.mag.matrix).addScaledVector(R.dir,0.012);bot.x-=0.012;bot.z-=0.012;lhTo(R,bot.sub(R.palmOff),carry);}
     const seat=bump(q,0.55,0.62);P.y+=seat*0.012;P.rx-=seat*0.06;
     if(empty){const sl=bump(q,0.72,0.8);P.rx+=sl*0.12;P.z+=sl*0.015;}
   }else if(st==='revolver'){
@@ -2132,8 +2159,10 @@ const knifeRoot=new THREE.Group();gunScene.add(knifeRoot);knifeRoot.visible=fals
   for(let i=0;i<5;i++)put(g,BOX(0.024,0.003,0.006),dark,0,-0.0035,0.025+i*0.018);
   put(g,BOX(0.02,0.026,0.012),dark,0,-0.003,0.13);                                   // pommel
   // right hand wrapped round the grip, forearm back to the lower right
-  hand(g,BOX(0.05,0.05,0.1),gloveM,0.004,-0.012,0.07);hand(g,BOX(0.016,0.022,0.05),gloveM,-0.026,0.004,0.05,0,0.2,0);
-  const s=rod(g,new V3(0.01,-0.03,0.11),new V3(0.06,-0.15,0.42),0.036,sleeveM,10);handMeshes.push(s);
+  hand(g,BOX(0.026,0.054,0.1),gloveM,0.022,-0.006,0.07);hand(g,BOX(0.012,0.03,0.07),cuffM,0.036,-0.004,0.07); // palm + knuckle pad
+  for(let i=0;i<4;i++){const z=0.034+i*0.022;finger(g,new V3(0.024,-0.03,z),new V3(-0.016,-0.012,z+0.004),0.0086-i*0.0004,new V3(-0.002,-0.012,0));}
+  finger(g,new V3(0.02,0.018,0.104),new V3(-0.008,0.021,0.052),0.0084,new V3(0,0.004,0));
+  sleeve(g,new V3(0.018,-0.024,0.13),new V3(0.07,-0.15,0.44),0.038);
   g.traverse(o=>{if(o.isMesh){o.material.polygonOffset=false;}});
 })();
 // q: 0..1 through the swing. Returns how far the gun should duck out of the way (0..1)
