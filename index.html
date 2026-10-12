@@ -494,7 +494,7 @@ function loadClass(i){const c=S.classes[i];if(!c)return;S.cls=i;S.prim=c.prim;S.
 /* ---------------- tuning ---------------- */
 const PIS_ADS_ZOOM=0.93, SCOPE_AT=0.9, SCOPED_FOV=11.5, HIP_SPREAD=0.105, MATCH_TIME_DEFAULT=600;
 const BOLT_TIME=1.1, FIRE_HOLD=0.16, ADS_OUT=0.2, SPRINT_OUT_BASE=0.3;
-const WALK=4.9, SPRINT=7.4, ADS_SPEED=2.0, CROUCH_SPEED=2.5, GRAV=14, JUMP_V=5.7, STEP=0.56, PR=0.38, CLIMB=3.4;
+const WALK=4.9, SPRINT=7.4, ADS_SPEED=2.0, CROUCH_SPEED=2.5, GRAV=14, JUMP_V=5.7, STEP=0.64, PR=0.38, CLIMB=3.4;
 const soh=(a,b)=>()=>S.p1==='soh'?a:b;
 const PRIM={ // primaries; 'snp' is the primary slot, W.pid says which gun is in it. 100 HP; Stopping Power x1.4
   int:{id:'int',wb:0.7,label:'Intervention',hud:'INTERVENTION',mag:5,reserve:35,reload:3.0,reloadEmpty:3.6,rof:0.16,ads:soh(0.30,0.42),scope:1,bolt:1,cls:'sniper',snd:'snp',dmg:{head:147,chest:147,stomach:147,arms:98,legs:98},pen:1,recoil:0.006,speed:1},
@@ -541,7 +541,7 @@ renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();w
 renderer.domElement.addEventListener('webglcontextrestored',()=>location.reload());
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
 renderer.autoClear=false;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.24;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.18;
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 wrap.appendChild(renderer.domElement);
@@ -554,7 +554,7 @@ const HAZE=0xa6967f;
   const g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'#566676');g.addColorStop(0.42,'#94897a');g.addColorStop(0.6,'#a6967f');g.addColorStop(1,'#7c6e5c');
   x.fillStyle=g;x.fillRect(0,0,2,256);scene.background=new THREE.CanvasTexture(c);
 })();
-scene.fog=new THREE.Fog(HAZE,45,170);
+scene.fog=new THREE.Fog(HAZE,60,190);
 const camera=new THREE.PerspectiveCamera(65,1,0.05,500);camera.rotation.order='YXZ';
 const gunScene=new THREE.Scene();
 const gunCam=new THREE.PerspectiveCamera(52,1,0.02,6);
@@ -562,7 +562,7 @@ const gunCam=new THREE.PerspectiveCamera(52,1,0.02,6);
 scene.add(new THREE.HemisphereLight(0xe9e2d6,0x544a3e,0.7));
 const sun=new THREE.DirectionalLight(0xffe1bb,0.95);
 sun.position.set(-40,55,30);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
-Object.assign(sun.shadow.camera,{left:-50,right:50,top:50,bottom:-50,near:1,far:200});
+Object.assign(sun.shadow.camera,{left:-56,right:56,top:56,bottom:-56,near:1,far:220});
 sun.shadow.bias=-0.0006;scene.add(sun);sun.target.position.set(7,0,0);scene.add(sun.target);
 function basePR(){const d=window.devicePixelRatio||1;return S.gfx===0?Math.min(d,1)*0.75:S.gfx===1?Math.min(d,1):Math.min(d,1.5);}
 function applyGfx(){ // Low: no shadows, 75% res. Medium: 1x res, smaller shadow map. High: everything
@@ -624,7 +624,7 @@ function surfCanvas(kind){
     {const g=x.createLinearGradient(0,0,0,N);g.addColorStop(0,'rgba(255,248,235,.1)');g.addColorStop(0.75,'rgba(255,248,235,0)');g.addColorStop(0.88,'rgba(180,150,110,0)');g.addColorStop(1,'rgba(180,150,110,.22)');x.fillStyle=g;x.fillRect(0,0,N,N);}
     if(!pipe)for(const ry of[6,134]){x.fillStyle='rgba(30,22,14,.3)';x.fillRect(0,ry+3,N,1);for(let i=0;i<16;i++){x.fillStyle='rgba(40,28,18,.5)';x.beginPath();x.arc(i*16+8,ry,1.5,0,TAU);x.fill();x.fillStyle='rgba(255,245,230,.25)';x.beginPath();x.arc(i*16+7.5,ry-0.6,0.7,0,TAU);x.fill();}}
   }else if(kind==='conc'){
-    fill('#c3b9a8');for(let i=0;i<30;i++)blob(r()*N,r()*N,16+r()*40,'rgba(88,74,58,A)',0.06+r()*0.08);
+    fill('#bfbab0');for(let i=0;i<30;i++)blob(r()*N,r()*N,16+r()*40,'rgba(84,76,64,A)',0.06+r()*0.08);
     for(let i=0;i<46;i++)blob(r()*N,r()*N,10+r()*40,'rgba(96,88,74,A)',0.06+r()*0.1);
     for(let i=0;i<16;i++)blob(r()*N,r()*N,6+r()*20,'rgba(250,248,240,A)',0.1);
     x.fillStyle='rgba(60,55,48,.28)';x.fillRect(0,0,N,1.5);x.fillRect(0,128,N,1.2);x.fillRect(0,0,1.5,N);x.fillRect(128,0,1.2,N); // form-panel joints
@@ -653,21 +653,20 @@ function surfCanvas(kind){
     for(let i=0;i<500;i++){x.fillStyle=`rgba(${r()<0.5?'255,255,255':'40,35,30'},${0.03+r()*0.05})`;x.fillRect(r()*N,r()*N,20+r()*80,1);}
     for(let i=0;i<40;i++){x.strokeStyle=`rgba(255,255,255,${0.1+r()*0.15})`;x.lineWidth=0.6;const sx=r()*N,sy=r()*N;x.beginPath();x.moveTo(sx,sy);x.lineTo(sx+(r()-0.5)*30,sy+(r()-0.5)*30);x.stroke();}
     for(let i=0;i<16;i++)blob(r()*N,r()*N,6+r()*26,'rgba(120,64,30,A)',0.14+r()*0.14);
-  }else if(kind==='bag'){
-    fill('#cfbf9c');const rows=5,rh=N/rows,cols=3,cw=N/cols;
-    for(let ry=0;ry<rows;ry++)for(let cx=0;cx<cols;cx++){const x0=cx*cw+(ry%2?cw/2:0),y0=ry*rh;
-      wrapDo((ox,oy)=>{const X=x0+ox,Y=y0+oy;if(X>N+cw||X<-cw*1.5||Y>N+rh||Y<-rh*1.5)return;
-        const g=x.createLinearGradient(0,Y,0,Y+rh);g.addColorStop(0,'rgba(255,250,235,.45)');g.addColorStop(0.55,'rgba(200,185,150,0)');g.addColorStop(1,'rgba(40,30,15,.55)');
-        x.fillStyle=g;x.beginPath();x.moveTo(X+8,Y+2);x.lineTo(X+cw-8,Y+2);x.quadraticCurveTo(X+cw-1,Y+rh/2,X+cw-8,Y+rh-2);x.lineTo(X+8,Y+rh-2);x.quadraticCurveTo(X+1,Y+rh/2,X+8,Y+2);x.fill();
-        x.strokeStyle='rgba(50,35,20,.55)';x.lineWidth=1.6;x.stroke();});}
-    for(let i=0;i<1500;i++){x.fillStyle=`rgba(60,45,25,${r()*0.12})`;x.fillRect(r()*N,r()*N,2,1);}
+  }else if(kind==='bag'){ // woven sack cloth: soft weave, a stitched seam, dust caked into the fibres (the stacking comes from real geometry now)
+    fill('#cbbb98');
+    for(let i=0;i<N;i+=2){x.fillStyle=`rgba(80,62,38,${0.05+r()*0.06})`;x.fillRect(0,i,N,1);x.fillStyle=`rgba(80,62,38,${0.04+r()*0.05})`;x.fillRect(i,0,1,N);}
+    for(let i=0;i<40;i++)blob(r()*N,r()*N,10+r()*36,'rgba(120,98,66,A)',0.08+r()*0.1);
+    for(let i=0;i<10;i++)blob(r()*N,r()*N,8+r()*24,'rgba(225,212,185,A)',0.12);
+    x.fillStyle='rgba(70,52,30,.28)';x.fillRect(0,N*0.5,N,1.2);for(let i=0;i<N;i+=6){x.fillStyle='rgba(70,52,30,.32)';x.fillRect(i,N*0.5-2,3,1);}
+    for(let i=0;i<1200;i++){x.fillStyle=`rgba(60,45,25,${r()*0.1})`;x.fillRect(r()*N,r()*N,1.5,1);}
   }
   // one shared weathering pass on every surface so concrete, wood, steel and rust read as the same world:
   // broad grime mottling, faint rain streaks, a film of desert dust, and the same fine grain
   for(let i=0;i<36;i++)blob(r()*N,r()*N,18+r()*46,'rgba(74,62,48,A)',0.05+r()*0.07);
-  for(let i=0;i<14;i++)blob(r()*N,r()*N,10+r()*30,'rgba(236,224,200,A)',0.05);
+  for(let i=0;i<14;i++)blob(r()*N,r()*N,10+r()*30,'rgba(236,224,200,A)',0.03);
   for(let i=0;i<22;i++){const sx=r()*N,sy=r()*N,len=30+r()*120;wrapDo((ox,oy)=>{const g=x.createLinearGradient(0,sy+oy,0,sy+oy+len);g.addColorStop(0,'rgba(60,48,36,.12)');g.addColorStop(1,'rgba(60,48,36,0)');x.fillStyle=g;x.fillRect(sx+ox,sy+oy,1.5+r()*3,len);});}
-  x.fillStyle='rgba(190,165,125,.07)';x.fillRect(0,0,N,N);
+  x.fillStyle='rgba(190,165,125,.04)';x.fillRect(0,0,N,N);
   grain(13,false);
   return c;
 }
@@ -691,9 +690,10 @@ KIND[0xa48f63]='bag';KIND[0x7a6440]='wood';
 [0x2f4f6e,0x8a2e22,0x9a7a4a,0x45603a].forEach(c=>KIND[c]='paint');
 const matCache={};
 function weather(hex,kind){ // desaturate toward luminance and lift the darkest values slightly
-  const c=new THREE.Color(hex),l=c.r*0.3+c.g*0.59+c.b*0.11,k=kind==='paint'?0.74:0.76;
-  c.r=(l+(c.r-l)*k)*1.0;c.g=(l+(c.g-l)*k)*0.975;c.b=(l+(c.b-l)*k)*0.93;c.multiplyScalar(0.94).addScalar(0.014);return c;}
-function mat(color,kind){kind=kind||KIND[color]||'rust';const key=color+'|'+kind;if(matCache[key])return matCache[key];const m=triplanar(new THREE.MeshLambertMaterial({color:weather(color,kind),map:surfTex(kind)}),SURF_SCALE[kind]);m.userData.kind=kind;return matCache[key]=m;}
+  const c=new THREE.Color(hex),l=c.r*0.3+c.g*0.59+c.b*0.11,k=kind==='paint'?0.9:0.88;
+  c.r=(l+(c.r-l)*k)*1.0;c.g=(l+(c.g-l)*k)*0.975;c.b=(l+(c.b-l)*k)*0.93;c.multiplyScalar(0.95).addScalar(0.005);return c;}
+function guessKind(hex){const c=new THREE.Color(hex),mx=Math.max(c.r,c.g,c.b),mn=Math.min(c.r,c.g,c.b);return mx-mn<0.06?'steel':'rust';} // neutral greys read as bare steel, anything warm as weathered metal
+function mat(color,kind){kind=kind||KIND[color]||guessKind(color);const key=color+'|'+kind;if(matCache[key])return matCache[key];const m=triplanar(new THREE.MeshLambertMaterial({color:weather(color,kind),map:surfTex(kind)}),SURF_SCALE[kind]);m.userData.kind=kind;return matCache[key]=m;}
 const kindMats={};function kindMat(kind){return kindMats[kind]||(kindMats[kind]=triplanar(new THREE.MeshLambertMaterial({color:0xffffff,map:surfTex(kind),vertexColors:true}),SURF_SCALE[kind]));}
 
 /* ---------------- world: Rust ---------------- */
@@ -740,7 +740,11 @@ function addLadder(x,z,face,y0,y1){ // face: direction from wall toward the clim
 
 const C={RUST:0x8a4a26,RUSTD:0x6c3a20,RUSTW:0x7a4024,STEEL:0x58514a,DECK:0x6a5a48,RAIL:0x9a7a34,CONC:0x9b9486,SANDB:0xa48f63,BLUE:0x2f4f6e,RED:0x8a2e22,TAN:0x9a7a4a,GRN:0x45603a,CRATE:0x7a6440,FENCE:0x6b4a33};
 const CS=1.4; // crate size
-const crate=(x,y,z)=>addBox(x,y,z,CS,CS,CS,C.CRATE);
+const MAP_SCALE=1.1; // the whole yard is built at this scale; small props (crates, barrels, barriers, pallets...) keep their real size
+const PROPS=[];let propDepth=0;
+function prop(fn,ax,ay,az){if(propDepth)return fn();propDepth++;const r={ms:scene.children.length,cs:colliders.length,ax,ay,az};try{return fn();}finally{propDepth--;r.me=scene.children.length;r.ce=colliders.length;PROPS.push(r);}}
+function asProp(fn,anchor){return function(...a){const [x,y,z]=anchor(...a);return prop(()=>fn.apply(this,a),x,y,z);};}
+const crate=(x,y,z)=>prop(()=>addBox(x,y,z,CS,CS,CS,C.CRATE),x,y,z);
 // ground
 const grainTex=(function(){ // fine sand grains and pebbles, multiplied over the dunes up close
   const N=256,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),im=x.createImageData(N,N),d=im.data;
@@ -748,13 +752,14 @@ const grainTex=(function(){ // fine sand grains and pebbles, multiplied over the
   for(let i=0;i<260;i++){const px=Math.random()*N,py=Math.random()*N,r=0.6+Math.random()*1.8,dk=Math.random()<0.6;
     for(const ox of[-N,0,N])for(const oy of[-N,0,N]){x.fillStyle=dk?'rgba(70,50,30,.45)':'rgba(255,245,225,.5)';x.beginPath();x.arc(px+ox,py+oy,r,0,TAU);x.fill();}}
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=8;return t;})();
-const groundMat=new THREE.MeshLambertMaterial({color:0xb9ac98,map:sandTex});
+const groundMat=new THREE.MeshLambertMaterial({color:0xae9a7c,map:sandTex});
 groundMat.onBeforeCompile=sh=>{sh.uniforms.uGrain={value:grainTex};
   sh.fragmentShader='uniform sampler2D uGrain;\n'+sh.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n#ifdef USE_MAP\n  float gr=texture2D(uGrain,vUv*7.0).r*0.65+texture2D(uGrain,vUv*2.3+0.37).r*0.35;\n  diffuseColor.rgb*=0.72+0.28*(gr/0.59);\n#endif');};
+const worldStart=scene.children.length;
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(300,300),groundMat);
 ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);worldMeshes.push(ground);
 // perimeter fence + dunes well outside it
-const XMIN=-34,XMAX=48,ZMIN=-34,ZMAX=34,XMID=(XMIN+XMAX)/2,XW=XMAX-XMIN; // the yard runs further east than the old square: the hangar lives there
+let XMIN=-34,XMAX=52.5,ZMIN=-34,ZMAX=34,HANGAR=null;const XMID=(XMIN+XMAX)/2,XW=XMAX-XMIN; // the yard runs further east than the old square: the hangar lives there
 addBox(XMID,0,ZMIN-0.5,XW+2,3.8,1,C.FENCE);addBox(XMID,0,ZMAX+0.5,XW+2,3.8,1,C.FENCE);addBox(XMIN-0.5,0,0,1,3.8,ZMAX-ZMIN+2,C.FENCE);addBox(XMAX+0.5,0,0,1,3.8,ZMAX-ZMIN+2,C.FENCE);
 addCol(XMIN-3,3.8,ZMIN-3,XMAX+3,60,ZMIN);addCol(XMIN-3,3.8,ZMAX,XMAX+3,60,ZMAX+3);addCol(XMIN-3,3.8,ZMIN-3,XMIN,60,ZMAX+3);addCol(XMAX,3.8,ZMIN-3,XMAX+3,60,ZMAX+3); // nobody vaults the fence
 // ---- beyond the fence: refinery, cranes, towers and rigs give the skyline depth (scenery only: no collision, not shootable) ----
@@ -816,7 +821,7 @@ const outskirtsFrom=scene.children.length;
     bx(-3,0,0,1.6,1.4,1.2,0x5d5a48,'conc');bx(3.4,0,0,0.3,1.4,0.3,0x3a3a38,'steel');arm.userData.ph=Math.random()*TAU;pumpjacks.push(arm);};
   pump(-30,50,0.3);pump(4,62,-0.2);pump(62,34,1.1);pump(-58,22,1.6);
   // distant mesas on the horizon, softened by the haze
-  const mesaM=new THREE.MeshLambertMaterial({color:0xa98760,map:surfTex('conc')});
+  const mesaM=triplanar(new THREE.MeshLambertMaterial({color:0x9c876c,map:surfTex('conc')}),1/9);
   for(let i=0;i<11;i++){const a=i/11*TAU+0.2,r=118+((i*37)%5)*6,w=16+((i*13)%4)*7,h=10+((i*29)%5)*4;
     const m=new THREE.Mesh(new THREE.CylinderGeometry(w*0.72,w,h,7,1),mesaM);m.position.set(Math.cos(a)*r,h/2-0.5,Math.sin(a)*r);m.rotation.y=i;m.scale.z=0.55+((i*7)%3)*0.2;scene.add(m);}
 })();
@@ -857,7 +862,7 @@ function barrel(x,z,col,tip){const m=new THREE.Mesh(new THREE.CylinderGeometry(0
   addCol(x-0.3,0,z-0.3,x+0.3,0.9,z+0.3);}
 function barrels(x,z,n,col){const P=[[0,0],[0.65,0.1],[0.3,0.62],[-0.4,0.55],[0.95,0.72],[-0.2,-0.66]];for(let i=0;i<n;i++)barrel(x+P[i][0],z+P[i][1],Array.isArray(col)?col[i%col.length]:col);}
 function jersey(x,z,alongX){const L=2.2,sh=new THREE.Shape([new THREE.Vector2(-0.32,0),new THREE.Vector2(0.32,0),new THREE.Vector2(0.22,0.25),new THREE.Vector2(0.12,0.82),new THREE.Vector2(-0.12,0.82),new THREE.Vector2(-0.22,0.25)]);
-  const g=new THREE.ExtrudeGeometry(sh,{depth:L,bevelEnabled:false});g.translate(0,0,-L/2);if(alongX)g.rotateY(Math.PI/2);const m=new THREE.Mesh(g,mat(0x9b9486,'conc'));m.position.set(x,0,z);m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);
+  const g=new THREE.ExtrudeGeometry(sh,{depth:L,bevelEnabled:false});g.translate(0,0,-L/2);if(alongX)g.rotateY(Math.PI/2);const m=new THREE.Mesh(g,mat(0x7e7f7c,'conc'));m.position.set(x,0,z);m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m);
   if(alongX)addCol(x-L/2,0,z-0.3,x+L/2,0.82,z+0.3);else addCol(x-0.3,0,z-L/2,x+0.3,0.82,z+L/2);}
 function spool(x,z,rot){const g=new THREE.Group();g.position.set(x,0.75,z);g.rotation.y=rot||0;scene.add(g);
   for(const s of[-0.38,0.38]){const d=new THREE.Mesh(new THREE.CylinderGeometry(0.75,0.75,0.06,20),mat(0x7a6440,'wood'));d.rotation.x=Math.PI/2;d.position.z=s;d.castShadow=true;g.add(d);worldMeshes.push(d);}
@@ -875,7 +880,25 @@ function truck(x,z){ // burnt-out flatbed along x, cab to +x
 function forklift(x,z){addBox(x,0.25,z,1.2,1.0,2.0,0xb08a2a);addBox(x,1.25,z+0.35,1.1,0.08,1.2,0x2a2a28,false);for(const s of[-0.5,0.5])addBox(x+s,1.25,z+0.85,0.08,1.1,0.08,0x2a2a28,false,false);
   addBox(x,0,z-1.1,1.0,2.6,0.12,0x2a2a28);addBox(x-0.25,0,z-1.65,0.12,0.08,1.0,0x3a3a38);addBox(x+0.25,0,z-1.65,0.12,0.08,1.0,0x3a3a38);addCol(x-0.6,0,z-1.0,x+0.6,0.25,z+1.0);
   for(const [wx,wz] of[[-0.6,-0.6],[0.6,-0.6],[-0.6,0.6],[0.6,0.6]]){const w=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.2,12),mat(0x1c1c1a,'steel'));w.rotation.z=Math.PI/2;w.position.set(x+wx,0.28,z+wz);scene.add(w);}}
-function bagWall(x0,z0,x1,z1,h){slab(Math.min(x0,x1),Math.min(z0,z1),Math.max(x0,x1),Math.max(z0,z1),0,h||1.05,C.SANDB);}
+const bagGeo=(()=>{const g=new THREE.SphereGeometry(1,8,4),P=g.attributes.position; // pillow: a squared-off ellipsoid with flattened top and bottom
+  for(let i=0;i<P.count;i++){let x=P.getX(i),y=P.getY(i),z=P.getZ(i);const sq=v=>Math.sign(v)*Math.pow(Math.abs(v),0.55);x=sq(x)*0.96;z=sq(z)*0.94;y=Math.sign(y)*Math.min(Math.abs(y),0.72)/0.72;P.setXYZ(i,x,y,z);}
+  g.computeVertexNormals();return g;})();
+const BAG_TONES=[0xa48f63,0x98845a,0xab9870,0x8e7b54];let bagSeed=mulberry(4242);
+function sandbags(cx,y0,cz,w,h,d){ // stacked, staggered sacks around a hidden core that does the colliding and stops bullets
+  const core=addBox(cx,y0,cz,Math.max(0.05,w-0.12),Math.max(0.05,h-0.06),Math.max(0.05,d-0.12),0x6f6046,false);core.material=mat(0x6f6046,'bag');
+  colliders.push({min:new V3(cx-w/2,y0,cz-d/2),max:new V3(cx+w/2,y0+h,cz+d/2)});
+  const alongX=w>=d,len=alongX?w:d,thick=alongX?d:w,rows=Math.max(1,Math.round(h/0.21)),rh=h/rows,deep=Math.max(1,Math.round(thick/0.4)),dd=thick/deep,r=bagSeed;
+  for(let ry=0;ry<rows;ry++){const n=Math.max(1,Math.round(len/0.56)),bl=len/n,off=(ry%2?0.5:0)*bl;
+    for(let k=0;k<deep;k++)for(let i=0;i<n+(ry%2?1:0);i++){let a=-len/2+off+(i+0.5)*bl-(ry%2?bl:0),L=bl;const lo=Math.max(-len/2,a-L/2),hi=Math.min(len/2,a+L/2);if(hi-lo<bl*0.4)continue;a=(lo+hi)/2;L=hi-lo;
+      const b=-thick/2+(k+0.5)*dd,m=new THREE.Mesh(bagGeo,mat(BAG_TONES[(r()*BAG_TONES.length)|0],'bag'));
+      const sx=L/2*(0.98+r()*0.04),sy=rh/2*(ry===rows-1?1.12:1.04),sz=dd/2*(1.0+r()*0.06);
+      if(alongX){m.scale.set(sx,sy,sz);m.position.set(cx+a,y0+rh*(ry+0.5),cz+b);}else{m.scale.set(sz,sy,sx);m.position.set(cx+b,y0+rh*(ry+0.5),cz+a);}
+      m.rotation.set((r()-0.5)*0.05,(r()-0.5)*0.08,(r()-0.5)*0.05);m.castShadow=m.receiveShadow=true;scene.add(m);}}
+  return core;}
+function bagWall(x0,z0,x1,z1,h){const a=Math.min(x0,x1),b=Math.max(x0,x1),c=Math.min(z0,z1),e=Math.max(z0,z1),hh=h||1.05;return sandbags((a+b)/2,0,(c+e)/2,b-a,hh,e-c);}
+barrel=asProp(barrel,(x,z)=>[x,0,z]);barrels=asProp(barrels,(x,z)=>[x,0,z]);jersey=asProp(jersey,(x,z)=>[x,0,z]);spool=asProp(spool,(x,z)=>[x,0,z]);
+pipeStack=asProp(pipeStack,(x,z)=>[x,0,z]);pallet=asProp(pallet,(x,z)=>[x,0,z]);truck=asProp(truck,(x,z)=>[x,0,z]);forklift=asProp(forklift,(x,z)=>[x,0,z]);
+bagWall=asProp(bagWall,(x0,z0,x1,z1)=>[(x0+x1)/2,0,(z0+z1)/2]);
 function lattice(cx,cz,y0,h,b,t,color){const L=[[-1,-1],[1,-1],[1,1],[-1,1]],at=(i,y)=>{const s=lerp(b,t,(y-y0)/h);return new V3(cx+L[i][0]*s,y,cz+L[i][1]*s);},mm=mat(color||0x3a3a38,'steel');
   for(let i=0;i<4;i++){rod(scene,at(i,y0),at(i,y0+h),0.11,mm,6);const p=at(i,y0);addCol(p.x-0.15,y0,p.z-0.15,p.x+0.15,y0+2.2,p.z+0.15);}
   const seg=Math.round(h/2.6);for(let k=0;k<seg;k++){const a=y0+k*h/seg,c=y0+(k+1)*h/seg;for(let i=0;i<4;i++){const j=(i+1)%4;rod(scene,at(i,a),at(j,c),0.045,mm,5);rod(scene,at(i,c),at(j,c),0.05,mm,5);}}}
@@ -899,7 +922,7 @@ for(const sx of[-LP+0.25,LP-0.25])addBox(sx,0,0,0.3,LY,0.3,C.STEEL); // mid-span
 railing(-LP,-LP,LP,-LP+0.15,LT,LT+1);railing(LP-0.15,-LP,LP,LP,LT,LT+1);railing(-LP,LP-0.15,LP,LP,LT,LT+1);
 railing(-LP,-LP,-LP+0.15,-2.6,LT,LT+1);railing(-LP,0.85,-LP+0.15,LP,LT,LT+1);
 addLadder(0,1.5,'z+',0,LT+0.35);
-crate(6.2,LT,-6.2);crate(-5.6,LT,5.6);crate(-5.6,LT+CS,5.6);slab(4.2,4.9,6.4,5.6,LT,LT+0.9,C.SANDB);
+crate(6.2,LT,-6.2);crate(-5.6,LT,5.6);crate(-5.6,LT+CS,5.6);sandbags(5.3,LT,5.25,2.2,0.9,0.7);
 const UT=13.6,MT=9.4;
 slab(-0.9,-0.9,0.9,0.9,LT,UT,C.RUST); // upper column
 for(const sx of[-2.4,2.4])for(const sz of[-2.4,2.4])addBox(sx,LT,sz,0.24,UT-LT,0.24,C.STEEL);
@@ -932,8 +955,8 @@ function pipeline(x0,x1){pipeX(x0,x1,-28,1.95,0.65,0x6a4a33,false);addCol(x0,1.3
   for(let x=x0+1.5;x<x1;x+=5){addBox(x,0,-28,0.45,1.3,1.3,C.STEEL);}
   for(let x=x0+4;x<x1-1;x+=8){const f=new THREE.Mesh(new THREE.CylinderGeometry(0.75,0.75,0.18,20),mat(0x4d3424,'pipe'));f.rotation.z=Math.PI/2;f.position.set(x,1.95,-28);scene.add(f);}}
 pipeline(-30,12);pipeline(15.5,22);
-for(let k=0;k<5;k++)slab(-34+k*0.8,-28.65,-33.2+k*0.8,-27.35,0,(k+1)*0.52,C.SANDB);
-for(let k=0;k<5;k++)slab(26-(k+1)*0.8,-28.65,26-k*0.8,-27.35,0,(k+1)*0.52,C.SANDB);
+for(let k=0;k<5;k++)sandbags(-33.6+k*0.8,0,-28,0.8,(k+1)*0.52,1.3);
+for(let k=0;k<5;k++)sandbags(25.6-k*0.8,0,-28,0.8,(k+1)*0.52,1.3);
 addBox(13.75,0,-28,3,0.8,1.8,C.RUSTD);
 pipeX(-33,33,-31.2,0.55,0.5,0x5d4632,true);for(let x=-30;x<=30;x+=6)addBox(x,0,-31.2,0.35,0.22,1.0,C.CONC); // concrete saddles under the ground pipe
 // valve station on the pipeline
@@ -981,18 +1004,18 @@ addBox(-11,3.2,-8.65,3.4,0.9,0.1,C.RAIL);addBox(-9.35,3.2,-7,0.1,0.9,3.4,C.RAIL)
 crate(-11,0,6);crate(-12.4,0,6);crate(-11.7,0,7.4);crate(-11,CS,6);crate(-8.5,0,8.6);
 barrels(-14.6,-9.6,4,[0x2f4f6e,0x2f4f6e,0x8a2e22]);
 // ---- Fuel depot (southeast corner) ----
-addCylV(25,25,3.5,5.5,0x7f6a52);addCylV(29.5,16,2.4,4,0x77624d);addCylV(17.5,30.5,2,3.5,0x7a6650);
+addCylV(25,25,3.5,5.5,0x7f6a52);addCylV(29.5,16,2.4,4,0x77624d);addCylV(26,31.6,2,3.5,0x7a6650);
 pipeX(18,31,20.5,0.75,0.38,0x5d4632,true);for(const x of[19,22,25.5,29])addBox(x,0,20.5,0.3,0.4,0.7,C.STEEL); // pipe stands
-barrels(21.6,21.4,4,[0x8a2e22,0x8a2e22,0x7f6a52]);
+barrels(20.4,20.9,4,[0x8a2e22,0x8a2e22,0x7f6a52]);
 // ---- Comms station: enterable shed, roof reachable up the crate steps ----
 room(22,-22,26,-18,3,0x6a6352,[['s',23.2,24.8,2.3],['e',-21.2,-19.8,2.2,1.1]]);
 slab(18.8,-20.5,19.6,-19.5,0,0.55,C.CRATE);slab(19.6,-20.5,20.4,-19.5,0,1.1,C.CRATE);slab(20.4,-20.5,21.2,-19.5,0,1.65,C.CRATE);slab(21.2,-20.5,22,-19.5,0,2.2,C.CRATE);
 (function antenna(){const m=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.09,7,6),mat(0x3a3a38));m.position.set(24.8,6.6,-20.8);scene.add(m);})();
 crate(28,0,-26);crate(29.5,0,-26.6);crate(27.4,0,-24.4);
-slab(26.75,-34,31.25,-31.72,0,1.05,C.SANDB); // sandbagged gate: no dead pocket behind the pipe
+bagWall(26.75,-34,31.25,-31.72,1.05); // sandbagged gate: no dead pocket behind the pipe
 addBox(31.5,0,-33,0.5,4.4,0.5,C.STEEL);addBox(26.5,0,-33,0.5,4.4,0.5,C.STEEL);addBox(29,4.2,-33,5.5,0.3,0.4,C.STEEL,false);
 // ---- low walls / sandbags / barriers ----
-[[-4,0,-15,3.6,1.05,0.8],[7,0,-18,0.8,1.05,3.6],[-29,0,-2,0.8,1.05,4],[0,0,18,3.6,1.05,0.8]].forEach(w=>addBox(w[0],w[1],w[2],w[3],w[4],w[5],C.SANDB));
+[[-4,0,-15,3.6,1.05,0.8],[7,0,-18,0.8,1.05,3.6],[-29,0,-2,0.8,1.05,4],[0,0,18,3.6,1.05,0.8]].forEach(w=>prop(()=>sandbags(w[0],w[1],w[2],w[3],w[4],w[5]),w[0],0,w[2]));
 bagWall(19.4,-0.6,21.6,0.2);bagWall(19.4,0.2,20.2,2.4);bagWall(19.4,2.4,21.6,3.2); // U bunker east
 jersey(-18,-4.5,false);jersey(13.6,20.2,true);jersey(-24.8,-11.4,true);jersey(-2.6,-18.4,true);
 // ---- clutter: barrels, cable spools, pipe stacks, pallets, a burnt-out truck ----
@@ -1010,6 +1033,7 @@ const grateM=triplanar(new THREE.MeshLambertMaterial({color:0x8a857a,map:grateTe
 function grate(x0,z0,x1,z1,y0,y1){const m=new THREE.Mesh(boxGeo,grateM);m.scale.set(x1-x0,y1-y0,z1-z0);m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);m.castShadow=false;m.receiveShadow=true;scene.add(m);worldMeshes.push(m);
   addCol(x0,y0,z0,x1,y1,z1);addBox((x0+x1)/2,y0-0.08,z0+0.04,x1-x0,0.08,0.08,C.STEEL,false,false);addBox((x0+x1)/2,y0-0.08,z1-0.04,x1-x0,0.08,0.08,C.STEEL,false,false);}
 (function hangar(){
+  const hs={ms:scene.children.length,cs:colliders.length,rs:ramps.length,ls:ladders.length,ps:PROPS.length};
   const X0=34.6,X1=47.6,Z0=-11,Z1=11,H=8.4,T=0.25,col=0x6e6655,MZ=3.4,MT=3.6,MD=2.2;
   KIND[0x5f6a6e]='paint';KIND[0x55605f]='paint';
   // walls: big hangar door on the west (facing the yard), flank door south, window on the north at mezzanine height
@@ -1035,7 +1059,14 @@ function grate(x0,z0,x1,z1,y0,y1){const m=new THREE.Mesh(boxGeo,grateM);m.scale.
   // stairs up to the south run (rises toward +x, steps up onto the mezzanine at its top)
   {const sx0=36.0,sx1=41.6,sz0=Z1-T-MD-1.25,sz1=Z1-T-MD;ramps.push({x0:sx0,x1:sx1,z0:sz0,z1:sz1,y0:0,y1:MT});
     const n=12;for(let i=0;i<n;i++){const xa=sx0+(sx1-sx0)*i/n,xb=sx0+(sx1-sx0)*(i+1)/n,yy=MT*(i+1)/n;addBox((xa+xb)/2,yy-0.08,(sz0+sz1)/2,xb-xa+0.02,0.08,sz1-sz0,C.STEEL,false,true);}
-    {const sh=new THREE.Shape([new THREE.Vector2(sx0,0),new THREE.Vector2(sx1,0),new THREE.Vector2(sx1,MT)]);for(const zz of[sz0,sz1-0.06]){const g=new THREE.ExtrudeGeometry(sh,{depth:0.06,bevelEnabled:false});g.translate(0,0,zz);const m=new THREE.Mesh(g,mat(C.STEEL));m.castShadow=true;scene.add(m);}}}
+    {const pts=[new THREE.Vector2(sx0,0)];for(let i=0;i<n;i++){const xa=sx0+(sx1-sx0)*i/n,xb=sx0+(sx1-sx0)*(i+1)/n,yy=MT*(i+1)/n-0.08;pts.push(new THREE.Vector2(xa,yy),new THREE.Vector2(xb,yy));}pts.push(new THREE.Vector2(sx1,0));
+      const g=new THREE.ExtrudeGeometry(new THREE.Shape(pts),{depth:sz1-sz0-0.04,bevelEnabled:false});g.translate(0,0,sz0+0.02);const m=new THREE.Mesh(g,mat(0x5f6a6e,'paint'));m.castShadow=m.receiveShadow=true;scene.add(m);worldMeshes.push(m); // solid stepped body, closed back and sides
+      for(let i=0;i<n;i++){const xa=sx0+(sx1-sx0)*i/n;addBox(xa+0.03,MT*(i+1)/n-0.16,sz0+0.01,0.06,0.08,0.03,0x9a7a34,false,false);} // worn yellow nosing on the open side
+      // railing down the open side: posts, a sloped handrail and mid rail, and a stepped collider so nobody walks off the edge
+      const rz=sz0+0.05,run=sx1-sx0,ang=Math.atan2(MT,run),hl=Math.hypot(run,MT);
+      for(let i=0;i<=4;i++){const px=sx0+0.15+(run-0.3)*i/4,py=MT*Math.min(1,(px-sx0)/run);addBox(px,py,rz,0.07,1.0,0.07,C.STEEL,false,false);}
+      for(const hy of[1.0,0.5]){const b=addBox((sx0+sx1)/2,MT/2+hy-0.03,rz,hl,0.06,0.06,C.STEEL,false,false);b.rotation.z=ang;b.userData.slope=[run,MT];}
+      for(let i=0;i<n;i++){const xa=sx0+(sx1-sx0)*i/n,xb=sx0+(sx1-sx0)*(i+1)/n,yy=MT*(i+1)/n;addCol(xa,yy-0.5,rz-0.04,xb,yy+1.05,rz+0.04);}}}
   // outside ladder up the north wall to the window
   addLadder(40.6,Z0,'z-',0,MT+0.35);
   // helicopter in the middle bay (walk-through cabin, both side doors open)
@@ -1064,9 +1095,42 @@ function grate(x0,z0,x1,z1,y0,y1){const m=new THREE.Mesh(boxGeo,grateM);m.scale.
   jersey(31,-7,false);jersey(31.4,6.5,false);pallet(32.2,0.4,1);
   addBox(43.5,0,-15.5,4.2,2.2,2.2,0x5d5a48);addBox(43.5,2.2,-15.5,3.6,0.5,1.8,0x3a3a38,false,true); // generator by the north wall
   crate(39,0,15.6);crate(40.4,0,15.6);crate(39.7,CS,15.6);barrels(45.6,16.4,3,[0x7f6a52,0x2f4f6e,0x8a2e22]);
-  container(44.2,0,-25,false,C.RED);container(44.4,0,26,false,C.BLUE);
+  // enlarge the whole hangar about the middle of its yard-facing door: 30% wider and deeper, 15% taller. Small props keep their size and just move
+  {const HS=1.3,VS=1.15,AX=X0,mx=x=>AX+(x-AX)*HS,mz=z=>z*HS;const pm=new Set(),pc=new Set();
+    for(const r of PROPS.slice(hs.ps)){for(let i=r.ms;i<r.me;i++)pm.add(i);for(let i=r.cs;i<r.ce;i++)pc.add(i);if(r.ax<X0)continue;const dx=mx(r.ax)-r.ax,dz=mz(r.az)-r.az; // apron cover west of the door stays put
+      for(let i=r.ms;i<r.me;i++){const o=scene.children[i];if(o){o.position.x+=dx;o.position.z+=dz;}}for(let i=r.cs;i<r.ce;i++){const c=colliders[i];c.min.x+=dx;c.max.x+=dx;c.min.z+=dz;c.max.z+=dz;}r.ax+=dx;r.az+=dz;}
+    for(let i=hs.ms;i<scene.children.length;i++){if(pm.has(i))continue;const o=scene.children[i];o.position.set(mx(o.position.x),o.position.y*VS,mz(o.position.z));
+      if(o.userData.slope){const [ru,ri]=o.userData.slope;o.rotation.z=Math.atan2(ri*VS,ru*HS);o.scale.x=Math.hypot(ru*HS,ri*VS);}
+      else if(o.isGroup)o.scale.y*=VS;else if(o.rotation.y&&!o.rotation.x&&!o.rotation.z){o.scale.x*=HS;o.scale.y*=VS;o.scale.z*=HS;}else{o.scale.multiply(new V3(HS,VS,HS));}}
+    for(let i=hs.cs;i<colliders.length;i++){if(pc.has(i))continue;const c=colliders[i];c.min.set(mx(c.min.x),c.min.y*VS,mz(c.min.z));c.max.set(mx(c.max.x),c.max.y*VS,mz(c.max.z));}
+    for(const r of ramps.slice(hs.rs)){r.x0=mx(r.x0);r.x1=mx(r.x1);r.z0=mz(r.z0);r.z1=mz(r.z1);r.y0*=VS;r.y1*=VS;}
+    for(const l of ladders.slice(hs.ls)){const nx=mx(l.lx),nz=mz(l.lz);l.x0+=nx-l.lx;l.x1+=nx-l.lx;l.z0+=nz-l.lz;l.z1+=nz-l.lz;l.lx=nx;l.lz=nz;l.y0*=VS;l.y1*=VS;}
+    HANGAR={x0:mx(X0),x1:mx(X1),z0:mz(Z0),z1:mz(Z1),map:(x,z)=>(x>=X0-0.5&&x<=X1+0.5&&z>=Z0-0.5&&z<=Z1+0.5)?[mx(x),mz(z)]:[x,z]};}
+  container(46.2,0,-29,false,C.RED);container(46.4,0,29,false,C.BLUE);
 })();
 
+(function scaleYard(){ // grow the whole yard by MAP_SCALE, then put the small props back to real size, resting on whatever they stood on
+  const k=MAP_SCALE,objs=scene.children.slice(worldStart),orig=colliders.map(c=>({min:c.min.clone(),max:c.max.clone()}));
+  for(const o of objs){o.position.multiplyScalar(k);o.scale.multiplyScalar(k);}
+  for(const c of colliders){c.min.multiplyScalar(k);c.max.multiplyScalar(k);}
+  for(const r of ramps){r.x0*=k;r.x1*=k;r.z0*=k;r.z1*=k;r.y0*=k;r.y1*=k;}
+  for(const l of ladders){for(const f of['x0','x1','z0','z1','y0','y1','lx','lz'])if(l[f]!=null)l[f]*=k;}
+  XMIN*=k;XMAX*=k;ZMIN*=k;ZMAX*=k;
+  const inProp=new Set();for(const r of PROPS)for(let i=r.cs;i<r.ce;i++)inProp.add(i);
+  const fp=r=>{let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;for(let i=r.cs;i<r.ce;i++){const c=orig[i];x0=Math.min(x0,c.min.x);x1=Math.max(x1,c.max.x);z0=Math.min(z0,c.min.z);z1=Math.max(z1,c.max.z);}if(x0>x1){x0=r.ax-0.3;x1=r.ax+0.3;z0=r.az-0.3;z1=r.az+0.3;}return{x0,x1,z0,z1};};
+  const ovl=(a,b)=>a.x1>b.x0+0.01&&a.x0<b.x1-0.01&&a.z1>b.z0+0.01&&a.z0<b.z1-0.01;
+  const placed=[];
+  for(const r of PROPS.slice().sort((a,b)=>a.ay-b.ay)){
+    const F=fp(r);let ty=0;
+    if(r.ay>0.01){ty=r.ay*k;let best=null;
+      for(let i=0;i<colliders.length;i++){if(inProp.has(i))continue;const c=orig[i];if(Math.abs(c.max.y-r.ay)>0.03)continue;if(!ovl(F,{x0:c.min.x,x1:c.max.x,z0:c.min.z,z1:c.max.z}))continue;best=colliders[i].max.y;}
+      for(const q of placed){if(Math.abs(q.top-r.ay)>0.03||!ovl(F,q.F))continue;best=q.newTop;}
+      if(best!=null)ty=best;}
+    const T=new V3(r.ax*k,ty,r.az*k),A=new V3(r.ax,r.ay,r.az);
+    for(let i=r.ms;i<r.me;i++){const o=scene.children[i];if(!o)continue;o.position.divideScalar(k).sub(A).add(T);o.scale.divideScalar(k);}
+    let top=-1e9,otop=-1e9;for(let i=r.cs;i<r.ce;i++){const c=colliders[i];c.min.divideScalar(k).sub(A).add(T);c.max.divideScalar(k).sub(A).add(T);top=Math.max(top,c.max.y);otop=Math.max(otop,orig[i].max.y);}
+    placed.push({top:otop,newTop:top,F});}
+})();
 (function mergeWorld(){ // fold the static world into one mesh per surface kind (colour rides along per vertex): same look and collisions, a few dozen draw calls instead of hundreds
   const objs=scene.children.slice(worldFrom);scene.updateMatrixWorld(true);const by=new Map(),wm=new Set(worldMeshes);
   const keyOf=m=>m.material.userData&&m.material.userData.kind?'k:'+m.material.userData.kind:m.material;
@@ -1135,7 +1199,7 @@ function segBlocked(a,b){
   }
   return false;
 }
-const SPAWNS=[[28,-31],[31,-24],[-28,31],[-31,24],[0,31.5],[31,9],[-31,-9],[-6,-31],[11,31.5],[-31.5,1],[9,-22],[-20,25],[-27,-22],[20,17],[-31,-18],[31,-15],[-16,31.5],[24,31.5],[-2,-22],[-14,-22],[16,-30],[-24,0],[22,10],[-22,30],[31,1],[-31,9],[40,-30],[46,-19],[40,30],[46,20],[33,-15],[33,16],[44,-2.5],[37.5,4]].map(p=>new V3(p[0],0,p[1])).filter(p=>openSpot(p.x,p.z));
+const SPAWNS=[[28,-31],[31,-24],[-28,31],[-31,24],[0,31.5],[31,9],[-31,-9],[-6,-31],[11,31.5],[-31.5,1],[9,-22],[-20,25],[-27,-22],[20,17],[-31,-18],[31,-15],[-16,31.5],[24,31.5],[-2,-22],[-14,-22],[16,-30],[-24,0],[22,10],[-22,30],[31,1],[-31,9],[40,-30],[41,-21],[40,30],[46,22],[33,-17],[33,18],[44,-2.5],[37.5,4]].map(p=>HANGAR.map(p[0],p[1])).map(p=>new V3(p[0]*MAP_SCALE,0,p[1]*MAP_SCALE)).filter(p=>openSpot(p.x,p.z));
 function openSpot(x,z){ // standable, not inside anything, and not boxed in
   if(x<XMIN+1||x>XMAX-1||z<ZMIN+1||z>ZMAX-1)return false;
   if(hitsAt(x,0.05,z,1.85,0.72)||groundAt(x,z,0.4,0.72)>0.01||rampAt(x,z,0.72)>0.05)return false;
@@ -1269,8 +1333,18 @@ const muzzleTex=(function(){
   return new THREE.CanvasTexture(c);
 })();
 const flashMat=()=>new THREE.SpriteMaterial({toneMapped:false,map:muzzleTex,blending:THREE.AdditiveBlending,depthWrite:false,transparent:true});
-const sleeveTex=camoTex(['#7b6c4f','#9a8a66','#5b4d37','#b3a27b'],4);
-const gloveTex=camoTex(['#3f3d33','#55524a','#2b2a24','#66615a'],3);
+const sleeveTex=(function(){ // soft multicam-style fabric: blended blobs, weave and a little grime
+  const N=128,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),r=mulberry(4242);x.fillStyle='#8a7c5e';x.fillRect(0,0,N,N);
+  const blob=(col,n,rmin,rmax)=>{for(let i=0;i<n;i++){const cx=r()*N,cy=r()*N,rr=rmin+r()*(rmax-rmin);for(const ox of[-N,0,N])for(const oy of[-N,0,N]){x.fillStyle=col;x.beginPath();x.ellipse(cx+ox,cy+oy,rr,rr*(0.5+r()*0.6),r()*3,0,TAU);x.fill();}}};
+  blob('rgba(108,96,64,.75)',16,6,16);blob('rgba(74,70,48,.7)',12,4,11);blob('rgba(160,146,110,.55)',10,4,10);blob('rgba(52,46,34,.6)',8,2,6);
+  for(let i=0;i<N;i+=2){x.fillStyle='rgba(255,255,255,.035)';x.fillRect(0,i,N,1);x.fillStyle='rgba(0,0,0,.035)';x.fillRect(i,0,1,N);}
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,2);return t;})();
+const gloveTex=(function(){ // dark synthetic glove: leather palm grain, knuckle padding seams
+  const N=64,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),r=mulberry(777);x.fillStyle='#3c3a33';x.fillRect(0,0,N,N);
+  const im=x.getImageData(0,0,N,N),d=im.data;for(let i=0;i<d.length;i+=4){const n=(r()-0.5)*16;d[i]+=n;d[i+1]+=n;d[i+2]+=n*0.9;}x.putImageData(im,0,0);
+  x.strokeStyle='rgba(20,18,14,.55)';x.lineWidth=1;for(let i=8;i<N;i+=16){x.beginPath();x.moveTo(0,i);x.lineTo(N,i);x.stroke();}
+  x.strokeStyle='rgba(120,112,96,.25)';for(let i=10;i<N;i+=16){x.beginPath();x.moveTo(0,i);x.lineTo(N,i);x.stroke();}
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,2);return t;})();
 const sleeveM=new THREE.MeshLambertMaterial({map:sleeveTex}), gloveM=new THREE.MeshLambertMaterial({map:gloveTex});
 
 /* ---------------- camos ---------------- */
@@ -1304,7 +1378,7 @@ function camoCanvas(id){
   else if(id==='digital')pixel(['#bfe0ff','#4a8ad0','#1e4f8f','#0b2244'],[0.36,0.5,0.62],8);
   else if(id==='urban')pixel(['#e8eaec','#a2a6aa','#5d6166','#222428'],[0.36,0.5,0.62],8);
   else if(id.endsWith('tiger')){
-    const P=id==='redtiger'?['#c8140c','#120302','#ff6a3c','#8a0a06']:['#1658d6','#030a1e','#6cc2ff','#0b3488'];x.fillStyle=P[0];x.fillRect(0,0,s,s);
+    const P=id==='redtiger'?['#a8231a','#1a0604','#e0643e','#741410']:['#2457b8','#060c1e','#6aaee8','#14327a'];x.fillStyle=P[0];x.fillRect(0,0,s,s);
     x.globalAlpha=0.22;for(let i=0;i<34;i++){x.fillStyle=i%2?P[3]:P[2];const cx=rnd()*s,cy=rnd()*s,r=14+rnd()*50;wrap((ox,oy)=>{x.beginPath();x.ellipse(cx+ox,cy+oy,r*1.6,r*0.6,0,0,TAU);x.fill();});}x.globalAlpha=1;
     const stripe=(y0,amp,k,ph,x0,len,w,col,alpha)=>{const pts=48,top=[],bot=[];
       for(let i=0;i<=pts;i++){const t=i/pts,X=x0+len*t,u=X/s;const Y=y0+Math.sin(TAU*u*k+ph)*amp+Math.sin(TAU*u*k*2+ph*1.7)*amp*0.35;
@@ -1336,6 +1410,13 @@ function camoCanvas(id){
     x.globalAlpha=0.25;for(let i=0;i<s;i+=8){x.fillStyle='#1b2a44';x.fillRect(i,0,1,s);x.fillRect(0,i,s,1);}x.globalAlpha=1;}
   else{x.fillStyle='#888';x.fillRect(0,0,s,s);}
   if(!['factory','polymer','woodstock','gold','diamond','darkmatter','cyborg'].includes(id))grain(12);
+  if(!['factory','polymer','woodstock'].includes(id)){ // shared finish: worn edges and handling scuffs, same weight on every camo
+    x.globalAlpha=1;for(let i=0;i<120;i++){x.fillStyle=`rgba(${rnd()<0.5?'255,250,240':'20,18,16'},${0.04+rnd()*0.06})`;x.fillRect(rnd()*s,rnd()*s,6+rnd()*30,1);}
+    for(let i=0;i<14;i++){const g=x.createRadialGradient(0,0,0,0,0,1);const cx=rnd()*s,cy=rnd()*s,r=10+rnd()*30;wrap((ox,oy)=>{const gg=x.createRadialGradient(cx+ox,cy+oy,0,cx+ox,cy+oy,r);gg.addColorStop(0,'rgba(0,0,0,.08)');gg.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=gg;x.fillRect(cx+ox-r,cy+oy-r,r*2,r*2);});void g;}}
+  if(!['factory','polymer','woodstock'].includes(id)){ // one colour grade for the whole set: tame saturation, soften pure blacks and whites, same fine grain
+    const prem=['gold','diamond','damascus','darkmatter','cyborg'].includes(id),k=prem?0.86:0.78,im=x.getImageData(0,0,s,s),d=im.data;
+    for(let i=0;i<d.length;i+=4){const l=d[i]*0.3+d[i+1]*0.59+d[i+2]*0.11;for(let j=0;j<3;j++){let v=l+(d[i+j]-l)*k;v=14+v*0.9;d[i+j]=v+(rnd()-0.5)*6;}}
+    x.putImageData(im,0,0);}
   return camoCanvasCache[id]=c;
 }
 const brushedCanvas=(function(){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle='#cfd2d5';x.fillRect(0,0,128,128);const rnd=mulberry(9);
@@ -1354,16 +1435,17 @@ const snpSkin=new THREE.MeshPhongMaterial({color:0xffffff,shininess:38,specular:
 const pisSkin=new THREE.MeshPhongMaterial({color:0xffffff,shininess:90,specular:0x888888});
 function addSheen(mat){mat.userData.sheenU={uTime:{value:0},uSheen:{value:0}};
   mat.onBeforeCompile=sh=>{sh.uniforms.uTime=mat.userData.sheenU.uTime;sh.uniforms.uSheen=mat.userData.sheenU.uSheen;
-    sh.fragmentShader='uniform float uTime;\nuniform float uSheen;\n'+sh.fragmentShader.replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n#ifdef USE_UV\n  float sbd=fract(vUv.x*0.22+vUv.y*0.12-uTime*0.3);\n  float shv=smoothstep(0.0,0.06,sbd)*smoothstep(0.16,0.06,sbd);\n  totalEmissiveRadiance+=vec3(1.0,0.96,0.88)*shv*uSheen;\n#endif');};}
+    sh.vertexShader='varying vec3 vShP;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n  vShP=(modelMatrix*vec4(transformed,1.0)).xyz;');
+    sh.fragmentShader='uniform float uTime;\nuniform float uSheen;\nvarying vec3 vShP;\n'+sh.fragmentShader.replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n  float sbd=fract(-vShP.z*0.7+vShP.y*0.4-uTime*0.11);\n  float shv=smoothstep(0.0,0.22,sbd)*smoothstep(0.5,0.22,sbd);\n  totalEmissiveRadiance+=vec3(1.0,0.96,0.88)*shv*uSheen*0.55;');};}
 addSheen(snpSkin);addSheen(pisSkin);
 // per-camo finish: glow colour (pulses when animated), shine, flow speed, sheen strength
-const CAMO_FX={desert:{g:0x3a2810},arctic:{g:0x1c2c3c},woodland:{g:0x14260a},digital:{g:0x0a2a5a,f:1.3},urban:{g:0x1e2226},redtiger:{g:0x5a0a04,f:1.4},bluetiger:{g:0x06205e,f:1.4},fall:{g:0x44200a},
+const CAMO_FX={desert:{g:0x3a2810},arctic:{g:0x1c2c3c},woodland:{g:0x14260a},digital:{g:0x0a2a5a,f:1.1},urban:{g:0x1e2226},redtiger:{g:0x4a0a04,f:1.1},bluetiger:{g:0x061c50,f:1.1},fall:{g:0x44200a},
   gold:{g:0x281800,sh:90,sp:0xb89048,f:0.5,sn:0.45,gl:1.1,c:0xd8d0c0},diamond:{g:0x18283a,sh:120,sp:0xc8dcec,f:0.6,sn:0.5,gl:1.2,c:0xe0e8ee},damascus:{g:0x3a0610,sh:90,sp:0xc08080,f:1.1},
-  darkmatter:{g:0x3a12a0,sh:70,sp:0x8866ff,f:2.4,sn:0.35,gl:3.2},cyborg:{g:0x0a70b0,sh:60,sp:0x66ccff,f:1.6,sn:0.3,gl:3.2}};
+  darkmatter:{g:0x3a12a0,sh:70,sp:0x8866ff,f:1.6,sn:0.3,gl:2.0},cyborg:{g:0x0a70b0,sh:60,sp:0x66ccff,f:1.2,sn:0.28,gl:2.0}};
 function animateCamo(t){
   for(const sk of[snpSkin,pisSkin]){const m=sk.map;if(!m)continue;
     const f=sk.userData.flow||1;if(sk.userData.sheenU)sk.userData.sheenU.uTime.value=t;
-    if(S.animCamo&&sk.userData.camo){m.offset.set(t*0.06*f+Math.sin(t*0.9)*0.06,t*0.03*f+Math.cos(t*0.7)*0.07);sk.emissiveIntensity=0.7+0.3*Math.sin(t*2.6+(sk===pisSkin?1.3:0));}
+    if(S.animCamo&&sk.userData.camo){m.offset.set(t*0.024*f+Math.sin(t*0.35)*0.03,t*0.012*f+Math.cos(t*0.28)*0.035);sk.emissiveIntensity=0.85+0.15*Math.sin(t*1.0+(sk===pisSkin?1.3:0));}
     else if(m.offset.x||m.offset.y){m.offset.set(0,0);}
   }
 }
@@ -1375,8 +1457,8 @@ function skinTo(sk,id,isPis){const fx=CAMO_FX[id]||{};
     else{const fin=FACTORY_FINISH[curModelPid]||'factory';sk.map=texFrom(camoCanvas(fin),'s-'+fin,1);sk.color.set(0xffffff);sk.shininess=fin==='polymer'?30:38;sk.specular.set(fin==='polymer'?0x2a2a2a:0x3a3a3a);}
     sk.userData.camo=false;sk.emissiveMap=null;sk.emissive.setHex(0);}
   else{sk.map=texFrom(camoCanvas(id),(isPis?'p-':'s-')+id,1);sk.color.set(fx.c||0xffffff);sk.shininess=fx.sh||(isPis?45:38);sk.specular.set(fx.sp||(isPis?0x444444:0x3a3a3a));sk.userData.camo=true;
-    if(S.animCamo){sk.emissiveMap=sk.map;sk.emissive.setHex(fx.g||0x202020).multiplyScalar(fx.gl||2.2);}else{sk.emissiveMap=null;sk.emissive.setHex(0);}}
-  sk.userData.flow=(fx.f||1)*(isPis?1.8:1);sk.userData.sheenU.uSheen.value=S.animCamo?(id==='factory'?(isPis?0.16:0.08):(fx.sn||0.32)):0;sk.needsUpdate=true;}
+    if(S.animCamo){sk.emissiveMap=sk.map;sk.emissive.setHex(fx.g||0x202020).multiplyScalar(fx.gl||1.4);}else{sk.emissiveMap=null;sk.emissive.setHex(0);}}
+  sk.userData.flow=(fx.f||1)*(isPis?1.4:1);sk.userData.sheenU.uSheen.value=S.animCamo?(id==='factory'?(isPis?0.16:0.08):(fx.sn||0.32)):0;sk.needsUpdate=true;}
 function applyCamo(){skinTo(snpSkin,validCamo(S.camoS),false);skinTo(pisSkin,validCamo(S.camoP),true);}
 
 /* ---------------- model helpers ---------------- */
@@ -1477,17 +1559,26 @@ function camoAll(root,skin,tile){root.traverse(o=>{if(o.isMesh&&o.material===ski
 /* ---------------- arsenal: every primary sits in the Intervention's frame (eye line at local y=E, grip under the same hand) ---------------- */
 const primGroups={};const E=0.025;
 (function wrapIntervention(){const ig=new THREE.Group();ig.name='int';for(const c of snpModel.children.slice()){snpModel.remove(c);ig.add(c);}snpModel.add(ig);primGroups.int=ig;ig.userData.flash=snpModel.userData.flash;})();
-function rifleHands(g){
-  hand(g,BOX(0.064,0.1,0.075),gloveM,0.002,-0.215,0.168,-0.42);
-  hand(g,BOX(0.018,0.026,0.06),gloveM,-0.028,-0.162,0.12,0,0.1,0);
-  hand(g,BOX(0.014,0.014,0.05),gloveM,0.006,-0.165,0.09,0.25);
-  hand(g,BOX(0.09,0.09,0.36),sleeveM,0.075,-0.31,0.37,0.55,-0.35,0);
+const cuffM=new THREE.MeshLambertMaterial({color:0x2a2a24});
+function finger(g,a,b,r){const m=rod(g,a,b,r||0.0085,gloveM,7);handMeshes.push(m);const tip=new THREE.Mesh(new THREE.SphereGeometry((r||0.0085)*1.02,7,5),gloveM);tip.position.copy(b);g.add(tip);handMeshes.push(tip);return m;}
+function sleeve(g,wr,el,r){const s=rod(g,wr,el,r||0.044,sleeveM,12);handMeshes.push(s);const d=new V3().subVectors(el,wr).normalize();
+  const c=new THREE.Mesh(new THREE.CylinderGeometry((r||0.044)*0.82,(r||0.044)*0.82,0.035,12),cuffM);c.position.copy(wr).addScaledVector(d,0.012);c.quaternion.setFromUnitVectors(new V3(0,1,0),d);g.add(c);handMeshes.push(c);
+  for(const t of[0.3,0.55]){const f=new THREE.Mesh(new THREE.TorusGeometry((r||0.044)*1.0,0.004,5,14),sleeveM);f.position.copy(wr).lerp(el,t);f.quaternion.setFromUnitVectors(new V3(0,0,1),d);g.add(f);handMeshes.push(f);}} // fabric folds
+function rifleHands(g){ // right hand on the pistol grip: palm, four fingers wrapped round the front strap, trigger finger, thumb over the top, cuffed sleeve
+  hand(g,BOX(0.05,0.098,0.066),gloveM,0.004,-0.214,0.172,-0.42);
+  hand(g,BOX(0.054,0.04,0.03),gloveM,0.004,-0.178,0.2,-0.42); // back of the hand / web
+  for(let i=0;i<4;i++){const y=-0.186-i*0.022,z=0.123+(-0.19-y)*0.31-0.012;finger(g,new V3(0.03,y,z+0.01),new V3(-0.022,y-0.002,z),0.0088-i*0.0005);}
+  finger(g,new V3(0.02,-0.164,0.122),new V3(0.012,-0.166,0.082),0.0075);                    // trigger finger
+  finger(g,new V3(-0.024,-0.17,0.17),new V3(-0.028,-0.156,0.118),0.0085);                     // thumb
+  sleeve(g,new V3(0.03,-0.255,0.215),new V3(0.13,-0.39,0.56),0.045);
 }
 function leftHand(g0,z,yb,vert){ // support hand under the handguard (or wrapped round a vertical grip) with the forearm running back to the lower left; lives in its own group so reloads can move it
   const g=new THREE.Group();g.userData.isLH=true;g0.add(g);
-  if(vert){hand(g,BOX(0.05,0.07,0.06),gloveM,-0.004,yb-0.03,z+0.01);hand(g,BOX(0.02,0.05,0.02),gloveM,0.022,yb-0.03,z-0.02);}
-  else{hand(g,BOX(0.062,0.032,0.09),gloveM,-0.006,yb-0.012,z,0,0,-0.18);hand(g,BOX(0.016,0.04,0.07),gloveM,-0.036,yb+0.006,z,0,0,0.25);hand(g,BOX(0.014,0.036,0.07),gloveM,0.028,yb+0.004,z+0.01,0,0,-0.3);}
-  const a=new V3(-0.02,yb-0.04,z+0.04),b=new V3(-0.2,yb-0.27,z+0.36);const s=rod(g,a,b,0.042,sleeveM,10);handMeshes.push(s);
+  if(vert){hand(g,BOX(0.046,0.066,0.054),gloveM,-0.006,yb-0.034,z+0.012);for(let i=0;i<4;i++){const y=yb-0.012-i*0.02;finger(g,new V3(-0.026,y,z+0.02),new V3(0.022,y,z-0.022),0.008);}finger(g,new V3(-0.026,yb+0.002,z+0.01),new V3(0.0,yb+0.012,z-0.022),0.0078);}
+  else{hand(g,BOX(0.056,0.024,0.086),gloveM,-0.004,yb-0.016,z,0,0,-0.12);
+    for(let i=0;i<4;i++){const zz=z-0.03+i*0.02;finger(g,new V3(0.022,yb-0.022,zz),new V3(0.034,yb+0.016,zz-0.004),0.0078);} // fingers curl up the right side
+    finger(g,new V3(-0.026,yb-0.018,z+0.02),new V3(-0.036,yb+0.014,z-0.012),0.0085);}                          // thumb up the left side
+  sleeve(g,new V3(-0.02,yb-0.04,z+0.045),new V3(-0.2,yb-0.27,z+0.36),0.042);
 }
 function rifleGrip(g,rub,blk){
   put(g,sideGeo([[0.04,-0.146],[0.122,-0.146],[0.122,-0.156],[0.106,-0.19],[0.05,-0.19],[0.04,-0.172]],[[[0.056,-0.152],[0.1,-0.152],[0.094,-0.18],[0.058,-0.18]]],0.012,0),blk);
@@ -1526,7 +1617,7 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   put(g,sideGeo([[-0.52,-0.066],[0.2,-0.066],[0.235,-0.08],[0.235,-0.13],[-0.18,-0.13],[-0.2,-0.112],[-0.52,-0.112],[-0.535,-0.09]],null,0.074,0.006),snpSkin); // upper with barrel jacket
   for(const sx of[-1,1])for(let i=0;i<4;i++)put(g,new THREE.CircleGeometry(0.012,14),M.hole,sx*0.0432,-0.089,-0.25-i*0.065,0,sx*Math.PI/2,0); // jacket vents
   put(g,BOX(0.04,0.008,0.62),M.blk,0,-0.062,-0.12);for(let i=0;i<30;i++)put(g,BOX(0.044,0.004,0.01),M.blk,0,-0.056,-0.42+i*0.02);
-  put(g,sideGeo([[-0.18,-0.13],[0.235,-0.13],[0.235,-0.155],[0.14,-0.16],[0.04,-0.16],[-0.18,-0.15]],null,0.066,0.004),M.drk); // lower receiver
+  put(g,sideGeo([[-0.18,-0.13],[0.235,-0.13],[0.235,-0.155],[0.14,-0.16],[0.04,-0.16],[-0.18,-0.15]],null,0.066,0.004),snpSkin); // lower receiver
   put(g,BOX(0.05,0.13,0.11),M.drk,0,-0.215,-0.08,0.04);put(g,BOX(0.054,0.012,0.115),M.blk,0,-0.28,-0.083,0.04); // 10 rd mag
   rod(g,new V3(0,-0.066,-0.27),new V3(0,-0.03,-0.3),0.007,M.blk);rod(g,new V3(0,-0.03,-0.3),new V3(0,-0.03,-0.4),0.009,M.rub);rod(g,new V3(0,-0.03,-0.4),new V3(0,-0.066,-0.43),0.007,M.blk); // carry handle
   put(g,new THREE.CylinderGeometry(0.019,0.021,0.62,14),M.stl,0,-0.09,-0.83,Math.PI/2);
@@ -1550,7 +1641,7 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   put(g,sideGeo([[-0.11,-0.062],[0.13,-0.062],[0.145,-0.078],[0.145,-0.11],[0.06,-0.114],[0.02,-0.122],[-0.06,-0.122],[-0.1,-0.105],[-0.11,-0.08]],null,0.046,0.004),snpSkin);
   put(g,BOX(0.05,0.008,0.07),M.blk,0,-0.124,-0.025);put(g,BOX(0.042,0.03,0.11),snpSkin,0,-0.134,0.1); // grip mount
   // quad-rail handguard
-  put(g,BOX(0.05,0.05,0.24),M.drk,0,-0.04,-0.26);                                  // carbine-length quad rail
+  put(g,BOX(0.05,0.05,0.24),snpSkin,0,-0.04,-0.26);                                  // carbine-length quad rail
   railTop(g,-0.142,-0.38,-0.011,0.024);for(const sx of[-1,1]){put(g,BOX(0.008,0.024,0.24),M.blk,sx*0.028,-0.04,-0.26);for(let z=-0.37;z<-0.15;z+=0.012)put(g,BOX(0.012,0.028,0.006),M.blk,sx*0.028,-0.04,z);}
   put(g,BOX(0.024,0.008,0.24),M.blk,0,-0.069,-0.26);
   put(g,new THREE.CylinderGeometry(0.009,0.0095,0.17,10),M.stl,0,-0.04,-0.46,Math.PI/2);
@@ -1570,19 +1661,19 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   railTop(g,0.15,-0.62,-0.004,0.028,-0.08);
   for(const sx of[-1,1])put(g,BOX(0.004,0.016,0.4),M.drk,sx*0.0318,-0.044,-0.06);
   put(g,BOX(0.004,0.016,0.05),M.hole,0.0322,-0.04,0.0);put(g,BOX(0.014,0.014,0.03),M.blk,-0.038,-0.022,-0.22);
-  put(g,sideGeo([[-0.13,-0.078],[0.155,-0.078],[0.155,-0.146],[0.04,-0.15],[-0.02,-0.168],[-0.1,-0.168],[-0.13,-0.12]],null,0.062,0.005),M.drk); // polymer lower with flared magwell
+  put(g,sideGeo([[-0.13,-0.078],[0.155,-0.078],[0.155,-0.146],[0.04,-0.15],[-0.02,-0.168],[-0.1,-0.168],[-0.13,-0.12]],null,0.062,0.005),snpSkin); // polymer lower with flared magwell
   for(const sx of[-1,1])put(g,BOX(0.004,0.014,0.02),M.blk,sx*0.033,-0.13,-0.02); // ambi mag release
   put(g,sideGeo([[-0.04,-0.16],[-0.11,-0.16],[-0.145,-0.31],[-0.09,-0.325],[-0.03,-0.17]],null,0.03,0.003),M.drk); // curved PMAG
   for(let i=0;i<4;i++)put(g,BOX(0.034,0.004,0.05),M.blk,0,-0.19-i*0.03,-0.08-i*0.008,0.2);
   // fat polymer handguard with a sloped nose
-  put(g,sideGeo([[-0.26,-0.006],[-0.56,-0.006],[-0.6,-0.022],[-0.61,-0.05],[-0.585,-0.086],[-0.3,-0.094],[-0.26,-0.088]],null,0.062,0.006),M.drk); // tapered polymer handguard
+  put(g,sideGeo([[-0.26,-0.006],[-0.56,-0.006],[-0.6,-0.022],[-0.61,-0.05],[-0.585,-0.086],[-0.3,-0.094],[-0.26,-0.088]],null,0.062,0.006),snpSkin); // tapered polymer handguard
   for(const sx of[-1,1]){put(g,BOX(0.006,0.016,0.14),M.blk,sx*0.034,-0.04,-0.5);for(let z=-0.565;z<-0.435;z+=0.012)put(g,BOX(0.009,0.02,0.005),M.blk,sx*0.034,-0.04,z);for(let i=0;i<3;i++)put(g,BOX(0.003,0.03,0.05),M.hole,sx*0.0315,-0.06,-0.3-i*0.065);}
   put(g,BOX(0.03,0.01,0.03),M.blk,0,0.0,-0.6);for(const sx of[-1,1])put(g,BOX(0.004,0.03,0.016),M.blk,sx*0.011,0.016,-0.6); // folding front sight
   put(g,new THREE.CylinderGeometry(0.0115,0.0125,0.18,12),M.stl,0,-0.045,-0.69,Math.PI/2);
   put(g,lathe([[0.008,-0.78],[0.0165,-0.78],[0.0165,-0.83],[0.008,-0.83]],14),M.blk,0,-0.045,0);for(let i=0;i<3;i++)put(g,BOX(0.003,0.01,0.02),M.hole,0.0168,-0.045,-0.79-i*0.012);
   rifleGrip(g,M.rub,M.blk);
-  put(g,BOX(0.05,0.07,0.05),M.drk,0,-0.06,0.18); // folding-stock hinge
-  put(g,sideGeo([[0.2,-0.028],[0.33,-0.028],[0.36,-0.012],[0.44,-0.012],[0.47,-0.03],[0.475,-0.06],[0.475,-0.215],[0.445,-0.228],[0.39,-0.2],[0.3,-0.172],[0.24,-0.128],[0.2,-0.1]],null,0.05,0.005),M.drk); // solid Masada stock, stepped comb
+  put(g,BOX(0.05,0.07,0.05),snpSkin,0,-0.06,0.18); // folding-stock hinge
+  put(g,sideGeo([[0.2,-0.028],[0.33,-0.028],[0.36,-0.012],[0.44,-0.012],[0.47,-0.03],[0.475,-0.06],[0.475,-0.215],[0.445,-0.228],[0.39,-0.2],[0.3,-0.172],[0.24,-0.128],[0.2,-0.1]],null,0.05,0.005),snpSkin); // solid Masada stock, stepped comb
   for(const sx of[-1,1]){put(g,BOX(0.003,0.05,0.13),M.blk,sx*0.0262,-0.1,0.33);for(let i=0;i<5;i++)put(g,BOX(0.004,0.008,0.012),M.blk,sx*0.0265,-0.06,0.25+i*0.03);} // length-of-pull slots
   put(g,BOX(0.056,0.2,0.026),M.rub,0,-0.13,0.485);
   holoSight(g,-0.04,0.0);
@@ -1605,7 +1696,7 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   // side-folding stock with cheek riser
   put(g,sideGeo([[0.15,-0.02],[0.215,-0.02],[0.215,-0.13],[0.15,-0.13]],null,0.056,0.004),snpSkin);                // hinge block
   put(g,sideGeo([[0.21,-0.028],[0.44,-0.035],[0.44,-0.062],[0.21,-0.058]],null,0.036,0.004),snpSkin);                 // top bar
-  put(g,sideGeo([[0.25,-0.003],[0.4,-0.003],[0.41,-0.015],[0.41,-0.036],[0.25,-0.034],[0.24,-0.018]],null,0.034,0.004),M.drk); // adjustable cheek riser
+  put(g,sideGeo([[0.25,-0.003],[0.4,-0.003],[0.41,-0.015],[0.41,-0.036],[0.25,-0.034],[0.24,-0.018]],null,0.034,0.004),snpSkin); // adjustable cheek riser
   for(const z of[0.27,0.38])put(g,BOX(0.03,0.01,0.012),M.blk,0,-0.04,z);
   rod(g,new V3(0,-0.125,0.21),new V3(0,-0.2,0.43),0.011,snpSkin,8);                                                   // lower strut
   put(g,sideGeo([[0.43,-0.03],[0.465,-0.035],[0.47,-0.06],[0.47,-0.24],[0.445,-0.25],[0.43,-0.22]],null,0.048,0.005),snpSkin); // butt
@@ -1649,6 +1740,7 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   put(g,sideGeo([[0.15,-0.04],[0.2,-0.045],[0.5,-0.075],[0.52,-0.09],[0.52,-0.26],[0.49,-0.27],[0.35,-0.2],[0.2,-0.13],[0.15,-0.1]],null,0.046,0.006),snpSkin);
   put(g,BOX(0.052,0.19,0.024),M.rub,0,-0.175,0.53);
   railTop(g,0.12,-0.02,-0.016,0.024,0.01);redDot(g,0.05,-0.012);
+  {const a=new V3(0,-0.018,-0.17),b=new V3(0,-0.002,-0.19),c=new V3(0,-0.002,-0.26),d=new V3(0,-0.018,-0.28);rod(g,a,b,0.005,M.blk);rod(g,b,c,0.008,M.rub);rod(g,c,d,0.005,M.blk);put(g,BOX(0.016,0.008,0.12),M.blk,0,-0.02,-0.225);} // folding carry handle
   leftHand(g,-0.42,-0.104);rifleHands(g);gunFlash(g,-1.1,-0.065,0.48);})();
 
 /* ---- UMP45 ---- */
@@ -1661,8 +1753,9 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   put(g,new THREE.CylinderGeometry(0.011,0.011,0.1,12),M.stl,0,-0.06,-0.3,Math.PI/2);put(g,lathe([[0.008,-0.335],[0.0155,-0.335],[0.0155,-0.37],[0.008,-0.37]],14),M.blk,0,-0.06,0);
   put(g,BOX(0.03,0.155,0.058),M.drk,0,-0.205,-0.07,0.05);put(g,BOX(0.034,0.012,0.064),M.blk,0,-0.285,-0.075,0.05);for(let i=0;i<3;i++)put(g,BOX(0.032,0.004,0.05),M.blk,0,-0.16-i*0.035,-0.068);
   rifleGrip(g,M.rub,M.blk);
-  rod(g,new V3(0.021,-0.04,0.145),new V3(0.021,-0.05,0.42),0.008,M.blk);rod(g,new V3(-0.021,-0.04,0.145),new V3(-0.021,-0.05,0.42),0.008,M.blk);rod(g,new V3(0,-0.125,0.145),new V3(0,-0.185,0.41),0.008,M.blk);
-  put(g,BOX(0.056,0.19,0.026),M.rub,0,-0.13,0.43);
+  put(g,BOX(0.05,0.06,0.03),M.drk,0,-0.06,0.158); // stock hinge
+  put(g,sideGeo([[0.17,-0.03],[0.4,-0.04],[0.43,-0.055],[0.43,-0.225],[0.405,-0.235],[0.36,-0.2],[0.2,-0.13],[0.17,-0.1]],[[[0.22,-0.06],[0.37,-0.066],[0.38,-0.17],[0.34,-0.165],[0.23,-0.11]]],0.044,0.005),snpSkin); // UMP folding polymer stock
+  put(g,BOX(0.05,0.19,0.02),M.rub,0,-0.135,0.436);
   redDot(g,-0.04,-0.011);
   leftHand(g,-0.17,-0.13);rifleHands(g);gunFlash(g,-0.39,-0.06,0.3);})();
 
@@ -1672,7 +1765,7 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   for(const sx of[-1,1]){put(g,BOX(0.003,0.008,0.2),M.drk,sx*0.0245,-0.05,-0.02);put(g,BOX(0.003,0.012,0.05),M.hole,sx*0.0245,-0.07,0.02);}
   put(g,new THREE.CylinderGeometry(0.0135,0.0135,0.27,14),snpSkin,0,-0.026,-0.03,Math.PI/2);                     // cocking tube
   put(g,BOX(0.008,0.016,0.026),M.blk,-0.028,-0.024,-0.13);put(g,BOX(0.026,0.008,0.008),M.blk,-0.042,-0.02,-0.13); // cocking handle
-  put(g,sideGeo([[-0.152,-0.052],[-0.21,-0.052],[-0.222,-0.066],[-0.222,-0.118],[-0.2,-0.122],[-0.152,-0.11]],null,0.05,0.005),M.drk); // nose / handstop block
+  put(g,sideGeo([[-0.152,-0.052],[-0.21,-0.052],[-0.222,-0.066],[-0.222,-0.118],[-0.2,-0.122],[-0.152,-0.11]],null,0.05,0.005),snpSkin); // nose / handstop block
   for(const sx of[-1,1])put(g,BOX(0.004,0.03,0.008),M.blk,sx*0.012,-0.028,-0.205);put(g,lathe([[0.012,-0.198],[0.016,-0.2],[0.016,-0.214],[0.012,-0.216]],16),M.blk,0,-0.018,0); // front sight hood
   put(g,new THREE.CylinderGeometry(0.0105,0.0105,0.07,14),M.stl,0,-0.064,-0.255,Math.PI/2);
   put(g,lathe([[0.008,-0.262],[0.0145,-0.262],[0.0145,-0.296],[0.011,-0.3],[0.008,-0.3]],16),M.blk,0,-0.064,0);   // tri-lug
@@ -1681,7 +1774,7 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
   for(let i=0;i<4;i++)put(g,BOX(0.034,0.003,0.03),M.blk,0,-0.15-i*0.022,-0.187);
   put(g,sideGeo([[-0.014,-0.096],[-0.08,-0.096],[-0.1,-0.165],[-0.12,-0.236],[-0.072,-0.247],[-0.056,-0.178],[-0.024,-0.122]],null,0.026,0.003),M.drk); // curved 30-round mag
   put(g,BOX(0.026,0.024,0.04),M.blk,0,-0.105,-0.045);                                                          // mag well
-  put(g,sideGeo([[0.0,-0.096],[0.135,-0.096],[0.135,-0.142],[0.05,-0.146],[0.0,-0.128]],null,0.046,0.004),M.drk); // trigger group
+  put(g,sideGeo([[0.0,-0.096],[0.135,-0.096],[0.135,-0.142],[0.05,-0.146],[0.0,-0.128]],null,0.046,0.004),snpSkin); // trigger group
   put(g,BOX(0.004,0.01,0.03),M.blk,-0.025,-0.115,0.08);                                                        // selector
   rifleGrip(g,M.rub,M.blk);
   put(g,BOX(0.05,0.07,0.014),M.blk,0,-0.065,0.142);rod(g,new V3(0.03,-0.06,0.15),new V3(0.03,-0.1,0.16),0.004,M.blk); // end cap + sling loop
@@ -1691,9 +1784,9 @@ function redDot(g,z,base){const M=gunMats;base=base==null?-0.004:base;const R=0.
 /* ---- RPD ---- */
 (function buildRPD(){const M=gunMats,g=new THREE.Group();g.position.y=-0.025;snpModel.add(g);primGroups.rpd=g;
   const brass=new THREE.MeshPhongMaterial({color:0xb08a3a,shininess:70,specular:0x806030});
-  put(g,sideGeo([[-0.18,-0.028],[0.15,-0.028],[0.165,-0.045],[0.165,-0.12],[-0.18,-0.122],[-0.19,-0.1]],null,0.066,0.005),M.drk); // receiver
+  put(g,sideGeo([[-0.18,-0.028],[0.15,-0.028],[0.165,-0.045],[0.165,-0.12],[-0.18,-0.122],[-0.19,-0.1]],null,0.066,0.005),snpSkin); // receiver
   for(const sx of[-1,1])put(g,BOX(0.003,0.03,0.24),M.blk,sx*0.0345,-0.085,-0.01);
-  put(g,sideGeo([[-0.15,-0.028],[0.13,-0.028],[0.145,-0.01],[0.12,0.0],[-0.13,0.002],[-0.15,-0.012]],null,0.074,0.004),M.blk); // feed cover
+  put(g,sideGeo([[-0.15,-0.028],[0.13,-0.028],[0.145,-0.01],[0.12,0.0],[-0.13,0.002],[-0.15,-0.012]],null,0.074,0.004),snpSkin); // feed cover
   put(g,BOX(0.008,0.02,0.04),M.blk,0.04,-0.06,-0.06);put(g,BOX(0.03,0.012,0.012),M.blk,0.058,-0.052,-0.07);       // charging handle, right side
   {const dr=new THREE.Group();dr.position.set(0,-0.215,-0.05);g.add(dr);
     put(dr,new THREE.CylinderGeometry(0.092,0.092,0.088,28),M.drk,0,0,0,0,0,Math.PI/2);put(dr,new THREE.CylinderGeometry(0.094,0.094,0.01,28),M.blk,0.045,0,0,0,0,Math.PI/2);put(dr,new THREE.CylinderGeometry(0.094,0.094,0.01,28),M.blk,-0.045,0,0,0,0,Math.PI/2);
@@ -1723,7 +1816,7 @@ let spasPump=null;
   put(g,sideGeo([[-0.12,-0.02],[-0.72,-0.02],[-0.74,-0.034],[-0.74,-0.05],[-0.12,-0.05]],null,0.04,0.003),snpSkin);
   for(let i=0;i<10;i++)for(const sx of[-1,1])put(g,new THREE.CircleGeometry(0.006,10),M.hole,sx*0.0238,-0.036,-0.18-i*0.055,0,sx*Math.PI/2,0);
   put(g,new THREE.SphereGeometry(0.004,8,6),M.stl,0,-0.016,-0.74);
-  put(g,new THREE.CylinderGeometry(0.019,0.019,0.5,14),M.drk,0,-0.096,-0.39,Math.PI/2);put(g,new THREE.CylinderGeometry(0.021,0.021,0.03,14),M.blk,0,-0.096,-0.655,Math.PI/2);
+  put(g,new THREE.CylinderGeometry(0.019,0.019,0.5,14),snpSkin,0,-0.096,-0.39,Math.PI/2);put(g,new THREE.CylinderGeometry(0.021,0.021,0.03,14),M.blk,0,-0.096,-0.655,Math.PI/2);
   spasPump=new THREE.Group();g.add(spasPump);
   put(spasPump,sideGeo([[-0.29,-0.064],[-0.53,-0.064],[-0.545,-0.08],[-0.545,-0.122],[-0.52,-0.135],[-0.3,-0.135],[-0.28,-0.12],[-0.28,-0.08]],null,0.07,0.006),M.rub);
   for(let i=0;i<8;i++)put(spasPump,BOX(0.06,0.003,0.012),M.blk,0,-0.1425,-0.31-i*0.028);
@@ -1746,17 +1839,18 @@ const pisMats=(()=>{const blk=new THREE.MeshPhongMaterial({color:0x121314,shinin
   return{blk,grip:new THREE.MeshLambertMaterial({map:texFrom(gripCanvas,'grip',14)}),port:new THREE.MeshBasicMaterial({color:0x0b0b0b}),
     brass:new THREE.MeshPhongMaterial({color:0xb08a3a,shininess:70,specular:0x806030}),wood:gunMats.wood};})();
 function secRoot(id){const g=new THREE.Group();g.name=id;pisModel.add(g);secGroups[id]=g;g.userData.slide=new THREE.Group();g.add(g.userData.slide);return g;}
-function pistolHands(g){ // two-handed grip used by every handgun: right hand on the grip, left hand cupping it
-  const H=gloveM;
-  hand(g,BOX(0.044,0.1,0.042),H,0.004,-0.15,0.152,-0.33);
-  for(let i=0;i<3;i++)hand(g,BOX(0.046,0.018,0.02),H,0.003,-0.132-i*0.022,0.066+i*0.008,-0.3);
-  hand(g,BOX(0.012,0.012,0.042),H,0.012,-0.094,0.03,0.2);
-  hand(g,BOX(0.014,0.016,0.05),H,0.022,-0.07,0.09,0,-0.15,0);
+function pistolHands(g){ // two-handed grip used by every handgun: right hand on the grip, left hand cupping it with its fingers over the right
+  const H=gloveM,fz=y=>0.074+(-0.098-y)*0.298;
+  hand(g,BOX(0.042,0.098,0.042),H,0.004,-0.15,0.152,-0.33);
+  for(let i=0;i<3;i++){const y=-0.13-i*0.022;finger(g,new V3(0.026,y,fz(y)+0.004),new V3(-0.018,y-0.002,fz(y)-0.01),0.0082);}
+  finger(g,new V3(0.016,-0.094,0.05),new V3(0.012,-0.094,0.018),0.0068);                      // trigger finger
+  finger(g,new V3(0.024,-0.075,0.12),new V3(0.022,-0.068,0.07),0.0078);                        // right thumb high on the frame
   const L=new THREE.Group();L.userData.isLH=true;g.add(L);
-  hand(L,BOX(0.02,0.085,0.07),H,-0.026,-0.16,0.115,-0.3);
-  for(let i=0;i<3;i++)hand(L,BOX(0.05,0.017,0.018),H,-0.002,-0.142-i*0.021,0.052+i*0.008,-0.3);
-  hand(L,BOX(0.014,0.015,0.06),H,-0.022,-0.07,0.05,0,0.12,0);
-  const s1=rod(g,new V3(0.01,-0.2,0.17),new V3(0.085,-0.4,0.44),0.033,sleeveM,12),s2=rod(L,new V3(-0.03,-0.2,0.15),new V3(-0.12,-0.4,0.42),0.033,sleeveM,12);handMeshes.push(s1,s2);
+  hand(L,BOX(0.02,0.082,0.066),H,-0.027,-0.16,0.115,-0.3);
+  for(let i=0;i<3;i++){const y=-0.14-i*0.021;finger(L,new V3(-0.03,y,fz(y)-0.004),new V3(0.026,y,fz(y)-0.016),0.0078);}
+  finger(L,new V3(-0.024,-0.08,0.085),new V3(-0.022,-0.07,0.035),0.0078);                       // support thumb forward along the frame
+  const s1=rod(g,new V3(0.01,-0.2,0.17),new V3(0.085,-0.4,0.44),0.034,sleeveM,12),s2=rod(L,new V3(-0.03,-0.2,0.15),new V3(-0.12,-0.4,0.42),0.034,sleeveM,12);handMeshes.push(s1,s2);
+  for(const [par,a,b] of[[g,new V3(0.01,-0.2,0.17),new V3(0.085,-0.4,0.44)],[L,new V3(-0.03,-0.2,0.15),new V3(-0.12,-0.4,0.42)]]){const d=new V3().subVectors(b,a).normalize();const c=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.03,12),cuffM);c.position.copy(a).addScaledVector(d,0.01);c.quaternion.setFromUnitVectors(new V3(0,1,0),d);par.add(c);handMeshes.push(c);}
 }
 function secFlash(g,z,y,s){const fl=new THREE.Sprite(flashMat());fl.position.set(0,y,z);fl.scale.set(s,s,1);fl.visible=false;g.add(fl);g.userData.flash=fl;}
 // common lower half for the compact pistols: frame with trigger guard, grip panels, trigger, mag base
@@ -1807,7 +1901,7 @@ function serr(sl,z0,n,w,y,h){for(let i=0;i<n;i++)for(const sx of[-1,1])put(sl,BO
   serr(sl,0.088,7,0.035,-0.024,0.03);put(sl,BOX(0.003,0.015,0.042),M.port,0.0172,-0.02,0.01);
   slideSights(sl,zf,0.126);
   put(g,new THREE.CircleGeometry(0.0068,16),M.port,0,-0.022,zf-0.0035,0,Math.PI,0);
-  pistolLower(g,zf+0.004,{rail:1,frameM:M.blk,w:0.031});
+  pistolLower(g,zf+0.004,{rail:1,w:0.031});
   put(g,BOX(0.012,0.02,0.014),M.blk,0,-0.036,0.134,-0.4);put(g,BOX(0.004,0.01,0.02),M.blk,-0.017,-0.06,0.11);
   pistolHands(g);secFlash(g,-0.12,-0.022,0.24);
 })();
@@ -1818,7 +1912,7 @@ function serr(sl,z0,n,w,y,h){for(let i=0;i<n;i++)for(const sx of[-1,1])put(sl,BO
   serr(sl,0.09,7,0.034,-0.026,0.03);for(const sx of[-1,1])put(sl,BOX(0.006,0.008,0.014),M.blk,sx*0.018,-0.012,0.108);
   put(sl,BOX(0.003,0.014,0.04),M.port,0.0162,-0.018,0.02);
   slideSights(sl,zf+0.004,0.126,-0.014);
-  pistolLower(g,zf+0.004,{round:1,frameM:M.blk,w:0.03});
+  pistolLower(g,zf+0.004,{round:1,w:0.03});
   put(g,BOX(0.011,0.02,0.014),M.blk,0,-0.034,0.133,-0.5);
   pistolHands(g);secFlash(g,-0.13,-0.019,0.24);
 })();
@@ -1830,7 +1924,7 @@ function serr(sl,z0,n,w,y,h){for(let i=0;i<n;i++)for(const sx of[-1,1])put(sl,BO
   slideSights(sl,zf,0.125,-0.003);
   put(sl,BOX(0.004,0.012,0.01),M.blk,-0.019,-0.02,0.104); // selector
   put(g,new THREE.CircleGeometry(0.007,16),M.port,0,-0.022,zf-0.0035,0,Math.PI,0);
-  pistolLower(g,zf+0.004,{grooves:1,rail:1,frameM:M.blk,w:0.032,extMag:0.07,gripM:M.blk});
+  pistolLower(g,zf+0.004,{grooves:1,rail:1,w:0.032,extMag:0.07,gripM:M.blk});
   pistolHands(g);secFlash(g,-0.11,-0.022,0.22);
 })();
 let mag44Cyl=null;
@@ -1899,6 +1993,26 @@ function hideFlashes(){for(const g of Object.values(primGroups))if(g.userData.fl
 function setSecondaryModel(sid){if(!secGroups[sid])sid='deagle';for(const k in RIGS)rigReset(RIGS[k]);for(const k in secGroups)secGroups[k].visible=k===sid;const g=secGroups[sid];pisSlide=g.userData.slide;pisModel.userData.flash=g.userData.flash;curSecId=sid;if(validCamo(S.camoP)==='factory')applyCamo();}
 camoAll(pisModel,pisSkin,0.085);pisModel.scale.setScalar(0.9);
 pisModel.visible=false;setSecondaryModel('deagle');
+// stop coplanar faces from z-fighting (the camo flicker): wherever two parts share a face plane on the same side, the smaller one is nudged out a hair
+function deZFight(G){G.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(G.matrixWorld).invert(),L=[],M4=new THREE.Matrix4(),q=new THREE.Quaternion(),sc=new V3(),ps=new V3();
+  // parts whose faces along an axis are true planes (that world axis depends on one local axis only) can z-fight on that axis
+  G.traverse(m=>{if(!m.isMesh)return;M4.multiplyMatrices(inv,m.matrixWorld);const e=M4.elements,ex=[-1,-1,-1];
+    for(let k=0;k<3;k++){const r=[Math.abs(e[k]),Math.abs(e[4+k]),Math.abs(e[8+k])],mx=Math.max(...r);if(mx<1e-9)continue;const nz=r.filter(v=>v>1e-5*mx).length;if(nz===1)ex[k]=r.indexOf(mx);}
+    const g=m.geometry;if(!g.boundingBox)g.computeBoundingBox();const bb=g.boundingBox.clone().applyMatrix4(M4),sz=new V3();bb.getSize(sz);L.push({m,bb,ex,vol:sz.x*sz.y*sz.z+1e-9,mv:{}});});
+  const ax=['x','y','z'],E=0.0004;
+  for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){const A=L[i],B=L[j];
+    for(let a=0;a<3;a++){if(A.ex[a]<0||B.ex[a]<0)continue;const k=ax[a],o1=ax[(a+1)%3],o2=ax[(a+2)%3];
+      if(!((Math.min(A.bb.max[o1],B.bb.max[o1])-Math.max(A.bb.min[o1],B.bb.min[o1]))>0.001&&(Math.min(A.bb.max[o2],B.bb.max[o2])-Math.max(A.bb.min[o2],B.bb.min[o2]))>0.001))continue;
+      const S2=A.vol<B.vol?A:B;const hiEq=Math.abs(A.bb.max[k]-B.bb.max[k])<E,loEq=Math.abs(A.bb.min[k]-B.bb.min[k])<E;
+      if(hiEq&&loEq){ // same extent on both sides: grow the smaller part a hair along that axis instead of sliding it
+        const m=S2.m,jx=S2.ex[a];M4.multiplyMatrices(inv,m.matrixWorld);const e=M4.elements,sl=Math.hypot(e[jx*4],e[jx*4+1],e[jx*4+2]);
+        const g=m.geometry.clone();g.computeBoundingBox();const bx=g.boundingBox,ctr=new V3();bx.getCenter(ctr);const sz=bx.max.getComponent(jx)-bx.min.getComponent(jx);if(sz<1e-6)continue;
+        const sv=new V3(1,1,1);sv.setComponent(jx,1+0.0012/(sz*sl));g.translate(-ctr.x,-ctr.y,-ctr.z);g.scale(sv.x,sv.y,sv.z);g.translate(ctr.x,ctr.y,ctr.z);g.computeBoundingBox();m.geometry=g;
+        S2.bb.min[k]-=0.0006;S2.bb.max[k]+=0.0006;continue;}
+      let dir=0;if(hiEq)dir=1;else if(loEq)dir=-1;if(!dir)continue;if(S2.mv[k]&&S2.mv[k]!==dir)continue;S2.mv[k]=dir;
+      const d=new V3();d[k]=dir*0.0005;const P=S2.m.parent;M4.multiplyMatrices(inv,P.matrixWorld);M4.decompose(ps,q,sc);d.applyQuaternion(q.invert()).divide(sc);S2.m.position.add(d);S2.m.updateMatrixWorld(true);S2.bb.min[k]+=dir*0.0005;S2.bb.max[k]+=dir*0.0005;}}
+}
+for(const k in primGroups)deZFight(primGroups[k]);for(const k in secGroups)deZFight(secGroups[k]);
 /* ---------------- weapon rigs: magazines, support hands and moving parts for the MW2-style reloads ---------------- */
 const RELOAD_STYLE={int:'mag',bar:'mag',m4:'mag',acr:'mag',scar:'mag',tar:'mag',fal:'mag',ump:'mag',mp5k:'mag',rpd:'lmg',spas:'shell',
   deagle:'pistol',usp:'pistol',m9:'pistol',g18:'pistol',pp2k:'pistol',mag44:'revolver',m1887:'shell'};
@@ -1928,6 +2042,7 @@ function buildRig(id,grp){
     L.position.set(-0.05,-0.42,0.05);L.visible=false;R.lh=L;R.lhRest=L.position.clone();}
   else R.lhRest=R.lh.position.clone();
   R.lhC=centerOf(R.lh).clone().sub(R.lh.position).add(R.lhRest);
+  {const P=new THREE.Group();P.position.copy(R.lhC);R.lh.parent.add(P);P.attach(R.lh);R.node=P;R.nodeRest=P.position.clone();} // pivot at the hand so the forearm can swing clear of the gun
   if(cfg.port)R.port=new V3(...cfg.port);
   if(R.style==='shell'||R.style==='bolt'){const pr=new THREE.Group();R.lh.add(pr);const sh=R.style==='shell';
     const body=new THREE.Mesh(new THREE.CylinderGeometry(sh?0.011:0.0065,sh?0.011:0.0065,sh?0.055:0.07,10),new THREE.MeshPhongMaterial({color:sh?0x9a2418:0xb08a3a,shininess:50}));body.rotation.x=Math.PI/2;pr.add(body);
@@ -1940,13 +2055,20 @@ for(const k in secGroups)RIGS[k]=buildRig(k,secGroups[k]);
 const SHELL_T={spas:{start:0.38,per:0.44,end:0.32,pump:0.5},m1887:{start:0.34,per:0.4,end:0.3,pump:0.42}};
 function shellTotal(id,n,empty){const T=SHELL_T[id];return T.start+T.per*n+T.end+(empty?T.pump:0);}
 function rigReset(R){if(!R)return;if(R.mag){R.mag.position.set(0,0,0);R.mag.rotation.set(0,0,0);R.mag.visible=true;}if(R.lid)R.lid.rotation.x=0;
-  R.lh.position.copy(R.lhRest);R.lh.rotation.set(0,0,0);if(R.lh.userData.temp)R.lh.visible=false;if(R.prop)R.prop.visible=false;}
+  R.node.position.copy(R.nodeRest);R.node.rotation.set(0,0,0);R.accW=0;R.accD=(R.accD||new V3()).set(0,0,0);if(R.lh.userData.temp)R.lh.visible=false;if(R.prop)R.prop.visible=false;}
 const seg=(q,a,b)=>clamp((q-a)/(b-a),0,1),sm=t=>t*t*(3-2*t),bump=(q,a,b)=>Math.sin(seg(q,a,b)*Math.PI);
-function lhTo(R,target,w,extra){ // move the support hand so its centre sits on target (frame coords), blended by w
-  const d=target.clone().sub(R.lhC);if(extra)d.add(extra);R.lh.position.copy(R.lhRest).addScaledVector(d,w);if(R.lh.userData.temp)R.lh.visible=w>0.02;}
+function lhTo(R,target,w,extra){ // queue a hand target (frame coords) at weight w; overlapping moves blend instead of snapping
+  if(w<=0)return;const d=target.clone().sub(R.lhC);if(extra)d.add(extra);R.accD.addScaledVector(d,w);R.accW+=w;}
+function lhApply(R){const W=R.accW;if(W<=0)return;const d=R.accD.clone();if(W>1)d.divideScalar(W);const w=Math.min(1,W);
+  R.node.position.copy(R.nodeRest).add(d);
+  // swing the forearm out to the left and down as the hand travels back toward the grip, so it never passes through the stock or the right hand
+  const back=clamp(d.z/0.3,0,1);R.node.rotation.set(0.3*back*w,-0.32*back*w,0.12*back*w);
+  if(R.lh.userData.temp)R.lh.visible=w>0.02;}
 // q: 0..1 through the reload, el/total: seconds (shell reloads), n: rounds going in, P: pose deltas to add to the gun
 function animReload(R,q,empty,n,el,total,P){
-  if(!R)return;const st=R.style;
+  if(!R)return;animReload2(R,q,empty,n,el,total,P);lhApply(R);}
+function animReload2(R,q,empty,n,el,total,P){
+  const st=R.style;
   const tilt=sm(seg(q,0,0.12))*(1-sm(seg(q,0.86,1)));
   if(st==='mag'||st==='lmg'){
     const heavy=st==='lmg'||R.id==='bar'||R.id==='int';
@@ -1964,7 +2086,7 @@ function animReload(R,q,empty,n,el,total,P){
     if(empty&&R.id==='int'){ // work the bolt to chamber the fresh mag: lift, rip back, slam home
       const k=seg(q,0.68,0.9),up=k<0.25?k/0.25:k<0.75?1:1-(k-0.75)/0.25,back=k<0.25?0:k<0.45?(k-0.25)/0.2:k<0.6?1:k<0.75?1-(k-0.6)/0.15:0;
       boltPivot.rotation.x=-sm(up)*1.2;boltPivot.position.z=BOLT_Z+back*0.09;const tl=bump(q,0.66,0.92);P.rz+=tl*0.3;P.rx+=tl*0.05;P.z+=bump(q,0.78,0.84)*0.015;}
-    else if(empty){const ch=bump(q,0.7,0.86);P.rz+=ch*0.35;P.x+=ch*0.02;P.z+=bump(q,0.76,0.82)*0.02;if(ch>0)lhTo(R,new V3(-0.045,-0.02,R.id==='tar'?0.25:-0.06),ch);}
+    else if(empty){const ch=bump(q,0.7,0.86);P.rz+=ch*0.35;P.x+=ch*0.02;P.z+=bump(q,0.76,0.82)*0.02;if(ch>0)lhTo(R,new V3(-0.042,-0.075,R.id==='tar'?0.22:0.0),ch);} // slap the bolt release on the left side
   }else if(st==='pistol'){
     P.rz+=tilt*0.4;P.rx+=tilt*0.32;P.y+=tilt*0.085;P.x-=tilt*0.045;P.z+=tilt*0.04;
     let d=0;if(q<0.22)d=sm(seg(q,0.08,0.22))*0.32;else if(q<0.36)d=0.5;else d=(1-sm(seg(q,0.36,0.55)))*0.3;
@@ -2017,12 +2139,12 @@ const knifeRoot=new THREE.Group();gunScene.add(knifeRoot);knifeRoot.visible=fals
 // q: 0..1 through the swing. Returns how far the gun should duck out of the way (0..1)
 function knifePose(q){
   const K=knifeRoot.userData.k;knifeRoot.visible=q>0&&q<1;if(!knifeRoot.visible)return 0;
-  const up=sm(seg(q,0,0.22)),sl=sm(seg(q,0.22,0.44)),dn=sm(seg(q,0.6,1));
+  const ss=t=>t*t*t*(t*(t*6-15)+10),up=ss(seg(q,0,0.3)),sl=ss(seg(q,0.16,0.52)),dn=ss(seg(q,0.56,1)); // overlapping smootherstep phases: no corners between wind-up, slash and recovery
   // wind-up low right -> raised right -> slash across to the left and forward -> drop out of view
   const x=lerp(lerp(0.32,0.2,up),-0.16,sl),y=lerp(lerp(-0.42,-0.06,up),-0.12,sl)-dn*0.4,z=lerp(-0.42,-0.5,sl)+dn*0.05;
   knifeRoot.position.set(x+dn*0.15,y,z);
   K.rotation.set(lerp(lerp(0.2,0.75,up),0.15,sl)+dn*0.5,lerp(1.35,0.55,sl),lerp(0.4,-0.15,up)+sl*0.35);
-  return Math.min(1,up*1.2)*(1-dn);
+  return ss(Math.min(1,seg(q,0,0.24)))*(1-ss(seg(q,0.62,1)));
 }
 function reloadSounds(style,T,empty,n,id){const c=(f,fr,v)=>sfxClick(T*f,fr,v),s=(t,fr,v)=>sfxClick(t,fr,v);
   if(style==='mag'){c(0.16,850,0.42);c(0.2,620,0.3);c(0.56,1050,0.45);c(0.61,1500,0.5);c(0.63,700,0.35);if(empty){if(id==='int'){c(0.7,1800,0.45);c(0.75,1300,0.4);c(0.81,1500,0.4);c(0.86,2200,0.5);}else{c(0.76,1900,0.45);c(0.81,2400,0.5);}}}
@@ -2031,6 +2153,7 @@ function reloadSounds(style,T,empty,n,id){const c=(f,fr,v)=>sfxClick(T*f,fr,v),s
   else if(style==='revolver'){c(0.15,1400,0.4);for(let i=0;i<6;i++)c(0.3+i*0.012,3000+i*120,0.15);c(0.58,1200,0.4);c(0.72,1900,0.5);}
   else if(style==='bolt'){c(0.12,1800,0.45);c(0.16,1300,0.4);for(let i=0;i<Math.max(1,n);i++)c(0.2+(i+0.6)*0.6/Math.max(1,n),2300,0.35);c(0.86,1500,0.45);c(0.9,2200,0.5);}
 }
+{let k=0;for(const root of[snpModel,pisModel])root.traverse(o=>{if(o.isMesh&&!handMeshes.includes(o))o.scale.multiplyScalar(1+((k++%9)+1)*0.0007);});}
 for(const root of[snpModel,pisModel])root.traverse(o=>{if(o.isMesh&&o.material!==snpSkin&&o.material!==pisSkin&&!handMeshes.includes(o)&&o.material.type!=='MeshBasicMaterial'){o.material.polygonOffset=true;o.material.polygonOffsetFactor=1;o.material.polygonOffsetUnits=2;}});
 const POSE={ // rifle hip pose from the MW2 reference: scope rear ~0.35m out, right of center at eye height, muzzle toward center
   snp:{hip:new V3(0.173,-0.058,-0.64),ads:new V3(0,0,-0.35),spr:new V3(0.22,-0.2,-0.6),hipRot:[0.06,0,0]},
@@ -2727,11 +2850,11 @@ function hostEnd(win,reason,fk){const M=MP.M;if(!M||M.ph!=='play')return;M.ph='e
 function hostNuke(who){const M=MP.M;if(!M||M.ph!=='play'||M.nuke||!game.R.streaks)return;M.nuke=[who.id,game.time+10];}
 
 /* ---------------- Search & Destroy ---------------- */
-const SITES=[{id:'A',pos:new V3(20.5,0,13.5)},{id:'B',pos:new V3(-20.5,0,20.5)}];
+const SITES=[{id:'A',pos:new V3(20.5*MAP_SCALE,0,13.5*MAP_SCALE)},{id:'B',pos:new V3(-20.5*MAP_SCALE,0,20.5*MAP_SCALE)}];
 const SND_SPAWN=[[[0,-25.5],[-6,-21],[6,-21],[-9,-25.5],[9,-25.5],[-15,-24],[15,-24],[-24,-25.5],[24,-25.5],[-30,-21],[30,-21],[-30,-25.5]],
                  [[0,21],[-6,30],[6,30],[9,21],[-15,25.5],[15,25.5],[-24,21],[-21,30],[21,30],[30,22.5],[-30,30],[30,30]]];
 function sndSideOf(team){const M=MP.M;if(!M)return 0;return team===M.att?0:1;}
-function sndSpawnFor(e){const side=sndSideOf(teamOf(e));const list=SND_SPAWN[side];const used=game.ents.filter(x=>x!==e&&x.alive&&teamOf(x)===teamOf(e));
+function sndSpawnFor(e){const side=sndSideOf(teamOf(e));const list=SND_SPAWN[side].map(p=>[p[0]*MAP_SCALE,p[1]*MAP_SCALE]);const used=game.ents.filter(x=>x!==e&&x.alive&&teamOf(x)===teamOf(e));
   let best=list[0],bs=-1;for(const s of list){let m=1e9;for(const u of used)m=Math.min(m,Math.hypot(u.pos.x-s[0],u.pos.z-s[1]));m+=Math.random()*0.5;if(m>bs){bs=m;best=s;}}
   return freeSpot(best[0],best[1],0);}
 function sndTeamEnts(t){return game.ents.filter(e=>teamOf(e)===t&&(e===player||e.inMatch||e.active));}
@@ -2739,7 +2862,7 @@ function hostSndStart(){const M=MP.M;M.rn=0;M.rs=0;M.att=0;M.sc=[0,0];MP.sc=[0,0
 function hostSndRound(first){
   const M=MP.M;M.rn=(M.rn||0)+1;M.rs=(M.rs||0)+1;if(!first)M.att=1-M.att;M.rp='frz';M.rt=4;M.rw=-1;M.rr='';
   for(const b of activeBots()){b.objective=null;b.objT=0;b.respawn();}
-  const att=sndTeamEnts(M.att);const c=att[Math.random()*att.length|0];M.bm=c?['c',c.id,0,0,'',0]:['d','',SND_SPAWN[0][0][0],SND_SPAWN[0][0][1],'',0];
+  const att=sndTeamEnts(M.att);const c=att[Math.random()*att.length|0];M.bm=c?['c',c.id,0,0,'',0]:['d','',SND_SPAWN[0][0][0]*MAP_SCALE,SND_SPAWN[0][0][1]*MAP_SCALE,'',0];
   MP.lastKill=null;
 }
 function hostSndTick(dt){
@@ -3038,7 +3161,7 @@ function updateViewmodel(dt){
   p.x+=(W.kickX||0)*W.kick;rz+=(W.kickX||0)*W.kick*1.5;
   {const o=swapPose(W.cur,clamp(W.lower||0,-0.15,1.1));p.x+=o.x;p.y+=o.y;p.z+=o.z;rx+=o.rx;ry+=o.ry;rz+=o.rz;}
   W.climbBlend=lerp(W.climbBlend||0,P.climb?1:0,Math.min(1,dt*7));p.y-=0.3*W.climbBlend;rx-=0.6*W.climbBlend;
-  {const q=W.meleeT>0?1-W.meleeT/0.55:0,duck=knifePose(q);p.y-=duck*0.28;p.x+=duck*0.06;rx-=duck*0.5;rz-=duck*0.35;}
+  {const q=W.meleeT>0?1-W.meleeT/0.55:0,duck=knifePose(q);p.y-=duck*0.26;p.x+=duck*0.05;rx-=duck*0.42;rz-=duck*0.3;}
   if(!P.alive)p.y-=0.5;
   gunRoot.position.copy(p);gunRoot.rotation.set(rx,ry,rz);
 }
