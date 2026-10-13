@@ -59,7 +59,8 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--
 #minimap{position:absolute;left:18px;top:18px;width:250px;height:250px}
 #uavTag{position:absolute;left:18px;top:274px;font:500 18px var(--display);letter-spacing:.08em;color:var(--green);text-shadow:0 1px 2px #000}
 
-#feed{position:absolute;right:18px;top:18px;display:flex;flex-direction:column;align-items:flex-end;gap:3px;font:500 15px var(--body);text-align:right;max-width:46vw}
+#perf{position:absolute;right:18px;top:14px;font:500 14px var(--body);letter-spacing:.06em;color:#d8d4c8;text-shadow:0 1px 2px #000;opacity:.85;white-space:nowrap}#perf b{font-weight:600;color:var(--ink)}#perf.bad b{color:#e0603a}
+#feed{position:absolute;right:18px;top:40px;display:flex;flex-direction:column;align-items:flex-end;gap:3px;font:500 15px var(--body);text-align:right;max-width:46vw}
 .fl{text-shadow:0 1px 2px #000;white-space:nowrap;transition:opacity .6s}
 .fl .w{font:13px var(--mono);color:var(--dim);margin:0 7px}
 .fl .me{color:var(--blue)}.fl .en{color:#ff6b55}
@@ -290,6 +291,7 @@ body.rec #kc,body.rec #scope,body.rec #hitmarker{visibility:hidden!important}bod
   <canvas id="minimap" width="500" height="500"></canvas>
   <div id="uavTag" hidden>UAV ONLINE</div>
   <div id="units" hidden><div class="side a"></div><div class="side e"></div></div>
+  <div id="perf" aria-live="off">-- FPS</div>
   <div id="feed"></div>
   <div id="scorebar">
     <div class="row me"><span id="myName">YOU</span><b id="myScore">0</b></div>
@@ -2080,6 +2082,7 @@ function moveEntity(e,dx,dz,dt){
   e.pos.y=ny;
 }
 function ladderAt(p){for(const l of ladders){if(p.x>l.x0&&p.x<l.x1&&p.z>l.z0&&p.z<l.z1&&p.y>=l.y0&&p.y<l.y1)return l;}return null;}
+const SEG_RAY=new THREE.Raycaster(),SEG_DIR=new V3();
 function segBlocked(a,b){
   if(TERR){for(let k=1;k<10;k++){const t=k/10,x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t,z=a.z+(b.z-a.z)*t;if(y<terrH(x,z)-0.05)return true;}} // berms block sight
   const dx=b.x-a.x,dy=b.y-a.y,dz=b.z-a.z;
@@ -2091,6 +2094,9 @@ function segBlocked(a,b){
     }
     if(ok)return true;
   }
+  // then the real geometry: stairs, railings, shutters, sheet walls and anything else drawn without a collision box. Same triangles the bullets test
+  for(const R of ramps){const x0=Math.min(R.x0,R.x1),x1=Math.max(R.x0,R.x1),z0=Math.min(R.z0,R.z1),z1=Math.max(R.z0,R.z1);for(let k=1;k<12;k++){const t=k/12,x=a.x+dx*t,z=a.z+dz*t;if(x<x0||x>x1||z<z0||z>z1)continue;if(a.y+dy*t<rampH(R,x,z)-0.1)return true;}} // under a stair or ramp
+  if(typeof worldMeshes!=='undefined'&&worldMeshes.length){const len=Math.hypot(dx,dy,dz);if(len>0.01){SEG_RAY.set(a,SEG_DIR.set(dx,dy,dz).multiplyScalar(1/len));SEG_RAY.far=len-0.05;SEG_RAY.near=0.05;const h=SEG_RAY.intersectObjects(worldMeshes,false);if(h.length)return true;}}
   return false;
 }
 const SPAWNS=[[-24,-34],[-12,-35],[-2,-35],[8,-35],[18,-35],[30,-34],[40,-34.5],[49,-34.5],[-42,-12],[-41,4],[-42,20],[-40,38],[-31,38.5],[-16,38],[-4,38.5],[10,38.5],[22,38.5],[34,37],[47,35],[-19,-16],[-17,7],[-6,25],[3,-23],[15.4,18.8],[33,9],[26.5,8.8],[33.2,-14.6],[44,9.5],[12.6,-22],[-31,20.5]].map(p=>new V3(p[0]*MAP_SCALE,0,p[1]*MAP_SCALE)).filter(p=>openSpot(p.x,p.z));
@@ -2412,6 +2418,8 @@ function rod(par,a,b,r,m,seg){const d=new V3().subVectors(b,a);const len=d.lengt
   me.position.copy(a).addScaledVector(d,0.5);me.quaternion.setFromUnitVectors(new V3(0,1,0),d.clone().normalize());par.add(me);return me;}
 const rboxCache={};function RBOX(w,h,d){const k=w+'|'+h+'|'+d;if(rboxCache[k])return rboxCache[k];const g=new THREE.SphereGeometry(1,14,10),P=g.attributes.position; // squared-off ellipsoid: a padded glove block with smooth shading
   for(let i=0;i<P.count;i++){const f=v=>Math.sign(v)*Math.pow(Math.abs(v),0.42);P.setXYZ(i,f(P.getX(i))*w/2,f(P.getY(i))*h/2,f(P.getZ(i))*d/2);}g.computeVertexNormals();return rboxCache[k]=g;}
+const sboxCache={};function SBOX(w,h,d,e){const k=w+'|'+h+'|'+d+'|'+e;if(sboxCache[k])return sboxCache[k];const g=new THREE.SphereGeometry(1,18,12),P=g.attributes.position; // superellipsoid: e 0.42 = padded block, 0.7 = soft pad
+  for(let i=0;i<P.count;i++){const f=v=>Math.sign(v)*Math.pow(Math.abs(v),e);P.setXYZ(i,f(P.getX(i))*w/2,f(P.getY(i))*h/2,f(P.getZ(i))*d/2);}g.computeVertexNormals();return sboxCache[k]=g;}
 function hand(par,geo,m,x,y,z,rx,ry,rz){if(m===gloveM&&geo.type==='BoxGeometry'){const p=geo.parameters;geo=RBOX(p.width,p.height,p.depth);}const me=put(par,geo,m,x,y,z,rx,ry,rz);handMeshes.push(me);return me;}
 const BOLT_Z=0.12;
 function camoUV(me,tile){ // per-triangle box projection in the gun's own space, constant texel size across every part
@@ -2496,10 +2504,10 @@ const primGroups={};const E=0.025;
 const cuffM=new THREE.MeshLambertMaterial({color:0x2a2a24});
 function fseg(g,a,b,r0,r1){const d=new V3().subVectors(b,a),len=d.length();const m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r0,len,12),gloveM);m.position.copy(a).addScaledVector(d,0.5);m.quaternion.setFromUnitVectors(new V3(0,1,0),d.normalize());g.add(m);handMeshes.push(m);return m;}
 function fball(g,p,r){const m=new THREE.Mesh(new THREE.SphereGeometry(r,12,9),gloveM);m.position.copy(p);g.add(m);handMeshes.push(m);return m;}
-function wrapFinger(g,pts,r){r=(r||0.0082)*1.24;const n=pts.length-1;for(let i=0;i<n;i++){const t0=i/n,t1=(i+1)/n,r0=r*(1.06-0.2*t0),r1=r*(1.06-0.2*t1);fball(g,pts[i],r0*(i?0.97:1.04));fseg(g,pts[i],pts[i+1],r0,r1);}fball(g,pts[n],r*0.86);}
-function smoothThumb(g,a,b,r){r*=1.15;const d=new V3().subVectors(b,a),n=d.clone().normalize(),k=a.clone().addScaledVector(d,0.55);
+function wrapFinger(g,pts,r){r=(r||0.0082)*1.02;const n=pts.length-1;for(let i=0;i<n;i++){const t0=i/n,t1=(i+1)/n,r0=r*(1.0-0.18*t0),r1=r*(1.0-0.18*t1);fball(g,pts[i],r0*(i?0.96:1.0));fseg(g,pts[i],pts[i+1],r0,r1);}const t=fball(g,pts[n],r*0.8);t.scale.set(0.95,0.8,1.1);}
+function smoothThumb(g,a,b,r){r*=1.0;const d=new V3().subVectors(b,a),n=d.clone().normalize(),k=a.clone().addScaledVector(d,0.55);
   fseg(g,a,k,r*1.12,r*1.02);fseg(g,k,b,r*1.02,r*0.86);fball(g,a,r*1.12);fball(g,k,r*1.02);const t=fball(g,b,r*0.86);t.scale.set(1,0.85,1.15);void n;} // two smooth bones, no knuckle beads
-function finger(g,a,b,r,curl){r=(r||0.0085)*1.18;fball(g,a,r*1.06); // knuckle
+function finger(g,a,b,r,curl){r=(r||0.0085)*1.0;fball(g,a,r*1.0); // knuckle
   let mid=a.clone().lerp(b,0.55);if(curl)mid.add(curl);else{const d=new V3().subVectors(b,a);mid.addScaledVector(new V3(-d.z,0,d.x).normalize().cross(d).normalize(),-d.length()*0.06);} // a slight natural bend
   const m=fseg(g,a,mid,r*1.05,r*0.98);fball(g,mid,r*0.99);fseg(g,mid,b,r*0.98,r*0.86);fball(g,b,r*0.87);return m;}
 function sleeve(g,wr,el,r){ // a real forearm: oval in section, wide over the muscle and narrow at the wrist, glove gauntlet and strap, a bunched sleeve cuff and soft folds
@@ -2518,15 +2526,25 @@ function sleeve(g,wr,el,r){ // a real forearm: oval in section, wide over the mu
   tube(0.046,len,30,(sc,a)=>k*(0.0405+0.0045*bump(0.06,0.012,sc)+0.0035*bump(0.085,0.01,sc)+0.021*sm(0.08,0.27,sc)-0.004*sm(0.3,0.45,sc)),sleeveM,
     (sc,a)=>k*(0.0016*Math.sin(a*3+sc*38)*sm(0.06,0.14,sc)+0.0012*Math.sin(a*5-sc*61)+0.0022*bump(0.15,0.012,sc)*Math.max(0,Math.cos(a-0.6))+0.002*bump(0.22,0.014,sc)*Math.max(0,Math.cos(a+2.2))));
   {const c=new THREE.Mesh(new THREE.SphereGeometry(1,16,10),sleeveM);c.scale.set(0.046*k*1.13,0.012,0.046*k*0.9);c.position.copy(wr).addScaledVector(d,0.05);c.quaternion.setFromUnitVectors(new V3(0,1,0),d);g.add(c);handMeshes.push(c);} // rolled hem
-}function rifleHands(g){ // right hand on the pistol grip: palm, four fingers wrapped round the front strap, trigger finger, thumb over the top, cuffed sleeve
-  hand(g,BOX(0.05,0.098,0.066),gloveM,0.004,-0.214,0.172,-0.42);
-  hand(g,BOX(0.054,0.04,0.03),gloveM,0.004,-0.178,0.2,-0.42); // back of the hand / web
-  hand(g,RBOX(0.022,0.074,0.024),knuckleM,0.03,-0.198,0.176,-0.42); // knuckle armour over the back of the hand
-  for(let i=0;i<4;i++){const y=-0.19-i*0.021,zf=0.126+(-0.19-y)*0.309,hw=0.023,r=0.0086-i*0.0005; // round the front strap: right side, across the front, back along the left side
-    wrapFinger(g,[new V3(hw-0.003,y,zf+0.022),new V3(hw+r*0.5,y,zf-0.002),new V3(0,y-0.002,zf-r-0.001),new V3(-hw-r*0.5,y-0.002,zf+0.002),new V3(-hw-r*0.3,y-0.002,zf+0.02)],r);}
-  finger(g,new V3(0.02,-0.164,0.122),new V3(0.012,-0.166,0.082),0.0075);                    // trigger finger
-  finger(g,new V3(-0.024,-0.17,0.17),new V3(-0.028,-0.156,0.118),0.0085);                     // thumb
-  sleeve(g,new V3(0.03,-0.255,0.215),new V3(0.16,-0.4,0.56),0.045);
+}function gripHand(g,o){ // right hand round a pistol grip. o: c (grip centre), rx (grip tilt), hw/hd (grip half width / half depth), top (grip top in the frame), trig (trigger, frame coords), wr (wrist, world), el (elbow, world)
+  const G=new THREE.Group();G.position.copy(o.c);G.rotation.x=o.rx;g.add(G);const V=(a,b,c)=>new V3(a,b,c),hw=o.hw,hd=o.hd,K=o.k||1;
+  // palm: a soft pad lying flat on the right grip panel, its front edge tucked toward the front strap where the fingers start
+  const palm=hand(G,SBOX(0.026*K,0.086*K,0.07*K,0.62),gloveM,hw+0.0125*K,-0.01*K,0.004*K,0,0.14,0.06);void palm;
+  hand(G,SBOX(0.03*K,0.054*K,0.026*K,0.7),gloveM,hw*0.35,-0.028*K,hd+0.011*K,0,0,0.1);                      // heel of the hand (hypothenar) wrapped behind the backstrap
+  hand(G,SBOX(0.03*K,0.04*K,0.03*K,0.7),gloveM,-hw*0.25,0.008*K,hd+0.008*K,0,0,-0.2);                     // thumb pad (thenar) on the back-left
+  hand(G,SBOX(0.012*K,0.05*K,0.032*K,0.42),knuckleM,hw+0.028*K,0.004*K,-0.004*K,0,0.14,0.06);              // knuckle armour on the back of the hand
+  // middle, ring, little: knuckles at the front-right edge of the palm, phalanges following the strap round to the left side; each one a little shorter and lower
+  for(const [y,r,L] of[[0.017,0.0084,1.0],[-0.004,0.008,0.95],[-0.025,0.007,0.84]]){const rr=r*K,yy=y*K;
+    wrapFinger(G,[V(hw+rr*0.9,yy,-hd*0.25),V(hw+rr*0.55,yy-0.001,-hd-rr*0.75),V(0,yy-0.003,-hd-rr*1.0),V((-hw-rr*0.55)*L,yy-0.005,-hd-rr*0.75),V((-hw-rr*0.95)*L,yy-0.007,(-hd*0.25)*L)],rr);}
+  wrapFinger(G,[V(hw+0.0076*K,0.039*K,-hd*0.3),V(hw+0.004*K,0.05*K,-hd-0.022*K),V(o.trig.x,o.trig.y,o.trig.z)],0.0076*K);               // index laid along the frame onto the trigger
+  wrapFinger(G,[V(-hw*0.3,0.01*K,hd+0.006*K),V(-hw-0.009*K,0.026*K,hd*0.1),V(-hw-0.0085*K,0.046*K,-hd*0.35)],0.0092*K);                // thumb over the back and up the left side
+  // wrist: a short joint from the palm base, pointing the way the forearm leaves, so the sleeve cuff starts where the glove ends
+  const wl=G.worldToLocal(o.wr.clone()),el=G.worldToLocal(o.el.clone()),dir=el.clone().sub(wl).normalize();
+  fseg(G,V(hw*0.6,-0.05*K,0.014*K),wl.clone().addScaledVector(dir,0.018),0.019*K,0.0205*K);fball(G,wl.clone().addScaledVector(dir,0.018),0.0195*K);
+  sleeve(g,o.wr.clone().addScaledVector(o.el.clone().sub(o.wr).normalize(),0.03),o.el,o.sr||0.045);
+  return G;}
+function rifleHands(g){ // right hand on the shared rifle grip: hw 0.016, grip leaning forward 0.29 rad, trigger at (0.072,-0.165) in the gun frame
+  gripHand(g,{c:new V3(0,-0.186,0.153),rx:-0.29,hw:0.0165,hd:0.021,trig:new V3(0.013,0.042,-0.072),wr:new V3(0.026,-0.238,0.206),el:new V3(0.19,-0.36,0.58)}); // hand high in the grip, web up under the receiver
 }
 function gunExtent(root,z,y0,y1,skip){ // half-width and underside of the gun at a station along its length, measured from the parts already built
   root.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(root.matrixWorld).invert(),M4=new THREE.Matrix4(),bb=new THREE.Box3();let hw=0,bot=1;
@@ -3009,17 +3027,17 @@ const pisMats=(()=>{const blk=detailed(new THREE.MeshPhongMaterial({color:0x1213
   return{blk,grip:new THREE.MeshLambertMaterial({map:texFrom(gripCanvas,'grip',14)}),port:new THREE.MeshBasicMaterial({color:0x0b0b0b}),
     brass:new THREE.MeshPhongMaterial({color:0xb08a3a,shininess:70,specular:0x806030}),wood:gunMats.wood};})();
 function secRoot(id){const g=new THREE.Group();g.name=id;pisModel.add(g);secGroups[id]=g;g.userData.slide=new THREE.Group();g.add(g.userData.slide);return g;}
-function pistolHands(g){ // two-handed grip used by every handgun: right hand on the grip, left hand cupping it with its fingers over the right
-  const H=gloveM,fz=y=>0.074+(-0.098-y)*0.298;
-  hand(g,BOX(0.056,0.1,0.05),H,0.004,-0.152,0.15,-0.33);                                                  // shooting palm: covers the backstrap and both sides of the grip
-  const hw=0.019;for(let i=0;i<3;i++){const y=-0.128-i*0.022,f=fz(y),r=0.0078;wrapFinger(g,[new V3(hw-0.004,y,f+0.012),new V3(hw-0.001,y,f-0.003),new V3(0,y,f-r),new V3(-hw+0.001,y,f-0.002),new V3(-hw+0.002,y,f+0.01)],r);}
-  finger(g,new V3(0.016,-0.094,0.05),new V3(0.012,-0.094,0.018),0.0068);                      // trigger finger
-  hand(g,BOX(0.012,0.017,0.054),H,-0.0228,-0.088,0.1,0.07); // thumbs-forward: shooting thumb lies flat along the left of the frame, below the slide
-  const L=new THREE.Group();L.userData.isLH=true;g.add(L);
-  hand(L,BOX(0.026,0.084,0.07),H,-0.03,-0.16,0.118,-0.3);                                                // support palm against the left grip panel
-  for(let i=0;i<3;i++){const y=-0.136-i*0.022,f=fz(y)-0.016,r=0.0074;wrapFinger(L,[new V3(-hw-0.008,y,f+0.022),new V3(-hw-0.004,y,f+0.0),new V3(0,y,f-r+0.001),new V3(hw-0.002,y,f+0.002)],r);} // over the shooting hand's fingers, ending inside the right palm's outline
-  hand(L,BOX(0.013,0.018,0.052),H,-0.0232,-0.1045,0.088,0.07);                                        // support thumb tucked under the shooting thumb, pointing at the target
-  sleeve(g,new V3(0.01,-0.2,0.17),new V3(0.085,-0.4,0.44),0.036);sleeve(L,new V3(-0.03,-0.2,0.15),new V3(-0.12,-0.4,0.42),0.036);
+function pistolHands(g){ // thumbs-forward two-handed grip: shooting hand round the grip, support hand's palm on the left panel with its fingers over the shooting fingers, both thumbs stacked along the left of the frame
+  const H=gloveM,V=(a,b,c)=>new V3(a,b,c),c=new V3(0,-0.145,0.104),rx=-0.29,hw=0.019,hd=0.016;
+  gripHand(g,{c,rx,hw,hd,k:0.94,trig:new V3(0.012,0.066,-0.064),wr:new V3(0.014,-0.205,0.148),el:new V3(0.1,-0.36,0.42),sr:0.038});
+  const L=new THREE.Group();L.userData.isLH=true;L.position.copy(c);L.rotation.x=rx;g.add(L);
+  hand(L,SBOX(0.024,0.076,0.06,0.62),H,-hw-0.012,-0.016,0.0,0,-0.14,-0.06);                                 // support palm flat on the left grip panel
+  hand(L,SBOX(0.026,0.036,0.028,0.7),H,-hw*0.5,0.012,hd+0.004,0,0,0.2);                                     // its thumb pad behind the shooting thumb's root
+  for(const [y,r,Lg] of[[0.008,0.0076,1.0],[-0.013,0.0072,0.95],[-0.034,0.0064,0.84]])                     // support fingers over the shooting fingers, a size out from the strap
+    wrapFinger(L,[V(-hw-0.011,y,-hd*0.2),V(-hw-0.006,y-0.001,-hd-0.028),V(0,y-0.002,-hd-0.033),V((hw+0.006)*Lg,y-0.003,-hd-0.028),V((hw+0.011)*Lg,y-0.004,-hd*0.2*Lg)],r);
+  wrapFinger(L,[V(-hw-0.012,0.024,hd*0.3),V(-hw-0.016,0.04,-hd),V(-hw-0.015,0.044,-hd-0.03)],0.0076);        // support thumb tucked under the shooting thumb, pointing forward
+  {const wl=L.worldToLocal(new V3(-0.04,-0.2,0.14)),dir=L.worldToLocal(new V3(-0.12,-0.36,0.38)).sub(wl).normalize();fseg(L,V(-hw-0.008,-0.048,0.01),wl.clone().addScaledVector(dir,0.015),0.018,0.0195);fball(L,wl.clone().addScaledVector(dir,0.015),0.0185);}
+  sleeve(L,new V3(-0.04,-0.2,0.14).addScaledVector(new V3(-0.08,-0.16,0.24).normalize(),0.03),new V3(-0.12,-0.36,0.38),0.038);
 }
 function pistolKit(g,o){ // the small parts every service pistol has: extractor, firing-pin plate, front serrations, slide stop, takedown, pins, mag release, grip screws, chamfered top edges
   const M=pisMats,K=gunMats,sl=g.userData.slide,hw=o.hw||0.0165,yt=o.yt==null?-0.004:o.yt,yb=o.yb==null?-0.048:o.yb;
@@ -3619,6 +3637,7 @@ class Bot{
     if(best!==this.target){this.target=best;this.reactT=0;this.reaction=rand(0.45,0.85)/this.skill*(this.reactMul||1);}
   }
   shoot(T,dist){
+    if(segBlocked(this.eyePos(),T.isPlayer?playerChest():T.chest())){this.fireCd=0.2;return;} // the target stepped behind cover since it was picked: hold fire
     const BD=PRIM[BOT_PID[this.weapon]]||PRIM.acr;this.fireCd=rand(0.5,0.95)*Math.sqrt(this.reactMul||1)*clamp(BD.rof/0.09,0.75,1.5);this.lastFire=game.time;this.shots=(this.shots||0)+1;
     let p;const tv=T.isPlayer?player.vel:null;
     if(T.isPlayer){const moving=Math.hypot(tv.x,tv.z)>3;p=0.5*this.skill-dist*0.006-(moving?0.13:0)-(player.crouch?0.07:0)-(!player.onGround?0.15:0);}
@@ -3964,7 +3983,7 @@ async function transportJoin(code){
   return await NET.room.join('rs-'+code.slice(5));
 }
 /* ---------------- multiplayer: up to 12 players, host-run rules, bots and scoring ---------------- */
-const MP={on:false,tr:null,code:'',isHost:true,myId:'me',hostId:null,st:'menu',joining:false,dropped:false,
+const MP={on:false,tr:null,rtt:0,hq:0,hostStamp:0,pe:null,code:'',isHost:true,myId:'me',hostId:null,st:'menu',joining:false,dropped:false,
   shot:0,hitSeq:0,hits:[],pending:{},dSeq:0,dl:[],evSeq:0,pl:null,df:null,nk:null,
   seenHit:new Map(),seenDeath:new Set(),seenEv:new Map(),deathAt:{},firstSeen:new Set(),
   hostRules:null,M:null,T:[],B:[],remotes:new Map(),proxies:new Map(),pushT:0,lastHostSeen:0,
@@ -4022,9 +4041,9 @@ function r3(v){return Math.round(v*1000)/1000;}
 function netPush(){
   if(!MP.tr)return;const P=player,inM=game.state==='playing'||game.state==='killcam';
   const an=animOf();
-  const o={v:2,n:cleanName(S.nick),st:MP.st,mid:inM?game.mid:0,tm:P.team,x:r2(P.pos.x),y:r2(P.pos.y),z:r2(P.pos.z),yw:r3(P.yaw),pt:r3(P.pitch),cr:P.crouch?1:0,w:W.cur,pw:W.pid,sw:W.sid,ad:r2(W.ads),
+  const o={v:2,pq:Math.round(performance.now()),he:MP.hostStamp||0,n:cleanName(S.nick),st:MP.st,mid:inM?game.mid:0,tm:P.team,x:r2(P.pos.x),y:r2(P.pos.y),z:r2(P.pos.z),yw:r3(P.yaw),pt:r3(P.pitch),cr:P.crouch?1:0,w:W.cur,pw:W.pid,sw:W.sid,ad:r2(W.ads),
     rl:r2(an.rl),bt:r2(an.bt),ml:r2(an.ml),sp:r2(an.sp),cb:r2(an.cb),lw:r2(clamp(W.lower||0,-0.2,1.1)),al:(P.alive&&inM)?1:0,sh:MP.shot,h:MP.hits,dl:MP.dl,pl:MP.pl,df:MP.df,nk:MP.nk};
-  if(MP.isHost){o.host=1;o.L=S.rules;o.M=MP.M;o.T=MP.T;o.B=MP.B;}else{o.host=null;o.L=null;o.M=null;o.T=null;o.B=null;}
+  if(MP.isHost){o.host=1;o.L=S.rules;o.M=MP.M;o.T=MP.T;o.B=MP.B;MP.hq=Math.round(performance.now());o.hq=MP.hq;o.pe=MP.pe||null;}else{o.host=null;o.L=null;o.M=null;o.T=null;o.B=null;o.hq=null;o.pe=null;}
   if(JSON.stringify(o).length>3700){o.h=MP.hits.slice(-3);o.dl=MP.dl.slice(-3);}
   MP.tr.presence(o).catch(()=>{});
 }
@@ -4042,8 +4061,9 @@ function netTick(dt){
   for(const p of peers){if(p.sameTab||p.kind!=='viewer')continue;const s=p.presence;if(!s||s.v!==2)continue;humans.push(p);
     if(s.host===1&&(!host||p.peer<host.peer))host=p;}
   MP.lobbyPeers=humans;
+  if(MP.isHost){MP.pe={};let n=0,sum=0;for(const p of humans){const q=p.presence;if(q.pq)MP.pe[p.peer]=q.pq;if(q.he&&MP.hq){const r=performance.now()-q.he;if(r>=0&&r<20000){sum+=r;n++;}}}MP.rtt=n?(MP.rtt?MP.rtt*0.7+(sum/n)*0.3:sum/n):0;}
   if(!MP.isHost){
-    if(host){MP.hostId=host.peer;MP.lastHostSeen=performance.now();readHost(host.presence);}
+    if(host){MP.hostId=host.peer;MP.lastHostSeen=performance.now();readHost(host.presence);const hp=host.presence;if(hp.hq)MP.hostStamp=hp.hq;if(hp.pe&&hp.pe[MP.myId]){const r=performance.now()-hp.pe[MP.myId];if(r>=0&&r<20000)MP.rtt=MP.rtt?MP.rtt*0.7+r*0.3:r;}}
     else if(MP.hostId&&performance.now()-MP.lastHostSeen>5000){MP.hostId=null;MP.M=null;if(game.state==='playing'||game.state==='killcam')endMatch('The host left the lobby');setMp('The host left. Create a new lobby or join another code.',true);updateLobbyUI();}
   }
   const seen=new Set();
@@ -5049,9 +5069,15 @@ function updateArrows(dt,on){ // soft red marker over an enemy's head while you'
   for(const sp of ARROWS)if(!sp.userData.seen)sp.visible=false;}
 function rebuildEnts(){const a=[player];if(MP.isHost){for(const b of bots)if(b.active)a.push(b);}else for(const r of MP.proxies.values())if(r.inMatch)a.push(r);
   for(const r of MP.remotes.values())if(r.inMatch)a.push(r);game.ents=a;}
+const PERF={n:0,t0:0,worst:0,el:null};
+function perfTick(now,dt){ // FPS, worst frame of the last half second, and the round trip to the host (or to the slowest client, when hosting)
+  if(!PERF.el)PERF.el=$('perf');PERF.n++;PERF.worst=Math.max(PERF.worst,dt*1000);if(now-PERF.t0<500)return;
+  const fps=Math.round(PERF.n*1000/(now-PERF.t0)),ms=PERF.worst;PERF.n=0;PERF.t0=now;PERF.worst=0;
+  const net=MP.tr&&MP.hostId&&!MP.isHost?MP.rtt:(MP.isHost&&MP.lobbyPeers&&MP.lobbyPeers.length?MP.rtt:null);
+  PERF.el.innerHTML='<b>'+fps+'</b> FPS · '+ms.toFixed(0)+' ms'+(net!=null?' · <b>'+Math.round(net)+'</b> ms net':' · solo');PERF.el.classList.toggle('bad',fps<45);}
 function frame(now){skyDome.position.set(camera.position.x,0,camera.position.z);skyDome.rotation.y=(now||0)*0.0000035;
   requestAnimationFrame(frame);
-  const dt=Math.min(0.05,(now-lastT)/1000);lastT=now;
+  const dtRaw=(now-lastT)/1000,dt=Math.min(0.05,dtRaw);lastT=now;perfTick(now,dtRaw);
   netTick(dt);animateCamo(now/1000);animateOutskirts(now/1000);
   followHost();
   const running=game.state==='playing'&&(!game.paused||MP.on);
